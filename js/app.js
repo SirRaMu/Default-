@@ -1531,6 +1531,54 @@ function initUpdateButton() {
   el('reload-latest-btn').addEventListener('click', loadLatestVersion);
 }
 
+/* ---------------- Erklär-Assistent (Maskottchen + Sprechblase) ---------------- */
+
+/**
+ * Verwandelt jede Trick-Karte in eine Lehrer-Erklärung: die Regel wandert in
+ * eine Sprechblase neben einem kleinen Maskottchen, und das durchgerechnete
+ * Beispiel wird erst per Klick eingeblendet ("Beispiel zeigen").
+ * Läuft einmalig über alle vorhandenen .trick-card-Elemente - egal ob
+ * Rechentricks oder Erweiterte Aufgaben.
+ */
+function enhanceTrickCards() {
+  document.querySelectorAll('.trick-card').forEach((card) => {
+    const rule = card.querySelector('.trick-rule');
+    if (rule) {
+      const row = document.createElement('div');
+      row.className = 'teacher-row';
+      const avatar = document.createElement('div');
+      avatar.className = 'teacher-avatar';
+      avatar.textContent = '🤖';
+      avatar.setAttribute('aria-hidden', 'true');
+      const bubble = document.createElement('div');
+      bubble.className = 'teacher-bubble';
+      bubble.innerHTML = rule.innerHTML;
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      rule.replaceWith(row);
+    }
+
+    const stepsBlocks = Array.from(card.querySelectorAll('.trick-steps, .trick-bullets'));
+    if (stepsBlocks.length) {
+      stepsBlocks.forEach((block) => {
+        block.hidden = true;
+      });
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'example-toggle';
+      toggle.textContent = '📖 Beispiel zeigen';
+      toggle.addEventListener('click', () => {
+        const nowHidden = !stepsBlocks[0].hidden;
+        stepsBlocks.forEach((block) => {
+          block.hidden = nowHidden;
+        });
+        toggle.textContent = nowHidden ? '📖 Beispiel zeigen' : '📖 Beispiel ausblenden';
+      });
+      stepsBlocks[0].parentNode.insertBefore(toggle, stepsBlocks[0]);
+    }
+  });
+}
+
 /* ---------------- Init ---------------- */
 
 loadSettings();
@@ -1539,6 +1587,7 @@ initGlobalNav();
 initPracticeScreen();
 initTheme();
 initUpdateButton();
+enhanceTrickCards();
 showScreen('setup');
 
 if ('serviceWorker' in navigator) {

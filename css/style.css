@@ -315,6 +315,60 @@ body {
 .trick-card h3 { margin: 0 0 6px; font-size: 1rem; }
 .trick-rule { color: var(--text-muted); font-size: 0.86rem; line-height: 1.45; margin: 0 0 12px; }
 
+.teacher-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.teacher-avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: var(--shadow);
+}
+.teacher-bubble {
+  position: relative;
+  background: var(--chip-bg);
+  color: var(--text-muted);
+  border-radius: 4px 14px 14px 14px;
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  flex: 1;
+}
+.teacher-bubble::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 8px 0;
+  border-color: transparent var(--chip-bg) transparent transparent;
+}
+
+.example-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0 0 12px 44px;
+  cursor: pointer;
+}
+.example-toggle:active { opacity: 0.7; }
+
 .trick-steps {
   display: flex;
   flex-wrap: wrap;
