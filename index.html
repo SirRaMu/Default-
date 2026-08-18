@@ -53,6 +53,12 @@
     </button>
 
     <div class="setup-card">
+      <h2 class="section-title">Kategorie</h2>
+      <div class="chip-group" id="category-toggle" role="group" aria-label="Kategorie">
+        <button type="button" class="chip" data-category="basic">🧮 Grundlegend</button>
+        <button type="button" class="chip" data-category="advanced">🎓 Erweitert</button>
+      </div>
+
       <h2 class="section-title">Rechenart</h2>
       <div class="chip-group" id="op-group" role="group" aria-label="Rechenart">
         <button type="button" class="chip" data-op="add">➕ Addition</button>
@@ -62,14 +68,25 @@
         <button type="button" class="chip" data-op="mix">🔀 Gemischt</button>
       </div>
 
-      <h2 class="section-title">Schwierigkeit</h2>
-      <div class="chip-group" id="diff-group" role="group" aria-label="Schwierigkeit">
-        <button type="button" class="chip" data-diff="easy">Leicht</button>
-        <button type="button" class="chip" data-diff="medium">Mittel</button>
-        <button type="button" class="chip" data-diff="hard">Schwer</button>
-        <button type="button" class="chip" data-diff="expert">Experte</button>
+      <div class="chip-group" id="adv-op-group" role="group" aria-label="Erweiterte Rechenart" hidden>
+        <button type="button" class="chip" data-adv-op="pct">📊 Prozentrechnung</button>
+        <button type="button" class="chip" data-adv-op="pq">➗ PQ-Formel</button>
+        <button type="button" class="chip" data-adv-op="lgs">🔗 Gleichungssysteme</button>
+        <button type="button" class="chip" data-adv-op="diffq">📈 Differenzenquotient</button>
+        <button type="button" class="chip" data-adv-op="diffeq">🔁 Differenzengleichung</button>
+        <button type="button" class="chip" data-adv-op="mix">🔀 Gemischt</button>
       </div>
-      <p class="diff-hint" id="diff-hint"></p>
+
+      <div id="difficulty-section">
+        <h2 class="section-title">Schwierigkeit</h2>
+        <div class="chip-group" id="diff-group" role="group" aria-label="Schwierigkeit">
+          <button type="button" class="chip" data-diff="easy">Leicht</button>
+          <button type="button" class="chip" data-diff="medium">Mittel</button>
+          <button type="button" class="chip" data-diff="hard">Schwer</button>
+          <button type="button" class="chip" data-diff="expert">Experte</button>
+        </div>
+        <p class="diff-hint" id="diff-hint"></p>
+      </div>
 
       <h2 class="section-title">Modus</h2>
       <div class="chip-group" id="mode-group" role="group" aria-label="Modus">
@@ -94,7 +111,7 @@
           <button type="button" class="pill" data-time="180">180</button>
         </div>
       </div>
-      <p class="highscore-line" id="setup-highscore" hidden>🏆 Highscore bei <span id="setup-highscore-time">60</span>s: <span id="setup-highscore-value">0</span> richtige Antworten</p>
+      <p class="highscore-line" id="setup-highscore" hidden>🏆 Highscore bei <span id="setup-highscore-time">60</span>s (<span id="setup-highscore-category">Grundlegend</span>): <span id="setup-highscore-value">0</span> richtige Antworten</p>
 
       <button type="button" class="btn-primary" id="start-btn">Training starten</button>
     </div>

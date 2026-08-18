@@ -128,7 +128,9 @@ function generateQuestion(selectedOps, difficultyKey) {
 
 const state = {
   setup: {
+    category: 'basic', // 'basic' | 'advanced'
     operations: ['add'],
+    advancedTopics: ['pct'],
     difficulty: 'easy',
     mode: 'count', // 'count' | 'time'
     count: 10,
@@ -183,6 +185,10 @@ function loadHighscores() {
   } catch (e) {
     return {};
   }
+}
+
+function highscoreKey(category, timeLimit) {
+  return `${category}-${timeLimit}`;
 }
 
 function getHighscore(timeLimit) {
@@ -246,6 +252,33 @@ function initGlobalNav() {
 /* ---------------- Setup-Screen ---------------- */
 
 function initSetupScreen() {
+  // Kategorie-Umschalter (Grundlegend / Erweitert)
+  Array.from(document.querySelectorAll('#category-toggle .chip')).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.setup.category = btn.dataset.category;
+      renderSetup();
+    });
+  });
+
+  // Erweiterte Rechenart-Chips
+  Array.from(document.querySelectorAll('#adv-op-group .chip')).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const op = btn.dataset.advOp;
+      if (op === 'mix') {
+        state.setup.advancedTopics = ['mix'];
+      } else {
+        let topics = state.setup.advancedTopics.filter((o) => o !== 'mix');
+        if (topics.includes(op)) {
+          topics = topics.filter((o) => o !== op);
+        } else {
+          topics.push(op);
+        }
+        state.setup.advancedTopics = topics.length ? topics : ['pct'];
+      }
+      renderSetup();
+    });
+  });
+
   // Rechenart-Chips
   const opButtons = Array.from(document.querySelectorAll('#op-group .chip'));
   opButtons.forEach((btn) => {
@@ -315,8 +348,20 @@ function initSetupScreen() {
 }
 
 function renderSetup() {
+  const isAdvanced = state.setup.category === 'advanced';
+
+  document.querySelectorAll('#category-toggle .chip').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.category === state.setup.category);
+  });
+  el('op-group').hidden = isAdvanced;
+  el('adv-op-group').hidden = !isAdvanced;
+  el('difficulty-section').hidden = isAdvanced;
+
   document.querySelectorAll('#op-group .chip').forEach((btn) => {
     btn.classList.toggle('selected', state.setup.operations.includes(btn.dataset.op));
+  });
+  document.querySelectorAll('#adv-op-group .chip').forEach((btn) => {
+    btn.classList.toggle('selected', state.setup.advancedTopics.includes(btn.dataset.advOp));
   });
   document.querySelectorAll('#diff-group .chip').forEach((btn) => {
     btn.classList.toggle('selected', btn.dataset.diff === state.setup.difficulty);
@@ -339,7 +384,8 @@ function renderSetup() {
   el('setup-highscore').hidden = state.setup.mode !== 'time';
   if (state.setup.mode === 'time') {
     el('setup-highscore-time').textContent = state.setup.time;
-    el('setup-highscore-value').textContent = getHighscore(state.setup.time);
+    el('setup-highscore-category').textContent = isAdvanced ? 'Erweitert' : 'Grundlegend';
+    el('setup-highscore-value').textContent = getHighscore(highscoreKey(state.setup.category, state.setup.time));
   }
 
   saveSettings();
@@ -362,12 +408,21 @@ function renderHistory() {
     const date = new Date(entry.date);
     const dateStr = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) +
       ' ' + date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-    const opsLabel = entry.operations.includes('mix')
-      ? 'Gemischt'
-      : entry.operations.map((o) => OP_LABEL[o]).join(', ');
+    let categoryLabel;
+    if (entry.category === 'advanced') {
+      const topics = entry.advancedTopics || [];
+      categoryLabel = 'Erweitert: ' + (topics.includes('mix')
+        ? 'Gemischt'
+        : topics.map((t) => ADVANCED_TOPIC_LABEL[t]).join(', '));
+    } else {
+      const opsLabel = entry.operations.includes('mix')
+        ? 'Gemischt'
+        : entry.operations.map((o) => OP_LABEL[o]).join(', ');
+      categoryLabel = `${opsLabel} · ${DIFFICULTY[entry.difficulty].label}`;
+    }
 
     li.innerHTML = `
-      <span class="h-meta">${dateStr} · ${opsLabel} · ${DIFFICULTY[entry.difficulty].label}</span>
+      <span class="h-meta">${dateStr} · ${categoryLabel}</span>
       <span class="h-score">${entry.accuracy}%</span>
     `;
     list.appendChild(li);
@@ -888,6 +943,59 @@ const TRICKS = {
   },
 };
 
+/* ---------------- Erweiterte Themen im Speed-Modus ---------------- */
+
+const ADVANCED_TOPICS = ['pct', 'pq', 'lgs', 'diffq', 'diffeq'];
+
+const ADVANCED_TOPIC_LABEL = {
+  pct: 'Prozentrechnung',
+  pq: 'PQ-Formel',
+  lgs: 'Gleichungssysteme',
+  diffq: 'Differenzenquotient',
+  diffeq: 'Differenzengleichung',
+};
+
+const ADVANCED_TOPIC_POOLS = {
+  pct: ['pct-value', 'pct-base', 'pct-rate', 'pct-change'],
+  pq: ['pq-formula'],
+  lgs: ['lgs-einsetzen', 'lgs-gleichsetzen', 'lgs-addition'],
+  diffq: ['diff-quotient'],
+  diffeq: ['diff-equation'],
+};
+
+// Manche Tricks liefern mehrere Werte (z.B. x und y) - im Speed-Modus wird
+// genau einer davon abgefragt, damit die Antwort ins Zahlenfeld passt.
+const ADVANCED_ANSWER_INDEX = {
+  'pq-formula': 4, // x1 (größere Lösung)
+  'lgs-einsetzen': 4, // x
+  'lgs-gleichsetzen': 2, // x
+  'lgs-addition': 2, // x
+};
+
+const ADVANCED_QUESTION_SUFFIX = {
+  'pq-formula': 'x₁ = ?',
+  'lgs-einsetzen': 'x = ?',
+  'lgs-gleichsetzen': 'x = ?',
+  'lgs-addition': 'x = ?',
+  'diff-quotient': 'm = ?',
+  'diff-equation': 'a₃ = ?',
+};
+
+function generateAdvancedQuestion(selectedTopics) {
+  const pool = selectedTopics.includes('mix') ? ADVANCED_TOPICS : selectedTopics;
+  const topic = pick(pool);
+  const trickId = pick(ADVANCED_TOPIC_POOLS[topic]);
+  const ctx = TRICKS[trickId].build();
+  const answerIndex = ADVANCED_ANSWER_INDEX[trickId];
+  const answer = answerIndex !== undefined ? ctx.steps[answerIndex].answer : ctx.steps[ctx.steps.length - 1].answer;
+  const suffix = ADVANCED_QUESTION_SUFFIX[trickId];
+
+  return {
+    text: suffix ? `${ctx.headline}\n${suffix}` : ctx.headline,
+    answer,
+  };
+}
+
 let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
 function openPractice(trickId) {
@@ -1039,10 +1147,12 @@ let timerHandle = null;
 let questionStartedAt = 0;
 
 function startSession() {
-  const { operations, difficulty, mode, count, time } = state.setup;
+  const { category, operations, advancedTopics, difficulty, mode, count, time } = state.setup;
 
   state.session = {
+    category,
     operations,
+    advancedTopics,
     difficulty,
     mode,
     totalQuestions: mode === 'count' ? count : Infinity,
@@ -1096,11 +1206,14 @@ function nextQuestion() {
     return;
   }
 
-  s.currentQuestion = generateQuestion(s.operations, s.difficulty);
+  s.currentQuestion = s.category === 'advanced'
+    ? generateAdvancedQuestion(s.advancedTopics)
+    : generateQuestion(s.operations, s.difficulty);
   s.currentInput = '';
   questionStartedAt = performance.now();
 
   el('question-text').textContent = s.currentQuestion.text;
+  el('question-text').classList.toggle('advanced-question', s.category === 'advanced');
   el('answer-display').textContent = ' ';
   el('feedback').textContent = '';
   el('feedback').className = 'feedback';
@@ -1243,9 +1356,10 @@ function finishSession() {
   el('result-streak').textContent = s.bestStreak;
 
   if (s.mode === 'time') {
-    const isNewHighscore = saveHighscoreIfBetter(s.timeLimit, s.correct);
+    const key = highscoreKey(s.category, s.timeLimit);
+    const isNewHighscore = saveHighscoreIfBetter(key, s.correct);
     el('result-highscore-tile').hidden = false;
-    el('result-highscore').textContent = getHighscore(s.timeLimit);
+    el('result-highscore').textContent = getHighscore(key);
     if (isNewHighscore) {
       el('results-title').textContent = 'Neuer Highscore! 🏆';
     }
@@ -1269,7 +1383,9 @@ function finishSession() {
 
   pushHistory({
     date: Date.now(),
+    category: s.category,
     operations: s.operations,
+    advancedTopics: s.advancedTopics,
     difficulty: s.difficulty,
     mode: s.mode,
     correct: s.correct,
