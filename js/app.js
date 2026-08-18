@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.5';
+const APP_VERSION = '2.6';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -774,6 +774,63 @@ const TRICKS = {
           { prompt: `Rest: ${dividend} − ${product} =`, answer: remainder },
           { prompt: `${remainder} ÷ ${d} =`, answer: remainderQuotient },
           { prompt: `Ergebnis: ${estimate} + ${remainderQuotient} =`, answer: q },
+        ],
+      };
+    },
+  },
+
+  'term-vereinfachen': {
+    build() {
+      const a = randInt(2, 9);
+      const b = randInt(2, 9);
+      const c = randInt(1, 8);
+      const bSign = pick([1, -1]);
+      const cSign = pick([1, -1]);
+      const partial = a + bSign * b;
+      const result = partial + cSign * c;
+      const bTerm = `${bSign === 1 ? '+' : '−'} ${b}x`;
+      const cTerm = `${cSign === 1 ? '+' : '−'} ${c}x`;
+      return {
+        headline: `${a}x ${bTerm} ${cTerm} = ?x`,
+        steps: [
+          { prompt: `Fasse zuerst die ersten beiden Glieder zusammen: ${a}x ${bTerm} = ___x. Welche Zahl gehört vor das x?`, answer: partial },
+          { prompt: `Jetzt noch das dritte Glied dazu: ${partial}x ${cTerm} = ___x. Welche Zahl gehört vor das x?`, answer: result },
+        ],
+      };
+    },
+  },
+
+  'term-klammern': {
+    build() {
+      const a = randInt(2, 9);
+      const b = randInt(2, 9);
+      const c = randInt(1, 9);
+      return {
+        headline: `${a}(${b}x + ${c}) = ?x + ?`,
+        steps: [
+          { prompt: `Multipliziere zuerst mit dem x-Glied: ${a} · ${b}x = ___x. Welche Zahl gehört vor das x?`, answer: a * b },
+          { prompt: `Jetzt mit der Zahl: ${a} · ${c} =`, answer: a * c },
+        ],
+      };
+    },
+  },
+
+  'term-einsetzen': {
+    build() {
+      const a = randInt(2, 9);
+      const b = randInt(2, 9);
+      const xVal = randInt(1, 9) * pick([1, -1]);
+      const yVal = randInt(1, 9) * pick([1, -1]);
+      const ax = a * xVal;
+      const by = b * yVal;
+      const result = ax + by;
+      const fmtMul = (coef, val) => (val < 0 ? `${coef} · (${val})` : `${coef} · ${val}`);
+      return {
+        headline: `${a}x + ${b}y für x=${xVal}, y=${yVal} = ?`,
+        steps: [
+          { prompt: `Setze x=${xVal} ein: ${fmtMul(a, xVal)} =`, answer: ax },
+          { prompt: `Setze y=${yVal} ein: ${fmtMul(b, yVal)} =`, answer: by },
+          { prompt: `Addiere beide Werte: ${ax} ${by >= 0 ? '+' : '−'} ${Math.abs(by)} =`, answer: result },
         ],
       };
     },

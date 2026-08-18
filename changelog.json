@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.6",
+    "date": "2026-08-18",
+    "title": "Neuer Ordner: Terme",
+    "items": [
+      { "icon": "🧩", "text": "Mathe hat jetzt einen Ordner \"Terme\" mit drei Themen: Terme vereinfachen, Klammern auflösen und Werte einsetzen." },
+      { "icon": "🎓", "text": "Jedes Thema hat wie bei den Rechentricks eine Erklärung zum Nachlesen und eine Schritt-für-Schritt-Übung zum Selbermachen." }
+    ]
+  },
+  {
     "version": "2.5",
     "date": "2026-08-18",
     "title": "Auswahl-Werkzeugleiste & Stilmittel überprüfen",
