@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.3",
+    "date": "2026-08-18",
+    "title": "Ordnerstruktur bei Mathe & Deutsch vereinheitlicht",
+    "items": [
+      { "icon": "🧮", "text": "Mathe hat jetzt einen eigenen Ordner \"Kopfrechnen\" neben Rechentricks und Erweiterten Aufgaben." },
+      { "icon": "🖋️", "text": "Deutsch hat jetzt einen Ordner \"Stilmittel\", der Stilmittel lernen und Stilmittel üben zusammenfasst." }
+    ]
+  },
+  {
     "version": "2.2",
     "date": "2026-08-18",
     "title": "Deutsch: Stilmittel lernen & üben",
