@@ -222,6 +222,32 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
+/**
+ * Verwandelt eine Chip-Gruppe (data-target=Sektions-ID) in echte Registerkarten:
+ * immer nur die aktive Sektion ist sichtbar, statt zu ihr zu scrollen.
+ */
+function initTabNav(navId, defaultTarget) {
+  const nav = el(navId);
+  const buttons = Array.from(nav.querySelectorAll('button[data-target]'));
+
+  function activate(target) {
+    buttons.forEach((btn) => btn.classList.toggle('selected', btn.dataset.target === target));
+    buttons.forEach((btn) => {
+      const section = el(btn.dataset.target);
+      if (section) section.hidden = btn.dataset.target !== target;
+    });
+  }
+
+  nav.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-target]');
+    if (!btn) return;
+    activate(btn.dataset.target);
+    nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  activate(defaultTarget);
+}
+
 /* ---------------- Setup-Screen ---------------- */
 
 function initSetupScreen() {
@@ -360,12 +386,7 @@ function initLearnScreen() {
   el('learn-back-btn').addEventListener('click', () => showScreen('setup'));
   el('learn-to-training-btn').addEventListener('click', () => showScreen('setup'));
 
-  el('learn-nav').addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button');
-    if (!btn) return;
-    const target = el(btn.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  initTabNav('learn-nav', 'sec-add');
 }
 
 /* ---------------- Trick-Übungen (Schritt für Schritt) ---------------- */
@@ -979,12 +1000,7 @@ function initAdvancedScreen() {
   el('advanced-back-btn').addEventListener('click', () => showScreen('setup'));
   el('advanced-to-training-btn').addEventListener('click', () => showScreen('setup'));
 
-  el('advanced-nav').addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button');
-    if (!btn) return;
-    const target = el(btn.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  initTabNav('advanced-nav', 'sec-pct');
 }
 
 /* ---------------- Quiz-Screen ---------------- */
