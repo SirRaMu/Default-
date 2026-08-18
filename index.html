@@ -31,6 +31,15 @@
       <p class="subtitle">Wähle Rechenart, Schwierigkeit und Modus – und leg los.</p>
     </header>
 
+    <button type="button" class="learn-banner" id="learn-open-btn">
+      <span class="learn-banner-icon">📘</span>
+      <span class="learn-banner-text">
+        <strong>Rechentricks lernen</strong>
+        <small>Die schnellsten Kopfrechen-Methoden, kompakt erklärt</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <div class="setup-card">
       <h2 class="section-title">Rechenart</h2>
       <div class="chip-group" id="op-group" role="group" aria-label="Rechenart">
@@ -124,6 +133,169 @@
       <button type="button" class="num-btn subtle" data-action="back">⌫</button>
       <button type="button" class="num-btn confirm" id="submit-btn" data-action="submit">✓ Prüfen</button>
     </div>
+  </section>
+
+  <!-- ===================== LEARN SCREEN ===================== -->
+  <section class="screen" id="screen-learn" data-screen="learn" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" id="learn-back-btn" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">Rechentricks</span>
+      </div>
+    </header>
+    <p class="subtitle learn-subtitle">Kein Kleinklein nach Schwierigkeit – das sind die Methoden, mit denen man Kopfrechnen-Aufgaben tatsächlich am schnellsten löst.</p>
+
+    <div class="chip-group" id="learn-nav">
+      <button type="button" class="chip" data-target="sec-add">➕ Addition</button>
+      <button type="button" class="chip" data-target="sec-sub">➖ Subtraktion</button>
+      <button type="button" class="chip" data-target="sec-mul">✖️ Multiplikation</button>
+      <button type="button" class="chip" data-target="sec-div">➗ Division</button>
+    </div>
+
+    <section class="trick-section" id="sec-add">
+      <h2 class="section-title">➕ Addition</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Von links nach rechts zerlegen</h3>
+          <p class="trick-rule">Addiere zuerst die großen Stellenwerte (Hunderter, Zehner), dann die Einer. Das ist näher an der tatsächlichen Größe der Zahl und lässt sich viel leichter im Kopf halten als das schriftliche Verfahren von rechts.</p>
+          <div class="trick-steps">
+            <span>347 + 258</span><span class="arrow">→</span>
+            <span>300+200=500</span><span class="arrow">→</span>
+            <span>40+50=90</span><span class="arrow">→</span>
+            <span>7+8=15</span><span class="arrow">→</span>
+            <span>500+90+15=</span><span class="result">605</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Runden &amp; Ausgleichen</h3>
+          <p class="trick-rule">Runde einen Summanden auf eine glatte Zahl, rechne einfach, und korrigiere danach um die Differenz.</p>
+          <div class="trick-steps">
+            <span>398 + 47</span><span class="arrow">=</span>
+            <span>400 + 47 − 2</span><span class="arrow">=</span>
+            <span>447 − 2 =</span><span class="result">445</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trick-section" id="sec-sub">
+      <h2 class="section-title">➖ Subtraktion</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Ergänzen statt abziehen</h3>
+          <p class="trick-rule">Statt zu subtrahieren, zähle vom kleineren zum größeren Wert hoch – über eine runde Zwischenstation. Fehleranfälliger "Übertrag" entfällt komplett.</p>
+          <div class="trick-steps">
+            <span>1000 − 437</span><span class="arrow">→</span>
+            <span>437→440 (+3)</span><span class="arrow">→</span>
+            <span>440→500 (+60)</span><span class="arrow">→</span>
+            <span>500→1000 (+500)</span><span class="arrow">→</span>
+            <span>3+60+500=</span><span class="result">563</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Runden &amp; Ausgleichen</h3>
+          <p class="trick-rule">Ziehe eine glatte Zahl ab und gleiche den Rundungsfehler danach wieder aus.</p>
+          <div class="trick-steps">
+            <span>623 − 298</span><span class="arrow">=</span>
+            <span>623 − 300 + 2</span><span class="arrow">=</span>
+            <span>323 + 2 =</span><span class="result">325</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trick-section" id="sec-mul">
+      <h2 class="section-title">✖️ Multiplikation</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Distributivgesetz (Zerlegen)</h3>
+          <p class="trick-rule">Zerlege einen Faktor in Zehner und Einer und multipliziere getrennt: a·(b+c) = a·b + a·c.</p>
+          <div class="trick-steps">
+            <span>23 × 7</span><span class="arrow">=</span>
+            <span>20×7 + 3×7</span><span class="arrow">=</span>
+            <span>140 + 21 =</span><span class="result">161</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Feste Faktoren auf einfache Operationen zurückführen</h3>
+          <p class="trick-rule">Für die immer gleichen Faktoren 5, 25 und 9 lohnt sich ein fester Kniff, statt jedes Mal neu zu rechnen:</p>
+          <ul class="trick-bullets">
+            <li><b>× 5</b> = ×10, dann halbieren &nbsp;→&nbsp; 48×5 = 480:2 = <b>240</b></li>
+            <li><b>× 25</b> = ×100, dann durch 4 &nbsp;→&nbsp; 48×25 = 4800:4 = <b>1200</b></li>
+            <li><b>× 9</b> = ×10, dann die Zahl selbst abziehen &nbsp;→&nbsp; 48×9 = 480−48 = <b>432</b></li>
+          </ul>
+        </div>
+        <div class="trick-card">
+          <h3>Der ×11-Trick</h3>
+          <p class="trick-rule">Zweistellige Zahl mal 11: Ziffern auseinanderziehen und die Summe der beiden Ziffern in die Mitte schreiben (mit Übertrag, falls die Summe ≥ 10 ist).</p>
+          <div class="trick-steps">
+            <span>34 × 11</span><span class="arrow">→</span>
+            <span>3 _(3+4)_ 4</span><span class="arrow">=</span>
+            <span class="result">374</span>
+          </div>
+          <div class="trick-steps">
+            <span>57 × 11</span><span class="arrow">→</span>
+            <span>5 _(5+7)_ 7 = 5_12_7</span><span class="arrow">→</span>
+            <span>Übertrag:</span>
+            <span class="result">627</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Quadrieren nahe einer runden Basis</h3>
+          <p class="trick-rule">Binomische Formel (a−x)² = a² − 2ax + x² mit a als nächster runder Zahl.</p>
+          <div class="trick-steps">
+            <span>98² = (100−2)²</span><span class="arrow">=</span>
+            <span>10000 − 400 + 4</span><span class="arrow">=</span>
+            <span class="result">9604</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Produkt zweier nah beieinanderliegender Zahlen</h3>
+          <p class="trick-rule">3. binomische Formel: a·b = (m−x)(m+x) = m² − x², wobei m der Mittelwert und x der Abstand zu m ist.</p>
+          <div class="trick-steps">
+            <span>97 × 103</span><span class="arrow">→</span>
+            <span>m=100, x=3</span><span class="arrow">→</span>
+            <span>100² − 3² =</span><span class="result">9991</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trick-section" id="sec-div">
+      <h2 class="section-title">➗ Division</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>In Multiplikation umwandeln</h3>
+          <p class="trick-rule">Teilen durch 5, 25 oder 0,5 ist unhandlich – mit dem Kehrwert wird daraus eine einfache Multiplikation: ÷5 = ×2 ÷10, ÷25 = ×4 ÷100, ÷0,5 = ×2.</p>
+          <div class="trick-steps">
+            <span>240 ÷ 5</span><span class="arrow">=</span>
+            <span>240×2 ÷10</span><span class="arrow">=</span>
+            <span>480 ÷ 10 =</span><span class="result">48</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Kürzen vor dem Rechnen</h3>
+          <p class="trick-rule">Teile Zähler und Nenner vorab durch einen gemeinsamen Faktor – die Zahlen werden kleiner, bevor du überhaupt zu rechnen anfängst.</p>
+          <div class="trick-steps">
+            <span>450 ÷ 15</span><span class="arrow">→</span>
+            <span>(÷5)</span><span class="arrow">→</span>
+            <span>90 ÷ 3 =</span><span class="result">30</span>
+          </div>
+        </div>
+        <div class="trick-card">
+          <h3>Schätzen &amp; Verfeinern</h3>
+          <p class="trick-rule">Bei "krummen" Divisionen erst grob mit runden Zahlen schätzen, dann die Probe machen und den Rest nachrechnen.</p>
+          <div class="trick-steps">
+            <span>621 ÷ 27</span><span class="arrow">≈</span>
+            <span>620÷30 ≈ 20</span><span class="arrow">→</span>
+            <span>27×20=540, Rest 81</span><span class="arrow">→</span>
+            <span>81÷27=3 → 20+3=</span><span class="result">23</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" class="btn-primary" id="learn-to-training-btn">Jetzt trainieren</button>
   </section>
 
   <!-- ===================== RESULTS SCREEN ===================== -->

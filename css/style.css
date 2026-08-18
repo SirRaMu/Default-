@@ -175,6 +175,67 @@ body {
   padding: 8px 0 0;
 }
 
+.learn-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 18px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  text-align: left;
+}
+.learn-banner:active { transform: scale(0.98); }
+.learn-banner-icon { font-size: 1.6rem; flex-shrink: 0; }
+.learn-banner-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.learn-banner-text strong { color: var(--text); font-size: 1rem; }
+.learn-banner-text small { color: var(--text-muted); font-size: 0.82rem; }
+.learn-banner-arrow { color: var(--primary); font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
+
+.learn-title { font-size: 1.05rem; font-weight: 700; }
+.learn-subtitle { text-align: left; margin-top: -8px; }
+
+#learn-nav.chip-group .chip { min-width: 44%; }
+
+.trick-section { margin-top: 4px; }
+.trick-list { display: flex; flex-direction: column; gap: 12px; }
+
+.trick-card {
+  background: var(--bg-elevated);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.trick-card h3 { margin: 0 0 6px; font-size: 1rem; }
+.trick-rule { color: var(--text-muted); font-size: 0.86rem; line-height: 1.45; margin: 0 0 12px; }
+
+.trick-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  background: var(--chip-bg);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.trick-steps + .trick-steps { margin-top: 8px; }
+.trick-steps .arrow { color: var(--text-muted); font-weight: 400; }
+.trick-steps .result { color: var(--primary); font-weight: 800; }
+
+.trick-bullets { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.trick-bullets li {
+  background: var(--chip-bg);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
 .history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .history-list li {
   display: flex;

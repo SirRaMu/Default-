@@ -177,6 +177,7 @@ const screens = {
   setup: el('screen-setup'),
   quiz: el('screen-quiz'),
   results: el('screen-results'),
+  learn: el('screen-learn'),
 };
 
 function showScreen(name) {
@@ -309,6 +310,21 @@ function renderHistory() {
     `;
     list.appendChild(li);
   }
+}
+
+/* ---------------- Learn-Screen ---------------- */
+
+function initLearnScreen() {
+  el('learn-open-btn').addEventListener('click', () => showScreen('learn'));
+  el('learn-back-btn').addEventListener('click', () => showScreen('setup'));
+  el('learn-to-training-btn').addEventListener('click', () => showScreen('setup'));
+
+  el('learn-nav').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button');
+    if (!btn) return;
+    const target = el(btn.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 }
 
 /* ---------------- Quiz-Screen ---------------- */
@@ -556,6 +572,7 @@ el('back-to-setup-btn').addEventListener('click', () => {
 
 loadSettings();
 initSetupScreen();
+initLearnScreen();
 showScreen('setup');
 
 if ('serviceWorker' in navigator) {
