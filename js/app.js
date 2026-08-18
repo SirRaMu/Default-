@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   history: 'kopfrechnen.history.v1',
   trickCount: 'kopfrechnen.trickCount.v1',
   highscores: 'kopfrechnen.highscores.v1',
+  theme: 'kopfrechnen.theme.v1',
 };
 
 const OPERATIONS = ['add', 'sub', 'mul', 'div'];
@@ -1021,12 +1022,74 @@ el('back-to-setup-btn').addEventListener('click', () => {
   showScreen('setup');
 });
 
+/* ---------------- Theme (Hell/Dunkel) ---------------- */
+
+function getSystemPrefersDark() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function getStoredTheme() {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.theme);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getEffectiveTheme() {
+  return getStoredTheme() || (getSystemPrefersDark() ? 'dark' : 'light');
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  el('theme-toggle-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  applyTheme(getEffectiveTheme());
+  el('theme-toggle-btn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    try {
+      localStorage.setItem(STORAGE_KEYS.theme, next);
+    } catch (e) {
+      /* ignore */
+    }
+    applyTheme(next);
+  });
+}
+
+/* ---------------- Update erzwingen ---------------- */
+
+async function loadLatestVersion() {
+  const btn = el('reload-latest-btn');
+  btn.textContent = '🔄 Wird geladen …';
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((reg) => reg.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+  } catch (e) {
+    /* falls Registrierungen/Caches nicht zugreifbar sind, trotzdem neu laden */
+  }
+  location.reload();
+}
+
+function initUpdateButton() {
+  el('reload-latest-btn').addEventListener('click', loadLatestVersion);
+}
+
 /* ---------------- Init ---------------- */
 
 loadSettings();
 initSetupScreen();
 initLearnScreen();
 initPracticeScreen();
+initTheme();
+initUpdateButton();
 showScreen('setup');
 
 if ('serviceWorker' in navigator) {
