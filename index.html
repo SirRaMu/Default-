@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Kopfrechnen Trainer</title>
+<meta name="description" content="Kopfrechnen üben: Addition, Subtraktion, Multiplikation, Division – wähle Rechenart und Schwierigkeit.">
+
+<meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+
+<!-- PWA / Installierbarkeit -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kopfrechnen">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <section class="screen" id="screen-setup" data-screen="setup">
+    <header class="app-header">
+      <h1>Kopfrechnen&nbsp;Trainer</h1>
+      <p class="subtitle">Wähle Rechenart, Schwierigkeit und Modus – und leg los.</p>
+    </header>
+
+    <div class="setup-card">
+      <h2 class="section-title">Rechenart</h2>
+      <div class="chip-group" id="op-group" role="group" aria-label="Rechenart">
+        <button type="button" class="chip" data-op="add">➕ Addition</button>
+        <button type="button" class="chip" data-op="sub">➖ Subtraktion</button>
+        <button type="button" class="chip" data-op="mul">✖️ Multiplikation</button>
+        <button type="button" class="chip" data-op="div">➗ Division</button>
+        <button type="button" class="chip" data-op="mix">🔀 Gemischt</button>
+      </div>
+
+      <h2 class="section-title">Schwierigkeit</h2>
+      <div class="chip-group" id="diff-group" role="group" aria-label="Schwierigkeit">
+        <button type="button" class="chip" data-diff="easy">Leicht</button>
+        <button type="button" class="chip" data-diff="medium">Mittel</button>
+        <button type="button" class="chip" data-diff="hard">Schwer</button>
+        <button type="button" class="chip" data-diff="expert">Experte</button>
+      </div>
+      <p class="diff-hint" id="diff-hint"></p>
+
+      <h2 class="section-title">Modus</h2>
+      <div class="chip-group" id="mode-group" role="group" aria-label="Modus">
+        <button type="button" class="chip" data-mode="count">🔢 Anzahl Aufgaben</button>
+        <button type="button" class="chip" data-mode="time">⏱️ Zeit-Sprint</button>
+      </div>
+
+      <div class="option-row" id="count-options">
+        <span class="option-label">Aufgaben:</span>
+        <div class="pill-group" id="count-pill-group">
+          <button type="button" class="pill" data-count="10">10</button>
+          <button type="button" class="pill" data-count="20">20</button>
+          <button type="button" class="pill" data-count="50">50</button>
+        </div>
+      </div>
+
+      <div class="option-row" id="time-options" hidden>
+        <span class="option-label">Sekunden:</span>
+        <div class="pill-group" id="time-pill-group">
+          <button type="button" class="pill" data-time="60">60</button>
+          <button type="button" class="pill" data-time="120">120</button>
+          <button type="button" class="pill" data-time="180">180</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn-primary" id="start-btn">Training starten</button>
+    </div>
+
+    <div class="history-card" id="history-card" hidden>
+      <h2 class="section-title">Letzte Ergebnisse</h2>
+      <ul class="history-list" id="history-list"></ul>
+      <button type="button" class="btn-text" id="clear-history-btn">Verlauf löschen</button>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <section class="screen" id="screen-quiz" data-screen="quiz" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" id="quiz-cancel-btn" aria-label="Abbrechen">✕</button>
+      <div class="quiz-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-label" id="progress-label">Aufgabe 1</span>
+      </div>
+      <div class="quiz-timer" id="quiz-timer" hidden>⏱️ <span id="timer-value">60</span>s</div>
+    </header>
+
+    <div class="quiz-stats">
+      <span class="stat">✅ <span id="stat-correct">0</span></span>
+      <span class="stat">❌ <span id="stat-wrong">0</span></span>
+      <span class="stat streak" id="stat-streak-wrap" hidden>🔥 <span id="stat-streak">0</span></span>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-text" id="question-text">7 × 8 =</div>
+      <div class="answer-display" id="answer-display" aria-live="polite">&nbsp;</div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="numpad" id="numpad">
+      <button type="button" class="num-btn" data-num="1">1</button>
+      <button type="button" class="num-btn" data-num="2">2</button>
+      <button type="button" class="num-btn" data-num="3">3</button>
+      <button type="button" class="num-btn" data-num="4">4</button>
+      <button type="button" class="num-btn" data-num="5">5</button>
+      <button type="button" class="num-btn" data-num="6">6</button>
+      <button type="button" class="num-btn" data-num="7">7</button>
+      <button type="button" class="num-btn" data-num="8">8</button>
+      <button type="button" class="num-btn" data-num="9">9</button>
+      <button type="button" class="num-btn subtle" data-action="minus">−</button>
+      <button type="button" class="num-btn" data-num="0">0</button>
+      <button type="button" class="num-btn subtle" data-action="back">⌫</button>
+      <button type="button" class="num-btn confirm" id="submit-btn" data-action="submit">✓ Prüfen</button>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <section class="screen" id="screen-results" data-screen="results" hidden>
+    <header class="app-header">
+      <h1 id="results-title">Ergebnis</h1>
+    </header>
+
+    <div class="results-summary">
+      <div class="result-tile big">
+        <span class="result-value" id="result-accuracy">0%</span>
+        <span class="result-label">Richtig</span>
+      </div>
+      <div class="result-tile">
+        <span class="result-value" id="result-correct">0</span>
+        <span class="result-label">Korrekt</span>
+      </div>
+      <div class="result-tile">
+        <span class="result-value" id="result-wrong">0</span>
+        <span class="result-label">Falsch</span>
+      </div>
+      <div class="result-tile">
+        <span class="result-value" id="result-avgtime">0s</span>
+        <span class="result-label">Ø Zeit</span>
+      </div>
+      <div class="result-tile">
+        <span class="result-value" id="result-streak">0</span>
+        <span class="result-label">Beste Serie</span>
+      </div>
+    </div>
+
+    <div class="mistakes-card" id="mistakes-card" hidden>
+      <h2 class="section-title">Zum Üben</h2>
+      <ul class="mistakes-list" id="mistakes-list"></ul>
+    </div>
+
+    <div class="results-actions">
+      <button type="button" class="btn-primary" id="retry-btn">Nochmal (gleiche Einstellungen)</button>
+      <button type="button" class="btn-secondary" id="back-to-setup-btn">Neue Einstellungen</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
