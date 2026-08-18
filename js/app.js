@@ -1064,9 +1064,9 @@ let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
 const PRACTICE_MAX_ATTEMPTS = 3;
 
-function openPractice(trickId, mode = 'practice') {
+function openPractice(trickId, mode = 'practice', ruleText = '') {
   const origin = Object.keys(screens).find((key) => key !== 'practice' && !screens[key].hidden) || 'setup';
-  practice = { trickId, ctx: null, stepIndex: 0, input: '', attempts: 0, mode, origin };
+  practice = { trickId, ctx: null, stepIndex: 0, input: '', attempts: 0, mode, ruleText, origin };
   showScreen('practice');
   loadPracticeProblem();
 }
@@ -1095,7 +1095,11 @@ function renderPracticeStep() {
   el('practice-feedback').className = 'feedback';
   el('practice-reveal-btn').hidden = true;
 
-  if (practice.mode === 'explain') {
+  const isExplain = practice.mode === 'explain';
+  el('practice-why-row').hidden = !isExplain;
+  el('practice-example-label').hidden = !isExplain;
+  if (isExplain) {
+    el('practice-why-text').textContent = practice.ruleText;
     el('practice-answer-display').textContent = String(step.answer);
     el('practice-numpad').hidden = true;
     el('practice-continue-btn').hidden = false;
@@ -1599,7 +1603,9 @@ function initUpdateButton() {
 function enhanceTrickCards() {
   document.querySelectorAll('.trick-card').forEach((card) => {
     const rule = card.querySelector('.trick-rule');
+    let ruleText = '';
     if (rule) {
+      ruleText = rule.textContent.trim();
       const row = document.createElement('div');
       row.className = 'teacher-row';
       const avatar = document.createElement('div');
@@ -1615,14 +1621,15 @@ function enhanceTrickCards() {
     }
 
     // "Erklären" führt Schritt für Schritt durch denselben Bildschirm wie
-    // "Üben" - nur dass dort direkt die Lösung gezeigt wird statt einer Eingabe.
+    // "Üben" - nur dass dort direkt die Lösung gezeigt wird statt einer Eingabe,
+    // und das Maskottchen oben erklärt weiterhin, warum der Trick funktioniert.
     const trickBtn = card.querySelector('.btn-practice');
     if (trickBtn) {
       const explainBtn = document.createElement('button');
       explainBtn.type = 'button';
       explainBtn.className = 'btn-explain';
       explainBtn.textContent = '🎓 Erklären';
-      explainBtn.addEventListener('click', () => openPractice(trickBtn.dataset.trick, 'explain'));
+      explainBtn.addEventListener('click', () => openPractice(trickBtn.dataset.trick, 'explain', ruleText));
       trickBtn.parentNode.insertBefore(explainBtn, trickBtn);
     }
   });
