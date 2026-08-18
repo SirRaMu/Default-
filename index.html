@@ -143,7 +143,9 @@
         <span class="learn-title">Rechentricks</span>
       </div>
     </header>
-    <p class="subtitle learn-subtitle">Kein Kleinklein nach Schwierigkeit – das sind die Methoden, mit denen man Kopfrechnen-Aufgaben tatsächlich am schnellsten löst.</p>
+    <p class="subtitle learn-subtitle">Kein Kleinklein nach Schwierigkeit – das sind die Methoden, mit denen man Kopfrechnen-Aufgaben tatsächlich am schnellsten löst. Bei jedem Trick kannst du ihn direkt Schritt für Schritt üben.</p>
+
+    <p class="trick-counter">🧠 <span id="trick-counter-value">0</span> Trick-Aufgaben geübt</p>
 
     <div class="chip-group" id="learn-nav">
       <button type="button" class="chip" data-target="sec-add">➕ Addition</button>
@@ -165,6 +167,7 @@
             <span>7+8=15</span><span class="arrow">→</span>
             <span>500+90+15=</span><span class="result">605</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="add-leftright">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Runden &amp; Ausgleichen</h3>
@@ -174,6 +177,7 @@
             <span>400 + 47 − 2</span><span class="arrow">=</span>
             <span>447 − 2 =</span><span class="result">445</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="add-round">🧠 Üben</button>
         </div>
       </div>
     </section>
@@ -191,6 +195,7 @@
             <span>500→1000 (+500)</span><span class="arrow">→</span>
             <span>3+60+500=</span><span class="result">563</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="sub-complement">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Runden &amp; Ausgleichen</h3>
@@ -200,6 +205,7 @@
             <span>623 − 300 + 2</span><span class="arrow">=</span>
             <span>323 + 2 =</span><span class="result">325</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="sub-round">🧠 Üben</button>
         </div>
       </div>
     </section>
@@ -215,6 +221,7 @@
             <span>20×7 + 3×7</span><span class="arrow">=</span>
             <span>140 + 21 =</span><span class="result">161</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="mul-distribute">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Feste Faktoren auf einfache Operationen zurückführen</h3>
@@ -224,6 +231,7 @@
             <li><b>× 25</b> = ×100, dann durch 4 &nbsp;→&nbsp; 48×25 = 4800:4 = <b>1200</b></li>
             <li><b>× 9</b> = ×10, dann die Zahl selbst abziehen &nbsp;→&nbsp; 48×9 = 480−48 = <b>432</b></li>
           </ul>
+          <button type="button" class="btn-practice" data-trick="mul-fixed">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Der ×11-Trick</h3>
@@ -239,6 +247,7 @@
             <span>Übertrag:</span>
             <span class="result">627</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="mul-eleven">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Quadrieren nahe einer runden Basis</h3>
@@ -248,6 +257,7 @@
             <span>10000 − 400 + 4</span><span class="arrow">=</span>
             <span class="result">9604</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="mul-square">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Produkt zweier nah beieinanderliegender Zahlen</h3>
@@ -257,6 +267,7 @@
             <span>m=100, x=3</span><span class="arrow">→</span>
             <span>100² − 3² =</span><span class="result">9991</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="mul-nearby">🧠 Üben</button>
         </div>
       </div>
     </section>
@@ -272,6 +283,7 @@
             <span>240×2 ÷10</span><span class="arrow">=</span>
             <span>480 ÷ 10 =</span><span class="result">48</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="div-invert">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Kürzen vor dem Rechnen</h3>
@@ -281,6 +293,7 @@
             <span>(÷5)</span><span class="arrow">→</span>
             <span>90 ÷ 3 =</span><span class="result">30</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="div-simplify">🧠 Üben</button>
         </div>
         <div class="trick-card">
           <h3>Schätzen &amp; Verfeinern</h3>
@@ -291,11 +304,56 @@
             <span>27×20=540, Rest 81</span><span class="arrow">→</span>
             <span>81÷27=3 → 20+3=</span><span class="result">23</span>
           </div>
+          <button type="button" class="btn-practice" data-trick="div-estimate">🧠 Üben</button>
         </div>
       </div>
     </section>
 
     <button type="button" class="btn-primary" id="learn-to-training-btn">Jetzt trainieren</button>
+  </section>
+
+  <!-- ===================== TRICK-ÜBUNG SCREEN ===================== -->
+  <section class="screen" id="screen-practice" data-screen="practice" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" id="practice-cancel-btn" aria-label="Zurück zu den Tricks">✕</button>
+      <div class="quiz-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="practice-progress-fill"></div>
+        </div>
+        <span class="progress-label" id="practice-progress-label">Schritt 1 von 4</span>
+      </div>
+    </header>
+
+    <div class="practice-problem" id="practice-problem">347 + 258 = ?</div>
+
+    <div class="question-card" id="practice-card">
+      <div class="question-text" id="practice-prompt">Hunderter zusammen: 300 + 200 =</div>
+      <div class="answer-display" id="practice-answer-display">&nbsp;</div>
+      <div class="feedback" id="practice-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="numpad" id="practice-numpad">
+      <button type="button" class="num-btn" data-num="1">1</button>
+      <button type="button" class="num-btn" data-num="2">2</button>
+      <button type="button" class="num-btn" data-num="3">3</button>
+      <button type="button" class="num-btn" data-num="4">4</button>
+      <button type="button" class="num-btn" data-num="5">5</button>
+      <button type="button" class="num-btn" data-num="6">6</button>
+      <button type="button" class="num-btn" data-num="7">7</button>
+      <button type="button" class="num-btn" data-num="8">8</button>
+      <button type="button" class="num-btn" data-num="9">9</button>
+      <button type="button" class="num-btn subtle" data-action="minus">−</button>
+      <button type="button" class="num-btn" data-num="0">0</button>
+      <button type="button" class="num-btn subtle" data-action="back">⌫</button>
+      <button type="button" class="num-btn confirm" data-action="submit">✓ Prüfen</button>
+    </div>
+
+    <div class="practice-done" id="practice-done" hidden>
+      <p class="practice-done-title">Super gemacht! 🎉</p>
+      <p class="practice-done-sub" id="practice-done-sub"></p>
+      <button type="button" class="btn-primary" id="practice-next-btn">Nächste Aufgabe</button>
+      <button type="button" class="btn-secondary" id="practice-exit-btn">Zurück zu den Tricks</button>
+    </div>
   </section>
 
   <!-- ===================== RESULTS SCREEN ===================== -->

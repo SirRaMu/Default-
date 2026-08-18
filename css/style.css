@@ -236,6 +236,55 @@ body {
   font-size: 0.9rem;
 }
 
+.trick-counter {
+  margin: -8px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.btn-practice {
+  margin-top: 12px;
+  width: 100%;
+  padding: 11px;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.btn-practice:active { transform: scale(0.98); background: var(--chip-bg); }
+
+.practice-problem {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 20px 0;
+}
+.practice-done-title { font-size: 1.5rem; font-weight: 800; margin: 0; }
+.practice-done-sub {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 10px;
+}
+.practice-done .btn-primary,
+.practice-done .btn-secondary { margin-top: 0; }
+
 .history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .history-list li {
   display: flex;
