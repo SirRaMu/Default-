@@ -142,8 +142,6 @@
       <ul class="history-list" id="history-list"></ul>
       <button type="button" class="btn-text" id="clear-history-btn">Verlauf löschen</button>
     </div>
-
-    <button type="button" class="reload-latest-btn" id="reload-latest-btn">🔄 Neueste Version laden</button>
   </section>
 
   <!-- ===================== EINSTELLUNGEN ===================== -->
@@ -178,6 +176,15 @@
         <button type="button" class="swatch" data-accent="teal" style="--swatch-color:#0d9488" aria-label="Türkis"></button>
         <button type="button" class="swatch" data-accent="violet" style="--swatch-color:#7c3aed" aria-label="Violett"></button>
       </div>
+    </div>
+
+    <div class="setup-card">
+      <h2 class="section-title">App-Version</h2>
+      <p class="version-current">Du nutzt Version <strong id="settings-current-version">–</strong></p>
+      <button type="button" class="reload-latest-btn" id="reload-latest-btn">🔄 Neueste Version laden</button>
+
+      <h3 class="settings-subtitle" id="version-history-title" hidden>Versionsverlauf</h3>
+      <div class="version-history" id="version-history"></div>
     </div>
   </section>
 

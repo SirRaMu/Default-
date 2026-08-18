@@ -683,6 +683,60 @@ body {
 
 .update-modal .btn-secondary { margin-top: 10px; }
 
+.version-current {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.version-current strong { color: var(--text); }
+
+.version-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.version-entry {
+  background: var(--chip-bg);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.version-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.version-badge {
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.version-date { color: var(--text-muted); font-size: 0.78rem; }
+
+.version-current-badge {
+  margin-left: auto;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.version-entry-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin: 4px 0 8px;
+}
+
+.version-entry-items { display: flex; flex-direction: column; gap: 6px; }
+.version-entry-items .update-changelog-item { background: var(--bg-elevated); }
+
 /* ============ EINSTELLUNGEN ============ */
 .settings-subtitle {
   margin: 4px 0 0;

@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.10",
+    "date": "2026-08-18",
+    "title": "Versionsverlauf in den Einstellungen",
+    "items": [
+      { "icon": "🔄", "text": "Der Button \"Neueste Version laden\" ist jetzt in den Einstellungen zu finden statt am Ende der Startseite." },
+      { "icon": "🏷️", "text": "Dort siehst du jetzt auch direkt, welche Version du gerade nutzt." },
+      { "icon": "📜", "text": "Neu: ein Versionsverlauf zeigt alle bisherigen Änderungen auf einen Blick." }
+    ]
+  },
+  {
     "version": "1.9",
     "date": "2026-08-18",
     "title": "Aufgeräumtes Icon oben rechts",

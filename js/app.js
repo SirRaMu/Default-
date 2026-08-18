@@ -10,6 +10,11 @@
    5) Persistenz (localStorage: letzte Einstellungen + Verlauf)
    ============================================================ */
 
+// Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
+// changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
+// Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
+const APP_VERSION = '1.10';
+
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
   history: 'kopfrechnen.history.v1',
@@ -1680,6 +1685,26 @@ function initUpdateButton() {
 let updateAccepted = false;
 
 /**
+ * Baut eine einzelne Änderungszeile (Icon + Text) für einen Changelog-Eintrag.
+ * Wird sowohl vom Update-Dialog als auch vom Versionsverlauf in den
+ * Einstellungen verwendet.
+ */
+function createChangelogItemRow(item) {
+  const row = document.createElement('div');
+  row.className = 'update-changelog-item';
+  const icon = document.createElement('div');
+  icon.className = 'update-changelog-icon';
+  icon.textContent = item.icon || '✨';
+  icon.setAttribute('aria-hidden', 'true');
+  const text = document.createElement('div');
+  text.className = 'update-changelog-text';
+  text.textContent = item.text || '';
+  row.appendChild(icon);
+  row.appendChild(text);
+  return row;
+}
+
+/**
  * Zeigt den Änderungen-Eintrag (Version, Titel, Icons + Texte) im
  * Update-Dialog an. `entry` kommt aus changelog.json.
  */
@@ -1687,20 +1712,63 @@ function renderUpdateChangelog(entry) {
   el('update-modal-subtitle').textContent = entry.title || 'Was ist neu';
   const list = el('update-changelog');
   list.innerHTML = '';
-  (entry.items || []).forEach((item) => {
-    const row = document.createElement('div');
-    row.className = 'update-changelog-item';
-    const icon = document.createElement('div');
-    icon.className = 'update-changelog-icon';
-    icon.textContent = item.icon || '✨';
-    icon.setAttribute('aria-hidden', 'true');
-    const text = document.createElement('div');
-    text.className = 'update-changelog-text';
-    text.textContent = item.text || '';
-    row.appendChild(icon);
-    row.appendChild(text);
-    list.appendChild(row);
-  });
+  (entry.items || []).forEach((item) => list.appendChild(createChangelogItemRow(item)));
+}
+
+/**
+ * Zeigt in den Einstellungen die aktuell laufende Version an sowie darunter
+ * den kompletten Versionsverlauf aus changelog.json - die zur laufenden
+ * Version passende Zeile wird mit "Aktuell" markiert.
+ */
+async function renderVersionHistory() {
+  el('settings-current-version').textContent = APP_VERSION;
+
+  try {
+    const res = await fetch('changelog.json', { cache: 'no-store' });
+    const changelog = await res.json();
+    if (!Array.isArray(changelog) || !changelog.length) return;
+
+    const list = el('version-history');
+    list.innerHTML = '';
+    changelog.forEach((entry) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'version-entry';
+
+      const header = document.createElement('div');
+      header.className = 'version-entry-header';
+      const badge = document.createElement('span');
+      badge.className = 'version-badge';
+      badge.textContent = `v${entry.version}`;
+      const date = document.createElement('span');
+      date.className = 'version-date';
+      date.textContent = entry.date || '';
+      header.appendChild(badge);
+      header.appendChild(date);
+      if (entry.version === APP_VERSION) {
+        const currentBadge = document.createElement('span');
+        currentBadge.className = 'version-current-badge';
+        currentBadge.textContent = 'Aktuell';
+        header.appendChild(currentBadge);
+      }
+
+      const title = document.createElement('div');
+      title.className = 'version-entry-title';
+      title.textContent = entry.title || '';
+
+      const items = document.createElement('div');
+      items.className = 'version-entry-items';
+      (entry.items || []).forEach((item) => items.appendChild(createChangelogItemRow(item)));
+
+      wrap.appendChild(header);
+      wrap.appendChild(title);
+      wrap.appendChild(items);
+      list.appendChild(wrap);
+    });
+
+    el('version-history-title').hidden = false;
+  } catch (e) {
+    /* Versionsverlauf ist ein Bonus - ohne Netz bleibt er einfach leer */
+  }
 }
 
 /**
@@ -1833,3 +1901,4 @@ initUpdateButton();
 enhanceTrickCards();
 showScreen('setup');
 initUpdateChecker();
+renderVersionHistory();
