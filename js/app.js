@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.1';
+const APP_VERSION = '2.2';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -1903,6 +1903,354 @@ function enhanceTrickCards() {
   });
 }
 
+/* ---------------- Deutsch: Stilmittel ---------------- */
+
+const STILMITTEL = [
+  {
+    id: 'alliteration', name: 'Alliteration', color: '#fca5a5',
+    definition: 'Mehrere aufeinanderfolgende Wörter beginnen mit demselben Anfangslaut.',
+    erkennung: 'Achte auf Wortgruppen, bei denen mehrere Wörter direkt hintereinander mit demselben Buchstaben bzw. Laut beginnen.',
+    beispiel: 'Milch macht müde Männer munter.',
+  },
+  {
+    id: 'anapher', name: 'Anapher', color: '#fdba74',
+    definition: 'Ein Wort oder eine Wortgruppe wird am Anfang mehrerer aufeinanderfolgender Sätze oder Verse wiederholt.',
+    erkennung: 'Schau auf die Satz- oder Versanfänge: Wiederholen sie sich wörtlich?',
+    beispiel: 'Wir haben gekämpft, wir haben durchgehalten, wir haben nie aufgegeben.',
+  },
+  {
+    id: 'metapher', name: 'Metapher', color: '#fde047',
+    definition: 'Ein Wort wird durch ein bildhaftes Wort aus einem anderen Bereich ersetzt, ohne Vergleichswort wie „wie“ oder „als“.',
+    erkennung: 'Die wörtliche Bedeutung ergibt keinen Sinn, es steckt aber ein Bild dahinter – und es fehlt ein Vergleichswort.',
+    beispiel: 'Das Leben ist ein Fluss, der unaufhaltsam dem Meer entgegenströmt.',
+  },
+  {
+    id: 'vergleich', name: 'Vergleich', color: '#bef264',
+    definition: 'Zwei Dinge werden mithilfe eines Vergleichswortes miteinander in Beziehung gesetzt.',
+    erkennung: 'Suche nach Signalwörtern wie „wie“, „als“ oder „gleich“.',
+    beispiel: 'Er rannte wie der Wind.',
+  },
+  {
+    id: 'personifikation', name: 'Personifikation', color: '#86efac',
+    definition: 'Einem unbelebten Gegenstand oder einer Idee werden menschliche Eigenschaften oder Handlungen zugeschrieben.',
+    erkennung: 'Ein Ding oder Naturphänomen „tut“ etwas, das eigentlich nur Menschen können, z. B. lachen, weinen oder flüstern.',
+    beispiel: 'Die Sonne lächelte über den Hügeln.',
+  },
+  {
+    id: 'hyperbel', name: 'Hyperbel', color: '#6ee7b7',
+    definition: 'Eine starke, bewusst unrealistische Übertreibung.',
+    erkennung: 'Die Aussage ist offensichtlich maßlos übertrieben und nicht wörtlich gemeint.',
+    beispiel: 'Ich habe dir das schon tausendmal gesagt.',
+  },
+  {
+    id: 'ellipse', name: 'Ellipse', color: '#5eead4',
+    definition: 'Ein Satzteil (z. B. das Verb) wird ausgelassen, lässt sich aber aus dem Zusammenhang erschließen.',
+    erkennung: 'Der Satz wirkt unvollständig oder abgehackt, ergibt aber trotzdem Sinn.',
+    beispiel: 'Je mehr Hektik, desto mehr Fehler.',
+  },
+  {
+    id: 'antithese', name: 'Antithese', color: '#67e8f9',
+    definition: 'Zwei gegensätzliche Begriffe oder Gedanken werden bewusst gegenübergestellt.',
+    erkennung: 'Zwei Wörter oder Aussagen mit entgegengesetzter Bedeutung stehen direkt nebeneinander.',
+    beispiel: 'Müde, aber stolz.',
+  },
+  {
+    id: 'rhetorische-frage', name: 'Rhetorische Frage', color: '#7dd3fc',
+    definition: 'Eine Frage, auf die keine Antwort erwartet wird, weil sie bereits eindeutig ist.',
+    erkennung: 'Die Frage wirkt wie eine verkleidete Behauptung oder Aufforderung.',
+    beispiel: 'Wollen wir jetzt, kurz vor dem Ziel, einfach aufgeben?',
+  },
+  {
+    id: 'symbol', name: 'Symbol', color: '#93c5fd',
+    definition: 'Ein konkreter Gegenstand steht stellvertretend für eine abstrakte Idee.',
+    erkennung: 'Der Gegenstand trägt eine tiefere, oft kulturell bekannte Bedeutung – zum Beispiel eine weiße Taube für Frieden.',
+    beispiel: 'Ein weißer Schmetterling flog über sein Grab.',
+  },
+  {
+    id: 'ironie', name: 'Ironie', color: '#a5b4fc',
+    definition: 'Es wird das Gegenteil von dem gesagt, was eigentlich gemeint ist.',
+    erkennung: 'Die Aussage passt nicht zur Situation – erkennbar meist nur durch Tonfall oder Kontext.',
+    beispiel: 'Na, das hast du ja wieder toll hinbekommen.',
+  },
+  {
+    id: 'wiederholung', name: 'Wiederholung', color: '#c4b5fd',
+    definition: 'Ein Wort oder Ausdruck wird mehrfach wiederholt, um ihn zu betonen.',
+    erkennung: 'Dasselbe Wort taucht auffällig oft oder direkt hintereinander auf.',
+    beispiel: 'Wind, Wind, überall nur Wind.',
+  },
+  {
+    id: 'klimax', name: 'Klimax', color: '#d8b4fe',
+    definition: 'Mehrere Begriffe werden in aufsteigender, sich steigernder Reihenfolge aufgezählt.',
+    erkennung: 'Die Wörter werden von Stufe zu Stufe intensiver oder bedeutender.',
+    beispiel: 'Etwas Großem, etwas Neuem, etwas Unvergesslichem.',
+  },
+  {
+    id: 'chiasmus', name: 'Chiasmus', color: '#f0abfc',
+    definition: 'Satzglieder werden über Kreuz angeordnet, nach dem Muster A–B–B–A.',
+    erkennung: 'Der zweite Teil des Satzes spiegelt den Aufbau des ersten in umgekehrter Reihenfolge.',
+    beispiel: 'Wir müssen leben, um zu essen, nicht essen, um zu leben.',
+  },
+  {
+    id: 'onomatopoesie', name: 'Onomatopoesie (Lautmalerei)', color: '#f9a8d4',
+    definition: 'Ein Wort ahmt lautlich das Geräusch nach, das es beschreibt.',
+    erkennung: 'Sprich das Wort laut aus – klingt es wie das beschriebene Geräusch?',
+    beispiel: 'Die Bienen summten und brummten im Garten.',
+  },
+  {
+    id: 'euphemismus', name: 'Euphemismus', color: '#fda4af',
+    definition: 'Eine unangenehme Tatsache wird beschönigend oder mildernd umschrieben.',
+    erkennung: 'Eine harte Tatsache (z. B. der Tod) wird sanft oder verschleiernd ausgedrückt.',
+    beispiel: 'Er schlief für immer ein.',
+  },
+];
+
+const STIL_TEXTS = [
+  {
+    id: 'heidenroeslein',
+    title: 'Heidenröslein',
+    author: 'Johann Wolfgang von Goethe',
+    body: "Sah ein Knab' ein Röslein stehn, Röslein auf der Heiden, war so jung und morgenschön, lief er schnell, es nah zu sehn, sah's mit vielen Freuden. Röslein, Röslein, Röslein rot, Röslein auf der Heiden.",
+  },
+  {
+    id: 'loreley',
+    title: 'Die Loreley (1. Strophe)',
+    author: 'Heinrich Heine',
+    body: 'Ich weiß nicht, was soll es bedeuten, dass ich so traurig bin; ein Märchen aus alten Zeiten, das kommt mir nicht aus dem Sinn.',
+  },
+  {
+    id: 'sturm',
+    title: 'Der Sturm',
+    author: 'Übungstext',
+    body: 'Der Wind heult und wütet, wild und wütend fegt er über die Felder. Der Himmel weint dicke Tränen, und die Bäume tanzen wie Verrückte im Sturm. Tausend Blitze zerreißen die Nacht, und der Donner brüllt lauter als ein Löwe. Ist das nicht der reinste Weltuntergang? Die Blätter flüstern und rascheln, als wollten sie vor der Wut des Himmels fliehen. Wind, Wind, überall nur Wind, der an den Fenstern rüttelt, an den Türen rüttelt, an den Nerven rüttelt.',
+  },
+  {
+    id: 'rede',
+    title: 'Die Rede',
+    author: 'Übungstext',
+    body: 'Wollen wir aufgeben? Wollen wir jetzt, kurz vor dem Ziel, einfach stehen bleiben? Ich sage: nein! Wir haben gekämpft, wir haben durchgehalten, wir haben nie aufgegeben. Der Weg war steinig und steil, aber wir sind ihn gemeinsam gegangen. Heute stehen wir hier: müde, aber stolz. Erschöpft, aber ungebrochen. Dies ist nicht das Ende, liebe Freunde, dies ist erst der Anfang von etwas Großem, etwas Neuem, etwas Unvergesslichem.',
+  },
+  {
+    id: 'morgen',
+    title: 'Der letzte Morgen',
+    author: 'Übungstext',
+    body: 'Die Sonne lächelte über den Hügeln, als der alte Mann für immer einschlief. Die Bienen summten und brummten im Garten, während die Blätter im Wind raschelten. Ein weißer Schmetterling flog über sein Grab, als wolle er sagen, dass die Seele nun frei sei. Das Leben ist ein Fluss, der unaufhaltsam dem Meer entgegenströmt. Manche nennen es das Ende, andere nennen es den Anfang einer neuen Reise.',
+  },
+];
+
+/**
+ * Baut die aufklappbare Stilmittel-Übersicht: Klick auf eine Zeile zeigt
+ * Definition, Erkennungsmerkmale und ein Beispiel darunter an.
+ */
+function renderStilmittelListe() {
+  const list = el('stilmittel-list');
+  list.innerHTML = '';
+  STILMITTEL.forEach((sm) => {
+    const item = document.createElement('div');
+    item.className = 'stilmittel-item';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'stilmittel-toggle';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'stilmittel-swatch';
+    swatch.style.background = sm.color;
+    swatch.setAttribute('aria-hidden', 'true');
+
+    const name = document.createElement('span');
+    name.className = 'stilmittel-name';
+    name.textContent = sm.name;
+
+    const chevron = document.createElement('span');
+    chevron.className = 'stilmittel-chevron';
+    chevron.textContent = '⌄';
+    chevron.setAttribute('aria-hidden', 'true');
+
+    toggle.appendChild(swatch);
+    toggle.appendChild(name);
+    toggle.appendChild(chevron);
+
+    const body = document.createElement('div');
+    body.className = 'stilmittel-body';
+    body.hidden = true;
+
+    const pDef = document.createElement('p');
+    pDef.innerHTML = `<strong>Was es ist:</strong> ${sm.definition}`;
+    const pErk = document.createElement('p');
+    pErk.innerHTML = `<strong>Woran du es erkennst:</strong> ${sm.erkennung}`;
+    const pBsp = document.createElement('p');
+    pBsp.className = 'stilmittel-example';
+    pBsp.innerHTML = `<strong>Beispiel:</strong> <em>${sm.beispiel}</em>`;
+    body.appendChild(pDef);
+    body.appendChild(pErk);
+    body.appendChild(pBsp);
+
+    toggle.addEventListener('click', () => {
+      const willOpen = body.hidden;
+      body.hidden = !willOpen;
+      item.classList.toggle('open', willOpen);
+    });
+
+    item.appendChild(toggle);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+}
+
+// Zustand der aktuellen Übungs-Session: welcher Text, welche Wörter sind
+// bereits einem Stilmittel zugeordnet, welche sind gerade nur markiert
+// (ausgewählt, aber noch nicht zugeordnet).
+const stilUebung = {
+  textId: null,
+  words: [],
+  selection: [],
+};
+
+function pickRandomStilText(excludeId) {
+  const pool = STIL_TEXTS.filter((t) => t.id !== excludeId);
+  const source = pool.length ? pool : STIL_TEXTS;
+  return source[Math.floor(Math.random() * source.length)];
+}
+
+function loadStilUebungText() {
+  const text = pickRandomStilText(stilUebung.textId);
+  stilUebung.textId = text.id;
+  stilUebung.words = text.body.split(/\s+/).filter(Boolean).map((raw) => ({ raw, assignedId: null }));
+  stilUebung.selection = [];
+
+  el('stilmittel-text-meta').textContent = `${text.title} – ${text.author}`;
+  renderStilText();
+  hideStilAssignPanel();
+}
+
+function renderStilText() {
+  const card = el('stilmittel-text-card');
+  card.innerHTML = '';
+  stilUebung.words.forEach((w, idx) => {
+    const span = document.createElement('span');
+    span.className = 'stil-word';
+    span.textContent = w.raw;
+    span.dataset.wordIdx = String(idx);
+    if (w.assignedId) {
+      const sm = STILMITTEL.find((s) => s.id === w.assignedId);
+      span.classList.add('assigned');
+      span.style.background = sm.color;
+      span.title = sm.name;
+    } else if (stilUebung.selection.includes(idx)) {
+      span.classList.add('pending');
+    }
+    card.appendChild(span);
+    card.appendChild(document.createTextNode(' '));
+  });
+}
+
+function hideStilAssignPanel() {
+  el('stilmittel-assign-panel').hidden = true;
+  el('stilmittel-search-input').value = '';
+  el('stilmittel-search-results').innerHTML = '';
+}
+
+function renderStilSearchResults(query) {
+  const results = el('stilmittel-search-results');
+  results.innerHTML = '';
+  const q = query.trim().toLowerCase();
+  STILMITTEL.filter((sm) => sm.name.toLowerCase().includes(q)).forEach((sm) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'stil-search-result';
+    const swatch = document.createElement('span');
+    swatch.className = 'stilmittel-swatch';
+    swatch.style.background = sm.color;
+    swatch.setAttribute('aria-hidden', 'true');
+    const name = document.createElement('span');
+    name.textContent = sm.name;
+    btn.appendChild(swatch);
+    btn.appendChild(name);
+    btn.addEventListener('click', () => assignSelectionTo(sm.id));
+    results.appendChild(btn);
+  });
+}
+
+function updateStilAssignPanel() {
+  if (!stilUebung.selection.length) {
+    hideStilAssignPanel();
+    return;
+  }
+  el('stilmittel-assign-panel').hidden = false;
+  const preview = stilUebung.selection
+    .slice()
+    .sort((a, b) => a - b)
+    .map((i) => stilUebung.words[i].raw)
+    .join(' ');
+  el('stilmittel-selected-preview').textContent = `„${preview}“`;
+  renderStilSearchResults(el('stilmittel-search-input').value);
+}
+
+function assignSelectionTo(stilmittelId) {
+  stilUebung.selection.forEach((idx) => {
+    stilUebung.words[idx].assignedId = stilmittelId;
+  });
+  stilUebung.selection = [];
+  renderStilText();
+  hideStilAssignPanel();
+}
+
+function onStilWordClick(idx) {
+  const word = stilUebung.words[idx];
+  if (word.assignedId) {
+    // Erneuter Klick auf eine bereits zugeordnete Markierung hebt sie auf.
+    word.assignedId = null;
+    renderStilText();
+    return;
+  }
+  const pos = stilUebung.selection.indexOf(idx);
+  if (pos === -1) stilUebung.selection.push(idx);
+  else stilUebung.selection.splice(pos, 1);
+  renderStilText();
+  updateStilAssignPanel();
+}
+
+function renderStilLegend(query = '') {
+  const list = el('stilmittel-legend-list');
+  list.innerHTML = '';
+  const q = query.trim().toLowerCase();
+  STILMITTEL.filter((sm) => sm.name.toLowerCase().includes(q)).forEach((sm) => {
+    const row = document.createElement('div');
+    row.className = 'stilmittel-legend-item';
+    const swatch = document.createElement('span');
+    swatch.className = 'stilmittel-swatch';
+    swatch.style.background = sm.color;
+    swatch.setAttribute('aria-hidden', 'true');
+    const name = document.createElement('span');
+    name.textContent = sm.name;
+    row.appendChild(swatch);
+    row.appendChild(name);
+    list.appendChild(row);
+  });
+}
+
+function initStilmittelUebung() {
+  el('stilmittel-text-card').addEventListener('click', (ev) => {
+    const wordEl = ev.target.closest('.stil-word');
+    if (!wordEl) return;
+    onStilWordClick(Number(wordEl.dataset.wordIdx));
+  });
+
+  el('stilmittel-new-text-btn').addEventListener('click', loadStilUebungText);
+
+  el('stilmittel-cancel-selection-btn').addEventListener('click', () => {
+    stilUebung.selection = [];
+    renderStilText();
+    hideStilAssignPanel();
+  });
+
+  el('stilmittel-search-input').addEventListener('input', (ev) => renderStilSearchResults(ev.target.value));
+  el('stilmittel-legend-search').addEventListener('input', (ev) => renderStilLegend(ev.target.value));
+
+  renderStilLegend();
+  loadStilUebungText();
+}
+
 /* ---------------- Init ---------------- */
 
 loadSettings();
@@ -1913,6 +2261,8 @@ initSettingsScreen();
 initTheme();
 initUpdateButton();
 enhanceTrickCards();
+renderStilmittelListe();
+initStilmittelUebung();
 showScreen('home');
 initUpdateChecker();
 renderVersionHistory();

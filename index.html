@@ -56,11 +56,11 @@
         <span class="learn-banner-arrow">→</span>
       </button>
 
-      <button type="button" class="learn-banner beta" data-goto="subject-deutsch">
+      <button type="button" class="learn-banner" data-goto="subject-deutsch">
         <span class="learn-banner-icon">📖</span>
         <span class="learn-banner-text">
-          <strong>Deutsch <span class="beta-badge">Bald</span></strong>
-          <small>Noch in Bearbeitung</small>
+          <strong>Deutsch</strong>
+          <small>Stilmittel lernen &amp; erkennen üben</small>
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
@@ -76,15 +76,75 @@
     </div>
   </section>
 
-  <!-- ===================== FACH: DEUTSCH (Platzhalter) ===================== -->
+  <!-- ===================== FACH: DEUTSCH ===================== -->
   <section class="screen" id="screen-subject-deutsch" data-screen="subject-deutsch" hidden>
+    <header class="app-header">
+      <h1>📖 Deutsch</h1>
+      <p class="subtitle">Stilmittel erkennen und verstehen.</p>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="stilmittel-lernen">
+      <span class="learn-banner-icon">📗</span>
+      <span class="learn-banner-text">
+        <strong>Stilmittel lernen</strong>
+        <small>Definition, Erkennungsmerkmale &amp; Beispiel für jedes Stilmittel</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="stilmittel-uebung">
+      <span class="learn-banner-icon">✏️</span>
+      <span class="learn-banner-text">
+        <strong>Stilmittel üben</strong>
+        <small>Wörter im Text markieren und Stilmitteln zuordnen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== DEUTSCH: STILMITTEL LERNEN ===================== -->
+  <section class="screen" id="screen-stilmittel-lernen" data-screen="stilmittel-lernen" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" data-goto="subject-deutsch" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
-        <span class="learn-title">📖 Deutsch</span>
+        <span class="learn-title">📗 Stilmittel lernen</span>
       </div>
     </header>
-    <div class="beta-note">🚧 Deutsch ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+    <p class="subtitle learn-subtitle">Tippe auf ein Stilmittel, um Definition, Erkennungsmerkmale und ein Beispiel zu sehen.</p>
+
+    <div class="stilmittel-list" id="stilmittel-list"></div>
+  </section>
+
+  <!-- ===================== DEUTSCH: STILMITTEL ÜBEN ===================== -->
+  <section class="screen" id="screen-stilmittel-uebung" data-screen="stilmittel-uebung" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="subject-deutsch" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">✏️ Stilmittel üben</span>
+      </div>
+    </header>
+
+    <div class="stilmittel-uebung-toolbar">
+      <div class="stilmittel-text-meta" id="stilmittel-text-meta"></div>
+      <button type="button" class="btn-text" id="stilmittel-new-text-btn">🔀 Neuer Text</button>
+    </div>
+
+    <p class="diff-hint">Tippe auf Wörter, um sie zu markieren, und ordne die Markierung dann unten einem Stilmittel zu.</p>
+
+    <div class="stilmittel-text-card" id="stilmittel-text-card"></div>
+
+    <div class="stilmittel-assign-panel" id="stilmittel-assign-panel" hidden>
+      <p class="stilmittel-assign-hint">Markiert: <strong id="stilmittel-selected-preview"></strong></p>
+      <input type="text" class="text-input" id="stilmittel-search-input" placeholder="🔍 Stilmittel suchen …" autocomplete="off">
+      <div class="stilmittel-search-results" id="stilmittel-search-results"></div>
+      <button type="button" class="btn-text" id="stilmittel-cancel-selection-btn">Auswahl aufheben</button>
+    </div>
+
+    <div class="stilmittel-legend">
+      <h3 class="settings-subtitle">🎨 Farben-Legende</h3>
+      <input type="text" class="text-input" id="stilmittel-legend-search" placeholder="🔍 Farbe zu einem Stilmittel suchen …" autocomplete="off">
+      <div class="stilmittel-legend-list" id="stilmittel-legend-list"></div>
+    </div>
   </section>
 
   <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->

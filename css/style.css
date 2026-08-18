@@ -683,6 +683,163 @@ body {
 
 .update-modal .btn-secondary { margin-top: 10px; }
 
+/* ============ DEUTSCH: STILMITTEL ============ */
+.stilmittel-list { display: flex; flex-direction: column; gap: 10px; }
+
+.stilmittel-item {
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.stilmittel-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stilmittel-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stilmittel-name { flex: 1; }
+
+.stilmittel-chevron {
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+.stilmittel-item.open .stilmittel-chevron { transform: rotate(180deg); }
+
+.stilmittel-body {
+  padding: 0 16px 16px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stilmittel-body strong { color: var(--text); }
+.stilmittel-example em { color: var(--text); font-style: italic; }
+
+.stilmittel-uebung-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.stilmittel-text-meta { font-weight: 700; font-size: 0.92rem; }
+
+.stilmittel-text-card {
+  background: var(--bg-elevated);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  font-size: 1.02rem;
+  line-height: 2.1;
+}
+
+.stil-word {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.stil-word:active { transform: scale(0.97); }
+.stil-word.pending {
+  background: var(--chip-bg);
+  outline: 2px dashed var(--primary);
+  outline-offset: -1px;
+}
+.stil-word.assigned { color: #1a1a1a; font-weight: 600; }
+
+.stilmittel-assign-panel {
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stilmittel-assign-hint { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+.stilmittel-assign-hint strong { color: var(--text); }
+
+.text-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.text-input:focus { outline: none; border-color: var(--primary); }
+
+.stilmittel-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.stil-search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: none;
+  background: var(--chip-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.stil-search-result:active { transform: scale(0.98); }
+
+.stilmittel-legend {
+  background: var(--bg-elevated);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-top: 4px;
+}
+.stilmittel-legend .text-input { margin-top: 10px; margin-bottom: 12px; }
+
+.stilmittel-legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stilmittel-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .version-current {
   margin: 4px 0 0;
   font-size: 0.9rem;

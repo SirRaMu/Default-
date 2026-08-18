@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.2",
+    "date": "2026-08-18",
+    "title": "Deutsch: Stilmittel lernen & üben",
+    "items": [
+      { "icon": "📗", "text": "Neu unter Deutsch: \"Stilmittel lernen\" – 16 Stilmittel zum Aufklappen, jeweils mit Definition, Erkennungsmerkmalen und Beispiel." },
+      { "icon": "✏️", "text": "Neu: \"Stilmittel üben\" – markiere Wörter in einem Text und ordne sie per Suche einem Stilmittel zu, inklusive Übungstexten und einer durchsuchbaren Farben-Legende." },
+      { "icon": "🔀", "text": "Mit \"Neuer Text\" gibt's jederzeit einen neuen Übungstext, alle Markierungen werden dann zurückgesetzt." }
+    ]
+  },
+  {
     "version": "2.1",
     "date": "2026-08-18",
     "title": "Browser-Tab zeigt jetzt sofort das neue Icon",
