@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.12",
+    "date": "2026-08-18",
+    "title": "Updates werden jetzt von selbst erkannt",
+    "items": [
+      { "icon": "🔍", "text": "Die App prüft jetzt selbstständig auf neue Versionen – auch wenn du sie nie ganz schließt, sondern nur zwischendurch woanders hin wechselst." },
+      { "icon": "🚫", "text": "Kein manuelles Schließen und Neuöffnen mehr nötig, um ein Update zu bekommen." }
+    ]
+  },
+  {
     "version": "1.11",
     "date": "2026-08-18",
     "title": "Nur noch ein Weg zu den Einstellungen",

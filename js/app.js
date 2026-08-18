@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '1.11';
+const APP_VERSION = '1.12';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -1839,6 +1839,20 @@ function initUpdateChecker() {
           }
         });
       });
+
+      // Der Browser prüft von sich aus nur bei einer echten Navigation auf
+      // eine neue sw.js - bleibt die als App installierte Seite einfach im
+      // Hintergrund offen (typisch auf iPad/Handy, ohne die App zu
+      // "schließen"), passiert das sonst tagelang nicht. Deshalb hier aktiv
+      // nachfragen: sobald die App wieder sichtbar wird und danach
+      // regelmäßig, solange sie offen bleibt.
+      const checkForUpdate = () => registration.update().catch(() => { /* offline - kein Problem */ });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      });
+      window.addEventListener('pageshow', () => checkForUpdate());
+      setInterval(checkForUpdate, 30 * 60 * 1000);
     }).catch(() => {
       /* Offline-Support ist optional – Fehler hier sind unkritisch */
     });
