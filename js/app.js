@@ -212,6 +212,7 @@ const screens = {
   results: el('screen-results'),
   learn: el('screen-learn'),
   practice: el('screen-practice'),
+  advanced: el('screen-advanced'),
 };
 
 function showScreen(name) {
@@ -381,7 +382,7 @@ const TRICKS = {
       const ua = a % 10;
       const ub = b % 10;
       return {
-        headline: `${a} + ${b}`,
+        headline: `${a} + ${b} = ?`,
         steps: [
           { prompt: `Hunderter zusammen: ${ha} + ${hb} =`, answer: ha + hb },
           { prompt: `Zehner zusammen: ${ta} + ${tb} =`, answer: ta + tb },
@@ -399,7 +400,7 @@ const TRICKS = {
       const a = round - delta;
       const b = randInt(10, 89);
       return {
-        headline: `${a} + ${b}`,
+        headline: `${a} + ${b} = ?`,
         steps: [
           { prompt: `Runde ${a} auf ${round}: ${round} + ${b} =`, answer: round + b },
           { prompt: `Jetzt ${delta} wieder abziehen: ${round + b} − ${delta} =`, answer: a + b },
@@ -420,7 +421,7 @@ const TRICKS = {
       const diff2 = nextHundred - nextTen;
       const diff3 = round - nextHundred;
       return {
-        headline: `${round} − ${sub}`,
+        headline: `${round} − ${sub} = ?`,
         steps: [
           { prompt: `Von ${sub} zur nächsten Zehnerzahl ${nextTen}: wie weit?`, answer: diff1 },
           { prompt: `Von ${nextTen} zur nächsten Hunderterzahl ${nextHundred}: wie weit?`, answer: diff2 },
@@ -438,7 +439,7 @@ const TRICKS = {
       const sub = round - delta;
       const a = sub + randInt(50, 400);
       return {
-        headline: `${a} − ${sub}`,
+        headline: `${a} − ${sub} = ?`,
         steps: [
           { prompt: `Runde ${sub} auf ${round}: ${a} − ${round} =`, answer: a - round },
           { prompt: `Jetzt ${delta} wieder dazuzählen: ${a - round} + ${delta} =`, answer: a - sub },
@@ -455,7 +456,7 @@ const TRICKS = {
       const tens = Math.floor(a / 10) * 10;
       const units = a % 10;
       return {
-        headline: `${a} × ${b}`,
+        headline: `${a} × ${b} = ?`,
         steps: [
           { prompt: `${tens} × ${b} =`, answer: tens * b },
           { prompt: `${units} × ${b} =`, answer: units * b },
@@ -471,7 +472,7 @@ const TRICKS = {
       const variant = pick(['5', '25', '9']);
       if (variant === '5') {
         return {
-          headline: `${n} × 5`,
+          headline: `${n} × 5 = ?`,
           steps: [
             { prompt: `${n} × 10 =`, answer: n * 10 },
             { prompt: `${n * 10} ÷ 2 =`, answer: n * 5 },
@@ -480,7 +481,7 @@ const TRICKS = {
       }
       if (variant === '25') {
         return {
-          headline: `${n} × 25`,
+          headline: `${n} × 25 = ?`,
           steps: [
             { prompt: `${n} × 100 =`, answer: n * 100 },
             { prompt: `${n * 100} ÷ 4 =`, answer: n * 25 },
@@ -488,7 +489,7 @@ const TRICKS = {
         };
       }
       return {
-        headline: `${n} × 9`,
+        headline: `${n} × 9 = ?`,
         steps: [
           { prompt: `${n} × 10 =`, answer: n * 10 },
           { prompt: `${n * 10} − ${n} =`, answer: n * 9 },
@@ -505,7 +506,7 @@ const TRICKS = {
       const sum = d1 + d2;
       if (sum < 10) {
         return {
-          headline: `${a} × 11`,
+          headline: `${a} × 11 = ?`,
           steps: [
             { prompt: `Ziffernsumme: ${d1} + ${d2} =`, answer: sum },
             { prompt: `Einsetzen: ${d1}_${sum}_${d2} → Ergebnis =`, answer: a * 11 },
@@ -513,7 +514,7 @@ const TRICKS = {
         };
       }
       return {
-        headline: `${a} × 11`,
+        headline: `${a} × 11 = ?`,
         steps: [
           { prompt: `Ziffernsumme: ${d1} + ${d2} =`, answer: sum },
           { prompt: `Übertrag: vordere Ziffer wird ${d1}+1=${d1 + 1}, Ergebnis =`, answer: a * 11 },
@@ -529,7 +530,7 @@ const TRICKS = {
       const sign = pick([1, -1]);
       const n = base + sign * x;
       return {
-        headline: `${n}²`,
+        headline: `${n}² = ?`,
         steps: [
           { prompt: `${base}² =`, answer: base * base },
           { prompt: `2 × ${base} × ${x} =`, answer: 2 * base * x },
@@ -552,7 +553,7 @@ const TRICKS = {
       const a = m - x;
       const b = m + x;
       return {
-        headline: `${a} × ${b}`,
+        headline: `${a} × ${b} = ?`,
         steps: [
           { prompt: `Mittelwert m = ${m} → m² =`, answer: m * m },
           { prompt: `Abstand x = ${x} → x² =`, answer: x * x },
@@ -568,7 +569,7 @@ const TRICKS = {
       if (variant === '5') {
         const n = randInt(6, 90) * 5;
         return {
-          headline: `${n} ÷ 5`,
+          headline: `${n} ÷ 5 = ?`,
           steps: [
             { prompt: `${n} × 2 =`, answer: n * 2 },
             { prompt: `${n * 2} ÷ 10 =`, answer: n / 5 },
@@ -577,7 +578,7 @@ const TRICKS = {
       }
       const n = randInt(4, 40) * 25;
       return {
-        headline: `${n} ÷ 25`,
+        headline: `${n} ÷ 25 = ?`,
         steps: [
           { prompt: `${n} × 4 =`, answer: n * 4 },
           { prompt: `${n * 4} ÷ 100 =`, answer: n / 25 },
@@ -594,7 +595,7 @@ const TRICKS = {
       const divisor = divisor2 * f;
       const dividend = result * divisor;
       return {
-        headline: `${dividend} ÷ ${divisor}`,
+        headline: `${dividend} ÷ ${divisor} = ?`,
         steps: [
           { prompt: `Beide durch ${f} teilen: ${dividend} ÷ ${f} =`, answer: dividend / f },
           { prompt: `${divisor} ÷ ${f} =`, answer: divisor / f },
@@ -615,7 +616,7 @@ const TRICKS = {
       const remainder = dividend - product;
       const remainderQuotient = q - estimate;
       return {
-        headline: `${dividend} ÷ ${d}`,
+        headline: `${dividend} ÷ ${d} = ?`,
         steps: [
           { prompt: `Grob geschätzt ≈ ${estimate}. Probe: ${d} × ${estimate} =`, answer: product },
           { prompt: `Rest: ${dividend} − ${product} =`, answer: remainder },
@@ -625,12 +626,214 @@ const TRICKS = {
       };
     },
   },
+
+  'pct-value': {
+    build() {
+      const g = randInt(1, 20) * 100;
+      const p = randInt(2, 90);
+      const unit = g / 100;
+      const w = unit * p;
+      return {
+        headline: `Wie viel sind ${p}% von ${g}?`,
+        steps: [
+          { prompt: `1% von ${g}: ${g} ÷ 100 =`, answer: unit },
+          { prompt: `${p}% davon: ${unit} × ${p} =`, answer: w },
+        ],
+        resultText: `${p}% von ${g} = ${w}`,
+      };
+    },
+  },
+
+  'pct-base': {
+    build() {
+      const g = randInt(1, 20) * 100;
+      const p = randInt(2, 90);
+      const unit = g / 100;
+      const w = unit * p;
+      return {
+        headline: `${w} sind ${p}% von wie viel?`,
+        steps: [
+          { prompt: `${w} ÷ ${p} = 1% des Grundwerts =`, answer: unit },
+          { prompt: `Grundwert: ${unit} × 100 =`, answer: g },
+        ],
+        resultText: `${w} sind ${p}% von ${g}`,
+      };
+    },
+  },
+
+  'pct-rate': {
+    build() {
+      const g = randInt(1, 20) * 100;
+      const p = randInt(2, 90);
+      const unit = g / 100;
+      const w = unit * p;
+      return {
+        headline: `Wie viel % sind ${w} von ${g}?`,
+        steps: [
+          { prompt: `1% von ${g}: ${g} ÷ 100 =`, answer: unit },
+          { prompt: `${w} ÷ ${unit} =`, answer: p },
+        ],
+        resultText: `${w} sind ${p}% von ${g}`,
+      };
+    },
+  },
+
+  'pct-change': {
+    build() {
+      const g = randInt(1, 20) * 100;
+      const p = randInt(2, 50);
+      const sign = pick([1, -1]);
+      const unit = g / 100;
+      const change = unit * p;
+      const result = g + sign * change;
+      return {
+        headline: `${g} wird um ${p}% ${sign === 1 ? 'erhöht' : 'gesenkt'}. Neuer Wert?`,
+        steps: [
+          { prompt: `1% von ${g}: ${g} ÷ 100 =`, answer: unit },
+          { prompt: `${p}% davon: ${unit} × ${p} =`, answer: change },
+          {
+            prompt: sign === 1
+              ? `Neuer Wert: ${g} + ${change} =`
+              : `Neuer Wert: ${g} − ${change} =`,
+            answer: result,
+          },
+        ],
+        resultText: `${g} ${sign === 1 ? '+' : '−'} ${p}% = ${result}`,
+      };
+    },
+  },
+
+  'pq-formula': {
+    build() {
+      const base = randInt(-6, 6);
+      let diffHalf = randInt(-3, 3);
+      if (base === 0 && diffHalf === 0) diffHalf = 1;
+      // Differenz ist immer gerade -> p/2 bleibt ganzzahlig
+      const rootA = base + diffHalf;
+      const rootB = base - diffHalf;
+      const x1 = Math.max(rootA, rootB);
+      const x2 = Math.min(rootA, rootB);
+
+      const p = -(x1 + x2);
+      const q = x1 * x2;
+      const halfP = -p / 2;
+      const halfPSq = halfP * halfP;
+      const discriminant = halfPSq - q;
+      const root = Math.abs(x1 - x2) / 2;
+      const pTerm = p >= 0 ? `+ ${p}x` : `− ${Math.abs(p)}x`;
+      const qTerm = q >= 0 ? `+ ${q}` : `− ${Math.abs(q)}`;
+
+      return {
+        headline: `x² ${pTerm} ${qTerm} = 0`,
+        steps: [
+          { prompt: `−p/2 =`, answer: halfP },
+          { prompt: `(p/2)² = ${halfP}² =`, answer: halfPSq },
+          { prompt: `(p/2)² − q = ${halfPSq} − (${q}) =`, answer: discriminant },
+          { prompt: `√${discriminant} =`, answer: root },
+          { prompt: `x₁ = ${halfP} + ${root} =`, answer: x1 },
+          { prompt: `x₂ = ${halfP} − ${root} =`, answer: x2 },
+        ],
+        resultText: `x₁ = ${x1}, x₂ = ${x2}`,
+      };
+    },
+  },
+
+  'lgs-einsetzen': {
+    build() {
+      let x0, y0, m, a, b;
+      do {
+        x0 = randInt(-6, 6);
+        y0 = randInt(-6, 6);
+        m = randInt(-3, 3);
+        a = pick([1, 2, 3, 4, -1, -2, -3, -4]);
+        b = pick([1, 2, 3, -1, -2, -3]);
+      } while (a + b * m === 0);
+      const c = y0 - m * x0;
+      const d = a * x0 + b * y0;
+      const bm = b * m;
+      const bc = b * c;
+      const xCoeff = a + bm;
+      const rhs = d - bc;
+
+      return {
+        headline: `I: y = ${m}x ${c >= 0 ? '+' : '−'} ${Math.abs(c)}\nII: ${a}x ${b >= 0 ? '+' : '−'} ${Math.abs(b)}y = ${d}`,
+        steps: [
+          { prompt: `I in II einsetzen, Klammer auflösen: ${b} × ${m} =`, answer: bm },
+          { prompt: `${b} × ${c} =`, answer: bc },
+          { prompt: `x-Koeffizienten zusammenfassen: ${a} + ${bm} =`, answer: xCoeff },
+          { prompt: `Zahlen zusammenfassen: ${d} − (${bc}) =`, answer: rhs },
+          { prompt: `x = ${rhs} ÷ ${xCoeff} =`, answer: x0 },
+          { prompt: `y mit I: ${m} × ${x0} ${c >= 0 ? '+' : '−'} ${Math.abs(c)} =`, answer: y0 },
+        ],
+        resultText: `x = ${x0}, y = ${y0}`,
+      };
+    },
+  },
+
+  'lgs-gleichsetzen': {
+    build() {
+      let x0, y0, m1, m2;
+      do {
+        x0 = randInt(-6, 6);
+        y0 = randInt(-6, 6);
+        m1 = randInt(-4, 4);
+        m2 = randInt(-4, 4);
+      } while (m1 === m2);
+      const c1 = y0 - m1 * x0;
+      const c2 = y0 - m2 * x0;
+      const mDiff = m1 - m2;
+      const cDiff = c2 - c1;
+
+      return {
+        headline: `I: y = ${m1}x ${c1 >= 0 ? '+' : '−'} ${Math.abs(c1)}\nII: y = ${m2}x ${c2 >= 0 ? '+' : '−'} ${Math.abs(c2)}`,
+        steps: [
+          { prompt: `Gleichsetzen, x-Koeffizienten: ${m1} − (${m2}) =`, answer: mDiff },
+          { prompt: `Zahlen: ${c2} − (${c1}) =`, answer: cDiff },
+          { prompt: `x = ${cDiff} ÷ ${mDiff} =`, answer: x0 },
+          { prompt: `y mit I: ${m1} × ${x0} ${c1 >= 0 ? '+' : '−'} ${Math.abs(c1)} =`, answer: y0 },
+        ],
+        resultText: `x = ${x0}, y = ${y0}`,
+      };
+    },
+  },
+
+  'lgs-addition': {
+    build() {
+      let x0, y0, a1, b1, a2;
+      do {
+        x0 = randInt(-6, 6);
+        y0 = randInt(-6, 6);
+        a1 = pick([1, 2, 3, 4, -1, -2, -3, -4]);
+        b1 = pick([1, 2, 3, -1, -2, -3]);
+        a2 = pick([1, 2, 3, 4, -1, -2, -3, -4]);
+      } while (a1 + a2 === 0);
+      const b2 = -b1;
+      const d1 = a1 * x0 + b1 * y0;
+      const d2 = a2 * x0 + b2 * y0;
+      const aSum = a1 + a2;
+      const dSum = d1 + d2;
+      const yRhs = d1 - a1 * x0;
+
+      return {
+        headline: `I: ${a1}x ${b1 >= 0 ? '+' : '−'} ${Math.abs(b1)}y = ${d1}\nII: ${a2}x ${b2 >= 0 ? '+' : '−'} ${Math.abs(b2)}y = ${d2}`,
+        steps: [
+          { prompt: `Addieren (y fällt weg): ${a1} + (${a2}) =`, answer: aSum },
+          { prompt: `${d1} + (${d2}) =`, answer: dSum },
+          { prompt: `x = ${dSum} ÷ ${aSum} =`, answer: x0 },
+          { prompt: `In I einsetzen: ${d1} − ${a1} × ${x0} =`, answer: yRhs },
+          { prompt: `y = ${yRhs} ÷ ${b1} =`, answer: y0 },
+        ],
+        resultText: `x = ${x0}, y = ${y0}`,
+      };
+    },
+  },
 };
 
 let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
 function openPractice(trickId) {
-  practice = { trickId, ctx: null, stepIndex: 0, input: '' };
+  const origin = !screens.advanced.hidden ? 'advanced' : 'learn';
+  practice = { trickId, ctx: null, stepIndex: 0, input: '', origin };
   showScreen('practice');
   loadPracticeProblem();
 }
@@ -652,7 +855,7 @@ function renderPracticeStep() {
 
   el('practice-progress-label').textContent = `Schritt ${practice.stepIndex + 1} von ${ctx.steps.length}`;
   el('practice-progress-fill').style.width = `${(practice.stepIndex / ctx.steps.length) * 100}%`;
-  el('practice-problem').textContent = `${ctx.headline} = ?`;
+  el('practice-problem').textContent = ctx.headline;
   el('practice-prompt').textContent = step.prompt;
   el('practice-answer-display').textContent = ' ';
   el('practice-feedback').textContent = '';
@@ -719,7 +922,8 @@ function finishPracticeProblem() {
   el('practice-card').hidden = true;
   el('practice-numpad').hidden = true;
   el('practice-done').hidden = false;
-  el('practice-done-sub').textContent = `${ctx.headline} = ${ctx.steps[ctx.steps.length - 1].answer}`;
+  const finalAnswer = ctx.steps[ctx.steps.length - 1].answer;
+  el('practice-done-sub').textContent = ctx.resultText || ctx.headline.replace(/\?\s*$/, String(finalAnswer));
 
   incrementTrickCounter();
 }
@@ -761,11 +965,26 @@ function initPracticeScreen() {
     }
   });
 
-  el('practice-cancel-btn').addEventListener('click', () => showScreen('learn'));
-  el('practice-exit-btn').addEventListener('click', () => showScreen('learn'));
+  el('practice-cancel-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'learn'));
+  el('practice-exit-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'learn'));
   el('practice-next-btn').addEventListener('click', loadPracticeProblem);
 
   renderTrickCounter();
+}
+
+/* ---------------- Erweiterte-Aufgaben-Screen ---------------- */
+
+function initAdvancedScreen() {
+  el('advanced-open-btn').addEventListener('click', () => showScreen('advanced'));
+  el('advanced-back-btn').addEventListener('click', () => showScreen('setup'));
+  el('advanced-to-training-btn').addEventListener('click', () => showScreen('setup'));
+
+  el('advanced-nav').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button');
+    if (!btn) return;
+    const target = el(btn.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 }
 
 /* ---------------- Quiz-Screen ---------------- */
@@ -1087,6 +1306,7 @@ function initUpdateButton() {
 loadSettings();
 initSetupScreen();
 initLearnScreen();
+initAdvancedScreen();
 initPracticeScreen();
 initTheme();
 initUpdateButton();

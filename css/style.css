@@ -324,6 +324,7 @@ body {
   font-weight: 700;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+  white-space: pre-line;
 }
 
 .practice-done {

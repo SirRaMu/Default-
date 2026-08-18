@@ -42,6 +42,15 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
+    <button type="button" class="learn-banner" id="advanced-open-btn">
+      <span class="learn-banner-icon">🎓</span>
+      <span class="learn-banner-text">
+        <strong>Erweiterte Aufgaben</strong>
+        <small>PQ-Formel, Gleichungssysteme, Prozentrechnung</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <div class="setup-card">
       <h2 class="section-title">Rechenart</h2>
       <div class="chip-group" id="op-group" role="group" aria-label="Rechenart">
@@ -315,6 +324,139 @@
     </section>
 
     <button type="button" class="btn-primary" id="learn-to-training-btn">Jetzt trainieren</button>
+  </section>
+
+  <!-- ===================== ERWEITERTE AUFGABEN SCREEN ===================== -->
+  <section class="screen" id="screen-advanced" data-screen="advanced" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" id="advanced-back-btn" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">Erweiterte Aufgaben</span>
+      </div>
+    </header>
+    <p class="subtitle learn-subtitle">Themen aus der Oberstufe/Sekundarstufe – mit Erklärung und Schritt-für-Schritt-Übung.</p>
+
+    <div class="chip-group" id="advanced-nav">
+      <button type="button" class="chip" data-target="sec-pct">📊 Prozentrechnung</button>
+      <button type="button" class="chip" data-target="sec-pq">➗ PQ-Formel</button>
+      <button type="button" class="chip" data-target="sec-lgs">🔗 Gleichungssysteme</button>
+    </div>
+
+    <section class="trick-section" id="sec-pct">
+      <h2 class="section-title">📊 Prozentrechnung</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Die drei Grundgrößen</h3>
+          <p class="trick-rule">Grundwert G (= 100%), Prozentsatz p (in %) und Prozentwert W (der Anteil) hängen über W = G × p ÷ 100 zusammen. Kennst du zwei davon, findest du die dritte immer über den Umweg "1% von G" – das macht Kopfrechnen einfach.</p>
+        </div>
+        <div class="trick-card">
+          <h3>Prozentwert berechnen</h3>
+          <p class="trick-rule">Gesucht: W. Erst 1% von G ausrechnen (÷100), dann mit p multiplizieren.</p>
+          <div class="trick-steps">
+            <span>15% von 200</span><span class="arrow">→</span>
+            <span>200÷100=2</span><span class="arrow">→</span>
+            <span>2×15=</span><span class="result">30</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="pct-value">🧠 Üben</button>
+        </div>
+        <div class="trick-card">
+          <h3>Grundwert berechnen</h3>
+          <p class="trick-rule">Gesucht: G. Erst W durch p teilen (ergibt 1%), dann mit 100 multiplizieren.</p>
+          <div class="trick-steps">
+            <span>60 sind 20% von?</span><span class="arrow">→</span>
+            <span>60÷20=3</span><span class="arrow">→</span>
+            <span>3×100=</span><span class="result">300</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="pct-base">🧠 Üben</button>
+        </div>
+        <div class="trick-card">
+          <h3>Prozentsatz berechnen</h3>
+          <p class="trick-rule">Gesucht: p. Erst 1% von G ausrechnen (÷100), dann W durch diesen Wert teilen.</p>
+          <div class="trick-steps">
+            <span>45 von 300 = ?%</span><span class="arrow">→</span>
+            <span>300÷100=3</span><span class="arrow">→</span>
+            <span>45÷3=</span><span class="result">15</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="pct-rate">🧠 Üben</button>
+        </div>
+        <div class="trick-card">
+          <h3>Prozentuale Veränderung</h3>
+          <p class="trick-rule">Bei Erhöhung/Senkung um p%: Änderung ausrechnen (über 1%) und zum Grundwert addieren bzw. davon abziehen.</p>
+          <div class="trick-steps">
+            <span>200 + 25%</span><span class="arrow">→</span>
+            <span>200÷100=2 → 2×25=50</span><span class="arrow">→</span>
+            <span>200+50=</span><span class="result">250</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="pct-change">🧠 Üben</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="trick-section" id="sec-pq">
+      <h2 class="section-title">➗ PQ-Formel</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Quadratische Gleichung lösen</h3>
+          <p class="trick-rule">Für Gleichungen in Normalform x² + px + q = 0 (Koeffizient vor x² ist 1): x = −p/2 ± √((p/2)² − q). Steht vor x² eine andere Zahl, zuerst die ganze Gleichung durch diese Zahl teilen, um die Normalform herzustellen.</p>
+          <div class="trick-steps">
+            <span>x² + 2x − 15 = 0</span><span class="arrow">→</span>
+            <span>−p/2 = −1</span><span class="arrow">→</span>
+            <span>(p/2)² = 1</span><span class="arrow">→</span>
+            <span>1−(−15) = 16</span><span class="arrow">→</span>
+            <span>√16 = 4</span><span class="arrow">→</span>
+            <span>x₁=−1+4=3, x₂=−1−4=</span><span class="result">−5</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="pq-formula">🧠 Üben</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="trick-section" id="sec-lgs">
+      <h2 class="section-title">🔗 Lineare Gleichungssysteme</h2>
+      <div class="trick-list">
+        <div class="trick-card">
+          <h3>Zwei Gleichungen, zwei Unbekannte</h3>
+          <p class="trick-rule">Für x und y aus zwei Gleichungen gibt es drei Standardverfahren – alle führen zum selben Ergebnis, je nachdem wie die Gleichungen vorliegen lohnt sich ein anderes Verfahren.</p>
+        </div>
+        <div class="trick-card">
+          <h3>Einsetzungsverfahren</h3>
+          <p class="trick-rule">Eine Gleichung ist schon nach einer Variablen aufgelöst (z. B. y = ...). Diesen Ausdruck in die andere Gleichung einsetzen.</p>
+          <div class="trick-steps">
+            <span>I: y=2x+1</span><span class="arrow">→</span>
+            <span>II: 3x+(2x+1)=11</span><span class="arrow">→</span>
+            <span>5x+1=11</span><span class="arrow">→</span>
+            <span>x=2</span><span class="arrow">→</span>
+            <span>y=2·2+1=</span><span class="result">5</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="lgs-einsetzen">🧠 Üben</button>
+        </div>
+        <div class="trick-card">
+          <h3>Gleichsetzungsverfahren</h3>
+          <p class="trick-rule">Beide Gleichungen sind nach derselben Variablen aufgelöst. Die rechten Seiten gleichsetzen.</p>
+          <div class="trick-steps">
+            <span>I: y=2x+1</span><span class="arrow">·</span>
+            <span>II: y=−x+7</span><span class="arrow">→</span>
+            <span>2x+1=−x+7</span><span class="arrow">→</span>
+            <span>3x=6, x=2</span><span class="arrow">→</span>
+            <span>y=2·2+1=</span><span class="result">5</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="lgs-gleichsetzen">🧠 Üben</button>
+        </div>
+        <div class="trick-card">
+          <h3>Additionsverfahren</h3>
+          <p class="trick-rule">Stehen die y-Koeffizienten schon entgegengesetzt da (z. B. +y und −y), einfach beide Gleichungen addieren – y fällt weg.</p>
+          <div class="trick-steps">
+            <span>I: 2x+y=9</span><span class="arrow">·</span>
+            <span>II: 3x−y=6</span><span class="arrow">→</span>
+            <span>5x=15, x=3</span><span class="arrow">→</span>
+            <span>y=9−2·3=</span><span class="result">3</span>
+          </div>
+          <button type="button" class="btn-practice" data-trick="lgs-addition">🧠 Üben</button>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" class="btn-primary" id="advanced-to-training-btn">Zurück zur Startseite</button>
   </section>
 
   <!-- ===================== TRICK-ÜBUNG SCREEN ===================== -->
