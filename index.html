@@ -73,7 +73,111 @@
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
+
+      <button type="button" class="learn-banner beta" data-goto="subject-astronomie">
+        <span class="learn-banner-icon">🔭</span>
+        <span class="learn-banner-text">
+          <strong>Astronomie <span class="beta-badge">Bald</span></strong>
+          <small>Noch in Bearbeitung</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+
+      <button type="button" class="learn-banner beta" data-goto="subject-physik">
+        <span class="learn-banner-icon">⚛️</span>
+        <span class="learn-banner-text">
+          <strong>Physik <span class="beta-badge">Bald</span></strong>
+          <small>Noch in Bearbeitung</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+
+      <button type="button" class="learn-banner" data-goto="notizen">
+        <span class="learn-banner-icon">📝</span>
+        <span class="learn-banner-text">
+          <strong>Notizen</strong>
+          <small>Nur für dich – wird ausschließlich auf diesem Gerät gespeichert</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
     </div>
+  </section>
+
+  <!-- ===================== FACH: ASTRONOMIE (Platzhalter) ===================== -->
+  <section class="screen" id="screen-subject-astronomie" data-screen="subject-astronomie" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🔭 Astronomie</span>
+      </div>
+    </header>
+    <div class="beta-note">🚧 Astronomie ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+  </section>
+
+  <!-- ===================== FACH: PHYSIK (Platzhalter) ===================== -->
+  <section class="screen" id="screen-subject-physik" data-screen="subject-physik" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">⚛️ Physik</span>
+      </div>
+    </header>
+    <div class="beta-note">🚧 Physik ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+  </section>
+
+  <!-- ===================== NOTIZEN ===================== -->
+  <section class="screen" id="screen-notizen" data-screen="notizen" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📝 Notizen</span>
+      </div>
+    </header>
+    <p class="diff-hint">Deine Notizen werden ausschließlich auf diesem Gerät gespeichert – niemand sonst, der die App öffnet, sieht sie.</p>
+
+    <button type="button" class="btn-primary" id="notiz-new-btn">✏️ Neue Notiz</button>
+
+    <div class="notiz-list" id="notiz-list"></div>
+    <p class="notiz-empty-hint" id="notiz-empty-hint" hidden>Noch keine Notizen vorhanden – leg mit "Neue Notiz" los.</p>
+  </section>
+
+  <!-- ===================== NOTIZ-EDITOR ===================== -->
+  <section class="screen" id="screen-notiz-editor" data-screen="notiz-editor" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="notizen" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">Notiz</span>
+      </div>
+      <button type="button" class="btn-icon" id="notiz-delete-btn" aria-label="Notiz löschen">🗑️</button>
+    </header>
+
+    <input type="text" class="text-input notiz-title-input" id="notiz-title-input" placeholder="Titel der Notiz" autocomplete="off">
+
+    <div class="notiz-toolbar">
+      <div class="notiz-toolbar-row">
+        <button type="button" class="notiz-tool-btn" data-cmd="bold" aria-label="Fett"><strong>F</strong></button>
+        <button type="button" class="notiz-tool-btn" data-cmd="italic" aria-label="Kursiv"><em>K</em></button>
+        <button type="button" class="notiz-tool-btn" data-cmd="underline" aria-label="Unterstrichen"><u>U</u></button>
+        <select class="notiz-select" id="notiz-font-select" aria-label="Schriftart">
+          <option value="">Schriftart</option>
+          <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Standard</option>
+          <option value="Georgia, 'Times New Roman', serif">Serifenschrift</option>
+          <option value="Arial, Helvetica, sans-serif">Serifenlos</option>
+          <option value="'Courier New', monospace">Schreibmaschine</option>
+          <option value="'Comic Sans MS', 'Comic Sans', cursive">Verspielt</option>
+        </select>
+        <select class="notiz-select" id="notiz-size-select" aria-label="Schriftgröße">
+          <option value="">Größe</option>
+          <option value="13px">Klein</option>
+          <option value="16px">Normal</option>
+          <option value="20px">Groß</option>
+          <option value="26px">Sehr groß</option>
+        </select>
+      </div>
+      <div class="notiz-color-row" id="notiz-color-row"></div>
+    </div>
+
+    <div class="notiz-body" id="notiz-body" contenteditable="true"></div>
   </section>
 
   <!-- ===================== FACH: DEUTSCH ===================== -->

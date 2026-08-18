@@ -471,7 +471,7 @@ body {
 .history-list .h-score { font-weight: 700; }
 
 /* ============ QUIZ ============ */
-.quiz-header { display: flex; align-items: center; gap: 12px; padding-left: 52px; }
+.quiz-header { display: flex; align-items: center; gap: 12px; padding-left: 52px; padding-right: 52px; }
 .btn-icon {
   border: none;
   background: var(--chip-bg);
@@ -838,6 +838,116 @@ body {
   background: var(--chip-bg);
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+/* ============ NOTIZEN ============ */
+.notiz-list { display: flex; flex-direction: column; gap: 10px; }
+
+.notiz-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.notiz-card-main { flex: 1; min-width: 0; }
+.notiz-card-title { font-weight: 700; font-size: 0.98rem; margin: 0 0 3px; }
+.notiz-card-snippet {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  margin: 0 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notiz-card-date { color: var(--text-muted); font-size: 0.72rem; }
+
+.notiz-card-delete {
+  border: none;
+  background: var(--chip-bg);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notiz-empty-hint { color: var(--text-muted); text-align: center; margin-top: 20px; }
+
+.notiz-title-input { font-size: 1.05rem; font-weight: 700; }
+
+.notiz-toolbar {
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notiz-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.notiz-tool-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: var(--chip-bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.notiz-tool-btn.active { background: var(--primary); color: #fff; }
+
+.notiz-select {
+  flex: 1 1 120px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.notiz-color-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.notiz-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.notiz-color-swatch.active { border-color: var(--text); }
+
+.notiz-body {
+  background: var(--bg-elevated);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  min-height: 260px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  outline: none;
+}
+.notiz-body:empty::before {
+  content: 'Schreib hier deine Notiz …';
+  color: var(--text-muted);
 }
 
 .version-current {

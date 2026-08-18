@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.4",
+    "date": "2026-08-18",
+    "title": "Astronomie, Physik & persönliche Notizen",
+    "items": [
+      { "icon": "🔭", "text": "Zwei neue Fächer angelegt: Astronomie und Physik (beide noch in Bearbeitung)." },
+      { "icon": "📝", "text": "Neuer Bereich \"Notizen\": eigene Notizen anlegen, benennen und bearbeiten – mit Fett/Kursiv/Unterstrichen, Schriftart, Schriftgröße und Textfarbe." },
+      { "icon": "🔒", "text": "Notizen werden ausschließlich auf deinem Gerät gespeichert – es gibt kein Konto und keinen Server, niemand sonst kann sie sehen." }
+    ]
+  },
+  {
     "version": "2.3",
     "date": "2026-08-18",
     "title": "Ordnerstruktur bei Mathe & Deutsch vereinheitlicht",

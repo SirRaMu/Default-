@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.3';
+const APP_VERSION = '2.4';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -22,6 +22,7 @@ const STORAGE_KEYS = {
   highscores: 'kopfrechnen.highscores.v1',
   theme: 'kopfrechnen.theme.v1',
   accent: 'kopfrechnen.accent.v1',
+  notes: 'kopfrechnen.notes.v1',
 };
 
 // Akzentfarben-Paletten für die Farbgestaltung in den Einstellungen.
@@ -2251,6 +2252,236 @@ function initStilmittelUebung() {
   loadStilUebungText();
 }
 
+/* ---------------- Notizen ---------------- */
+
+// Notizen leben ausschließlich in localStorage auf diesem Gerät - es gibt
+// in dieser App kein Backend und keine Konten, also werden sie nirgendwo
+// hochgeladen oder mit anderen geteilt.
+const NOTIZ_COLORS = ['#14162b', '#dc2626', '#ea580c', '#16a34a', '#0ea5e9', '#4f46e5', '#a855f7', '#db2777'];
+
+let currentNoteId = null;
+let notizSavedRange = null;
+
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.notes);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveNotes(notes) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(notes));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function makeNoteId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `note-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function formatNoteDate(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+    ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotesList() {
+  const notes = loadNotes().slice().sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const list = el('notiz-list');
+  list.innerHTML = '';
+  el('notiz-empty-hint').hidden = notes.length > 0;
+
+  notes.forEach((note) => {
+    const card = document.createElement('div');
+    card.className = 'notiz-card';
+
+    const main = document.createElement('div');
+    main.className = 'notiz-card-main';
+    const title = document.createElement('p');
+    title.className = 'notiz-card-title';
+    title.textContent = note.title || 'Ohne Titel';
+    const snippet = document.createElement('p');
+    snippet.className = 'notiz-card-snippet';
+    const tmp = document.createElement('div');
+    tmp.innerHTML = note.html || '';
+    snippet.textContent = tmp.textContent.trim() || 'Keine weiteren Inhalte';
+    const date = document.createElement('span');
+    date.className = 'notiz-card-date';
+    date.textContent = formatNoteDate(note.updatedAt);
+    main.appendChild(title);
+    main.appendChild(snippet);
+    main.appendChild(date);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'notiz-card-delete';
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.setAttribute('aria-label', 'Notiz löschen');
+    deleteBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      deleteNote(note.id);
+    });
+
+    card.appendChild(main);
+    card.appendChild(deleteBtn);
+    card.addEventListener('click', () => openNoteEditor(note.id));
+    list.appendChild(card);
+  });
+}
+
+function deleteNote(id) {
+  const notes = loadNotes().filter((n) => n.id !== id);
+  saveNotes(notes);
+  if (currentNoteId === id) {
+    currentNoteId = null;
+    showScreen('notizen');
+  }
+  renderNotesList();
+}
+
+function createNewNote() {
+  const notes = loadNotes();
+  const note = { id: makeNoteId(), title: '', html: '', updatedAt: new Date().toISOString() };
+  notes.push(note);
+  saveNotes(notes);
+  openNoteEditor(note.id);
+}
+
+function openNoteEditor(id) {
+  const note = loadNotes().find((n) => n.id === id);
+  if (!note) return;
+  currentNoteId = id;
+  el('notiz-title-input').value = note.title || '';
+  el('notiz-body').innerHTML = note.html || '';
+  showScreen('notiz-editor');
+}
+
+function saveCurrentNote() {
+  if (!currentNoteId) return;
+  const notes = loadNotes();
+  const note = notes.find((n) => n.id === currentNoteId);
+  if (!note) return;
+  note.title = el('notiz-title-input').value;
+  note.html = el('notiz-body').innerHTML;
+  note.updatedAt = new Date().toISOString();
+  saveNotes(notes);
+}
+
+function trackNotizSelection() {
+  document.addEventListener('selectionchange', () => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    const body = el('notiz-body');
+    if (body && body.contains(range.commonAncestorContainer)) {
+      notizSavedRange = range.cloneRange();
+      updateNotizToolbarActiveState();
+    }
+  });
+}
+
+function restoreNotizSelection() {
+  if (!notizSavedRange) return false;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(notizSavedRange);
+  return true;
+}
+
+function updateNotizToolbarActiveState() {
+  document.querySelectorAll('.notiz-tool-btn').forEach((btn) => {
+    try {
+      btn.classList.toggle('active', document.queryCommandState(btn.dataset.cmd));
+    } catch (e) {
+      /* ignore - queryCommandState kann außerhalb eines editierbaren Bereichs werfen */
+    }
+  });
+}
+
+function applyNotizStyle(styleProp, value) {
+  if (!restoreNotizSelection()) return;
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+
+  if (range.collapsed) {
+    // Keine Auswahl -> Einstellung gilt als neuer Standard für die ganze Notiz.
+    el('notiz-body').style[styleProp] = value;
+  } else {
+    const span = document.createElement('span');
+    span.style[styleProp] = value;
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      const content = range.extractContents();
+      span.appendChild(content);
+      range.insertNode(span);
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  saveCurrentNote();
+  renderNotesList();
+}
+
+function renderNotizColorRow() {
+  const row = el('notiz-color-row');
+  row.innerHTML = '';
+  NOTIZ_COLORS.forEach((color) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'notiz-color-swatch';
+    btn.style.background = color;
+    btn.setAttribute('aria-label', `Textfarbe ${color}`);
+    btn.addEventListener('click', () => applyNotizStyle('color', color));
+    row.appendChild(btn);
+  });
+}
+
+function initNotizen() {
+  el('notiz-new-btn').addEventListener('click', createNewNote);
+
+  document.querySelectorAll('.notiz-tool-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (!restoreNotizSelection()) return;
+      document.execCommand(btn.dataset.cmd, false, null);
+      updateNotizToolbarActiveState();
+      saveCurrentNote();
+      renderNotesList();
+    });
+  });
+
+  el('notiz-font-select').addEventListener('change', (ev) => {
+    if (ev.target.value) applyNotizStyle('fontFamily', ev.target.value);
+    ev.target.value = '';
+  });
+  el('notiz-size-select').addEventListener('change', (ev) => {
+    if (ev.target.value) applyNotizStyle('fontSize', ev.target.value);
+    ev.target.value = '';
+  });
+
+  renderNotizColorRow();
+
+  el('notiz-title-input').addEventListener('input', saveCurrentNote);
+  el('notiz-body').addEventListener('input', () => {
+    saveCurrentNote();
+    renderNotesList();
+  });
+
+  el('notiz-delete-btn').addEventListener('click', () => {
+    if (currentNoteId) deleteNote(currentNoteId);
+  });
+
+  trackNotizSelection();
+  renderNotesList();
+}
+
 /* ---------------- Init ---------------- */
 
 loadSettings();
@@ -2263,6 +2494,7 @@ initUpdateButton();
 enhanceTrickCards();
 renderStilmittelListe();
 initStilmittelUebung();
+initNotizen();
 showScreen('home');
 initUpdateChecker();
 renderVersionHistory();
