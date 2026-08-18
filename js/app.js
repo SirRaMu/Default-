@@ -1066,9 +1066,11 @@ function generateAdvancedQuestion(selectedTopics, difficulty) {
 
 let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
+const PRACTICE_MAX_ATTEMPTS = 3;
+
 function openPractice(trickId) {
   const origin = Object.keys(screens).find((key) => key !== 'practice' && !screens[key].hidden) || 'setup';
-  practice = { trickId, ctx: null, stepIndex: 0, input: '', origin };
+  practice = { trickId, ctx: null, stepIndex: 0, input: '', attempts: 0, origin };
   showScreen('practice');
   loadPracticeProblem();
 }
@@ -1087,6 +1089,7 @@ function loadPracticeProblem() {
 function renderPracticeStep() {
   const ctx = practice.ctx;
   const step = ctx.steps[practice.stepIndex];
+  practice.attempts = 0;
 
   el('practice-progress-label').textContent = `Schritt ${practice.stepIndex + 1} von ${ctx.steps.length}`;
   el('practice-progress-fill').style.width = `${(practice.stepIndex / ctx.steps.length) * 100}%`;
@@ -1095,10 +1098,14 @@ function renderPracticeStep() {
   el('practice-answer-display').textContent = ' ';
   el('practice-feedback').textContent = '';
   el('practice-feedback').className = 'feedback';
+
+  el('practice-numpad').hidden = false;
+  el('practice-reveal-btn').hidden = true;
+  el('practice-continue-btn').hidden = true;
 }
 
 function handlePracticeInput(action, num) {
-  if (!practice) return;
+  if (!practice || el('practice-numpad').hidden) return;
   if (num !== undefined) {
     if (practice.input.length >= 8) return;
     practice.input += num;
@@ -1141,13 +1148,44 @@ function submitPracticeAnswer() {
       }
     }, 450);
   } else {
-    feedback.textContent = `Leider falsch. Richtig: ${step.answer}`;
-    feedback.className = 'feedback wrong';
+    practice.attempts += 1;
     card.classList.remove('flash-correct');
     void card.offsetWidth;
     card.classList.add('flash-wrong');
     practice.input = '';
     el('practice-answer-display').textContent = ' ';
+
+    if (practice.attempts >= PRACTICE_MAX_ATTEMPTS) {
+      feedback.textContent = `Leider falsch (Versuch ${practice.attempts}/${PRACTICE_MAX_ATTEMPTS}).`;
+      feedback.className = 'feedback wrong';
+      el('practice-reveal-btn').hidden = false;
+    } else {
+      feedback.textContent = `Leider falsch. Versuch ${practice.attempts}/${PRACTICE_MAX_ATTEMPTS} – probier's nochmal!`;
+      feedback.className = 'feedback wrong';
+    }
+  }
+}
+
+function revealPracticeSolution() {
+  const ctx = practice.ctx;
+  const step = ctx.steps[practice.stepIndex];
+
+  el('practice-feedback').textContent = `Lösung: ${step.answer}`;
+  el('practice-feedback').className = 'feedback wrong';
+  el('practice-numpad').hidden = true;
+  el('practice-reveal-btn').hidden = true;
+  el('practice-continue-btn').hidden = false;
+}
+
+function continuePracticeAfterReveal() {
+  const ctx = practice.ctx;
+  practice.stepIndex += 1;
+  practice.input = '';
+
+  if (practice.stepIndex >= ctx.steps.length) {
+    finishPracticeProblem();
+  } else {
+    renderPracticeStep();
   }
 }
 
@@ -1203,6 +1241,8 @@ function initPracticeScreen() {
   el('practice-cancel-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
   el('practice-exit-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
   el('practice-next-btn').addEventListener('click', loadPracticeProblem);
+  el('practice-reveal-btn').addEventListener('click', revealPracticeSolution);
+  el('practice-continue-btn').addEventListener('click', continuePracticeAfterReveal);
 
   renderTrickCounter();
 }
@@ -1558,24 +1598,59 @@ function enhanceTrickCards() {
       rule.replaceWith(row);
     }
 
-    const stepsBlocks = Array.from(card.querySelectorAll('.trick-steps, .trick-bullets'));
-    if (stepsBlocks.length) {
-      stepsBlocks.forEach((block) => {
-        block.hidden = true;
-      });
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'example-toggle';
-      toggle.textContent = '📖 Beispiel zeigen';
-      toggle.addEventListener('click', () => {
-        const nowHidden = !stepsBlocks[0].hidden;
-        stepsBlocks.forEach((block) => {
-          block.hidden = nowHidden;
+    const blocks = Array.from(card.querySelectorAll('.trick-steps, .trick-bullets'));
+    if (!blocks.length) return;
+
+    // Jeden Block in einzeln aufdeckbare Häppchen zerlegen: bei .trick-steps
+    // gehört ein Text-Span + sein direkt folgender Pfeil-Span zusammen,
+    // bei .trick-bullets ist jedes <li> ein eigener Happen.
+    const items = [];
+    blocks.forEach((block) => {
+      block.hidden = true;
+      if (block.classList.contains('trick-bullets')) {
+        Array.from(block.children).forEach((li) => {
+          li.hidden = true;
+          items.push({ parent: block, elements: [li] });
         });
-        toggle.textContent = nowHidden ? '📖 Beispiel zeigen' : '📖 Beispiel ausblenden';
-      });
-      stepsBlocks[0].parentNode.insertBefore(toggle, stepsBlocks[0]);
-    }
+      } else {
+        const children = Array.from(block.children);
+        let i = 0;
+        while (i < children.length) {
+          const group = [children[i]];
+          children[i].hidden = true;
+          i += 1;
+          if (i < children.length && (children[i].classList.contains('arrow') || children[i].classList.contains('result'))) {
+            group.push(children[i]);
+            children[i].hidden = true;
+            i += 1;
+          }
+          items.push({ parent: block, elements: group });
+        }
+      }
+    });
+
+    let revealed = 0;
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'example-toggle';
+    toggle.textContent = '🎓 Erklären';
+
+    toggle.addEventListener('click', () => {
+      if (revealed >= items.length) {
+        items.forEach(({ elements }) => elements.forEach((el) => { el.hidden = true; }));
+        blocks.forEach((block) => { block.hidden = true; });
+        revealed = 0;
+        toggle.textContent = '🎓 Erklären';
+        return;
+      }
+      const { parent, elements } = items[revealed];
+      parent.hidden = false;
+      elements.forEach((el) => { el.hidden = false; });
+      revealed += 1;
+      toggle.textContent = revealed >= items.length ? '✓ Ausblenden' : 'Weiter →';
+    });
+
+    blocks[0].parentNode.insertBefore(toggle, blocks[0]);
   });
 }
 
