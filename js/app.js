@@ -711,6 +711,57 @@ const TRICKS = {
     },
   },
 
+  'diff-quotient': {
+    build() {
+      const a = randInt(1, 4);
+      const b = randInt(-4, 4);
+      const x1 = randInt(-4, 4);
+      let x2 = randInt(-4, 4);
+      while (x2 === x1) x2 = randInt(-4, 4);
+      const fx1 = a * x1 * x1 + b * x1;
+      const fx2 = a * x2 * x2 + b * x2;
+      const dy = fx2 - fx1;
+      const dx = x2 - x1;
+      const m = dy / dx;
+      const bTerm = b >= 0 ? `+ ${b}x` : `− ${Math.abs(b)}x`;
+      const bOp = b >= 0 ? '+' : '−';
+
+      return {
+        headline: `f(x) = ${a}x² ${bTerm}\nx₁ = ${x1}, x₂ = ${x2}`,
+        steps: [
+          { prompt: `f(${x1}) = ${a}×(${x1})² ${bOp} ${Math.abs(b)}×(${x1}) =`, answer: fx1 },
+          { prompt: `f(${x2}) = ${a}×(${x2})² ${bOp} ${Math.abs(b)}×(${x2}) =`, answer: fx2 },
+          { prompt: `Δy = f(${x2}) − f(${x1}) = ${fx2} − (${fx1}) =`, answer: dy },
+          { prompt: `Δx = ${x2} − (${x1}) =`, answer: dx },
+          { prompt: `m = Δy ÷ Δx = ${dy} ÷ ${dx} =`, answer: m },
+        ],
+        resultText: `Differenzenquotient m = ${m}`,
+      };
+    },
+  },
+
+  'diff-equation': {
+    build() {
+      const a0 = randInt(-5, 8);
+      const k = pick([-2, -1, 1, 2]);
+      const d = randInt(-8, 8);
+      const a1 = k * a0 + d;
+      const a2 = k * a1 + d;
+      const a3 = k * a2 + d;
+      const dTerm = d >= 0 ? `+ ${d}` : `− ${Math.abs(d)}`;
+
+      return {
+        headline: `a₀ = ${a0}, aₙ₊₁ = ${k}·aₙ ${dTerm}`,
+        steps: [
+          { prompt: `a₁ = ${k}×${a0} ${dTerm} =`, answer: a1 },
+          { prompt: `a₂ = ${k}×${a1} ${dTerm} =`, answer: a2 },
+          { prompt: `a₃ = ${k}×${a2} ${dTerm} =`, answer: a3 },
+        ],
+        resultText: `a₁=${a1}, a₂=${a2}, a₃=${a3}`,
+      };
+    },
+  },
+
   'pq-formula': {
     build() {
       const base = randInt(-6, 6);

@@ -411,6 +411,22 @@
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
+      <button type="button" class="learn-banner" data-goto="adv-diffq">
+        <span class="learn-banner-icon">📈</span>
+        <span class="learn-banner-text">
+          <strong>Differenzenquotient</strong>
+          <small>Mittlere Änderungsrate/Sekantensteigung berechnen</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+      <button type="button" class="learn-banner" data-goto="adv-diffeq">
+        <span class="learn-banner-icon">🔁</span>
+        <span class="learn-banner-text">
+          <strong>Differenzengleichung</strong>
+          <small>Folgeglieder aus einer Rekursionsformel berechnen</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
     </div>
   </section>
 
@@ -542,6 +558,52 @@
           <span>y=9−2·3=</span><span class="result">3</span>
         </div>
         <button type="button" class="btn-practice" data-trick="lgs-addition">🧠 Üben</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ERWEITERT: DIFFERENZENQUOTIENT ===================== -->
+  <section class="screen" id="screen-adv-diffq" data-screen="adv-diffq" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="advanced" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📈 Differenzenquotient</span>
+      </div>
+    </header>
+    <div class="trick-list">
+      <div class="trick-card">
+        <h3>Mittlere Änderungsrate</h3>
+        <p class="trick-rule">Der Differenzenquotient ist die Steigung der Sekante durch zwei Punkte einer Funktion: m = (f(x₂) − f(x₁)) ÷ (x₂ − x₁). Er ist die Vorstufe zum Differentialquotient (der Ableitung), bei dem x₂ immer näher an x₁ heranrückt.</p>
+        <div class="trick-steps">
+          <span>f(x)=2x²+3x</span><span class="arrow">→</span>
+          <span>f(1)=5, f(3)=27</span><span class="arrow">→</span>
+          <span>Δy=22, Δx=2</span><span class="arrow">→</span>
+          <span>m=22÷2=</span><span class="result">11</span>
+        </div>
+        <button type="button" class="btn-practice" data-trick="diff-quotient">🧠 Üben</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ERWEITERT: DIFFERENZENGLEICHUNG ===================== -->
+  <section class="screen" id="screen-adv-diffeq" data-screen="adv-diffeq" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="advanced" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🔁 Differenzengleichung</span>
+      </div>
+    </header>
+    <div class="trick-list">
+      <div class="trick-card">
+        <h3>Folgeglieder aus der Rekursion berechnen</h3>
+        <p class="trick-rule">Eine Differenzengleichung beschreibt eine Folge rekursiv – der nächste Wert ergibt sich aus dem vorherigen, z. B. aₙ₊₁ = k·aₙ + d. Um Folgeglieder zu berechnen, setzt du einfach immer wieder das letzte Ergebnis erneut ein.</p>
+        <div class="trick-steps">
+          <span>a₀=4, aₙ₊₁=2aₙ+3</span><span class="arrow">→</span>
+          <span>a₁=2×4+3=11</span><span class="arrow">→</span>
+          <span>a₂=2×11+3=25</span><span class="arrow">→</span>
+          <span>a₃=2×25+3=</span><span class="result">53</span>
+        </div>
+        <button type="button" class="btn-practice" data-trick="diff-equation">🧠 Üben</button>
       </div>
     </div>
   </section>
