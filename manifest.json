@@ -1,7 +1,7 @@
 {
-  "name": "Kopfrechnen Trainer",
-  "short_name": "Kopfrechnen",
-  "description": "Kopfrechnen üben: Addition, Subtraktion, Multiplikation, Division – mit wählbarer Rechenart und Schwierigkeit.",
+  "name": "Lernhelfer",
+  "short_name": "Lernhelfer",
+  "description": "Lernhelfer: Übungs-App für die Schule – Mathe (Kopfrechnen, Rechentricks, erweiterte Aufgaben), Deutsch und Englisch folgen.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

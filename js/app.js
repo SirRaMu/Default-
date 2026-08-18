@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '1.12';
+const APP_VERSION = '2.0';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -257,7 +257,7 @@ function showScreen(name) {
   for (const key of Object.keys(screens)) {
     screens[key].hidden = key !== name;
   }
-  el('home-btn').hidden = name === 'setup';
+  el('home-btn').hidden = name === 'home';
   window.scrollTo(0, 0);
 }
 
@@ -277,7 +277,7 @@ function initGlobalNav() {
       if (timerHandle) clearInterval(timerHandle);
       if (state.session) state.session.finished = true;
     }
-    showScreen('setup');
+    showScreen('home');
   });
 }
 
@@ -1913,6 +1913,6 @@ initSettingsScreen();
 initTheme();
 initUpdateButton();
 enhanceTrickCards();
-showScreen('setup');
+showScreen('home');
 initUpdateChecker();
 renderVersionHistory();

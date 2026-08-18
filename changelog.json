@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.0",
+    "date": "2026-08-18",
+    "title": "Neuer Name: Lernhelfer",
+    "items": [
+      { "icon": "📚", "text": "Die App heißt jetzt \"Lernhelfer\" und hat eine neue Startseite: Wähle zwischen Mathe, Deutsch und Englisch." },
+      { "icon": "🧮", "text": "Mathe enthält weiterhin alles, was du kennst – Kopfrechnen, Rechentricks und erweiterte Aufgaben." },
+      { "icon": "📖", "text": "Deutsch und Englisch sind schon als Fächer angelegt, aber noch in Bearbeitung." },
+      { "icon": "🎓", "text": "Neues App-Icon: ein schwarzer Doktorhut als Schul-Symbol." }
+    ]
+  },
+  {
     "version": "1.12",
     "date": "2026-08-18",
     "title": "Updates werden jetzt von selbst erkannt",

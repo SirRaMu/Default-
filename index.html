@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Kopfrechnen Trainer</title>
-<meta name="description" content="Kopfrechnen üben: Addition, Subtraktion, Multiplikation, Division – wähle Rechenart und Schwierigkeit.">
+<title>Lernhelfer</title>
+<meta name="description" content="Lernhelfer: Übungs-App für die Schule – Mathe (Kopfrechnen, Rechentricks, erweiterte Aufgaben), Deutsch und Englisch folgen.">
 
 <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
@@ -16,7 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Kopfrechnen">
+<meta name="apple-mobile-web-app-title" content="Lernhelfer">
 
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -39,8 +39,67 @@
     </div>
   </div>
 
-  <!-- ===================== SETUP SCREEN ===================== -->
-  <section class="screen" id="screen-setup" data-screen="setup">
+  <!-- ===================== HOME / FÄCHERAUSWAHL ===================== -->
+  <section class="screen" id="screen-home" data-screen="home">
+    <header class="app-header">
+      <h1>📚 Lernhelfer</h1>
+      <p class="subtitle">Wähle ein Fach, um zu üben.</p>
+    </header>
+
+    <div class="menu-list">
+      <button type="button" class="learn-banner" data-goto="setup">
+        <span class="learn-banner-icon">🧮</span>
+        <span class="learn-banner-text">
+          <strong>Mathe</strong>
+          <small>Kopfrechnen, Rechentricks &amp; erweiterte Aufgaben</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+
+      <button type="button" class="learn-banner beta" data-goto="subject-deutsch">
+        <span class="learn-banner-icon">📖</span>
+        <span class="learn-banner-text">
+          <strong>Deutsch <span class="beta-badge">Bald</span></strong>
+          <small>Noch in Bearbeitung</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+
+      <button type="button" class="learn-banner beta" data-goto="subject-englisch">
+        <span class="learn-banner-icon">🇬🇧</span>
+        <span class="learn-banner-text">
+          <strong>Englisch <span class="beta-badge">Bald</span></strong>
+          <small>Noch in Bearbeitung</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== FACH: DEUTSCH (Platzhalter) ===================== -->
+  <section class="screen" id="screen-subject-deutsch" data-screen="subject-deutsch" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📖 Deutsch</span>
+      </div>
+    </header>
+    <div class="beta-note">🚧 Deutsch ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+  </section>
+
+  <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->
+  <section class="screen" id="screen-subject-englisch" data-screen="subject-englisch" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🇬🇧 Englisch</span>
+      </div>
+    </header>
+    <div class="beta-note">🚧 Englisch ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+  </section>
+
+  <!-- ===================== SETUP SCREEN (FACH: MATHE) ===================== -->
+  <section class="screen" id="screen-setup" data-screen="setup" hidden>
     <header class="app-header">
       <h1>Kopfrechnen&nbsp;Trainer</h1>
       <p class="subtitle">Wähle Rechenart, Schwierigkeit und Modus – und leg los.</p>
