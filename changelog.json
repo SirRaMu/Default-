@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.9",
+    "date": "2026-08-18",
+    "title": "Aufgeräumtes Icon oben rechts",
+    "items": [
+      { "icon": "⚙️", "text": "Der separate Hell-/Dunkel-Button oben rechts ist weg – an seiner Stelle öffnet jetzt ein Zahnrad-Symbol direkt die Einstellungen." },
+      { "icon": "🌗", "text": "Hell-/Dunkelmodus wechselst du weiterhin ganz einfach dort in den Einstellungen." }
+    ]
+  },
+  {
     "version": "1.8",
     "date": "2026-08-18",
     "title": "Neues Einstellungen-Menü",

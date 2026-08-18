@@ -90,7 +90,7 @@ body {
 
 .screen { display: flex; flex-direction: column; gap: 20px; flex: 1; }
 
-.theme-toggle-btn {
+.settings-btn {
   position: fixed;
   top: calc(12px + var(--safe-top));
   right: calc(max(16px, (100vw - 480px) / 2 + 16px));
@@ -105,7 +105,7 @@ body {
   box-shadow: var(--shadow);
   cursor: pointer;
 }
-.theme-toggle-btn:active { transform: scale(0.94); }
+.settings-btn:active { transform: scale(0.94); }
 
 .home-btn {
   position: fixed;

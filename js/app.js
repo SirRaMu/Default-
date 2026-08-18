@@ -1597,17 +1597,12 @@ function setTheme(theme) {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  el('theme-toggle-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
   renderThemeSelection(theme);
   applyAccent(getStoredAccent());
 }
 
 function initTheme() {
   applyTheme(getEffectiveTheme());
-  el('theme-toggle-btn').addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-  });
 }
 
 /* ---------------- Farbgestaltung (Akzentfarbe) ---------------- */
