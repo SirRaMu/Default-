@@ -355,7 +355,6 @@ function renderSetup() {
   });
   el('op-group').hidden = isAdvanced;
   el('adv-op-group').hidden = !isAdvanced;
-  el('difficulty-section').hidden = isAdvanced;
 
   document.querySelectorAll('#op-group .chip').forEach((btn) => {
     btn.classList.toggle('selected', state.setup.operations.includes(btn.dataset.op));
@@ -379,7 +378,9 @@ function renderSetup() {
   el('count-options').hidden = state.setup.mode !== 'count';
   el('time-options').hidden = state.setup.mode !== 'time';
 
-  el('diff-hint').textContent = DIFFICULTY[state.setup.difficulty].hint;
+  el('diff-hint').textContent = isAdvanced
+    ? ADVANCED_DIFFICULTY_HINT[state.setup.difficulty]
+    : DIFFICULTY[state.setup.difficulty].hint;
 
   el('setup-highscore').hidden = state.setup.mode !== 'time';
   if (state.setup.mode === 'time') {
@@ -432,6 +433,61 @@ function renderHistory() {
 /* ---------------- Learn-Screen ---------------- */
 
 /* ---------------- Trick-Übungen (Schritt für Schritt) ---------------- */
+
+// Zahlenbereiche der erweiterten Themen je Schwierigkeitsstufe.
+const ADV_DIFFICULTY = {
+  pct: {
+    easy: { gSteps: 10, pMin: 5, pMax: 50, pChangeMax: 25 },
+    medium: { gSteps: 20, pMin: 2, pMax: 90, pChangeMax: 50 },
+    hard: { gSteps: 60, pMin: 2, pMax: 95, pChangeMax: 80 },
+    expert: { gSteps: 150, pMin: 2, pMax: 99, pChangeMax: 150 },
+  },
+  pq: {
+    easy: { baseMax: 4, halfMax: 2 },
+    medium: { baseMax: 6, halfMax: 3 },
+    hard: { baseMax: 9, halfMax: 4 },
+    expert: { baseMax: 12, halfMax: 6 },
+  },
+  lgs: {
+    easy: { xyMax: 4, coefMax: 2 },
+    medium: { xyMax: 6, coefMax: 4 },
+    hard: { xyMax: 9, coefMax: 5 },
+    expert: { xyMax: 12, coefMax: 6 },
+  },
+  diffq: {
+    easy: { aMax: 2, bMax: 2, xMax: 3 },
+    medium: { aMax: 4, bMax: 4, xMax: 4 },
+    hard: { aMax: 6, bMax: 6, xMax: 6 },
+    expert: { aMax: 9, bMax: 9, xMax: 8 },
+  },
+  diffeq: {
+    easy: { a0Min: -3, a0Max: 5, kPool: [-1, 1, 2], dMax: 5 },
+    medium: { a0Min: -5, a0Max: 8, kPool: [-2, -1, 1, 2], dMax: 8 },
+    hard: { a0Min: -8, a0Max: 12, kPool: [-3, -2, 2, 3], dMax: 12 },
+    expert: { a0Min: -12, a0Max: 20, kPool: [-3, -2, 2, 3, 4], dMax: 15 },
+  },
+};
+
+const ADVANCED_DIFFICULTY_HINT = {
+  easy: 'Kleinere, freundlichere Zahlen.',
+  medium: 'Mittlere Zahlengröße (Standard).',
+  hard: 'Größere Zahlen, mehr Rechenaufwand.',
+  expert: 'Große Zahlen, anspruchsvollste Variante.',
+};
+
+function advCfg(group, diff) {
+  const tiers = ADV_DIFFICULTY[group];
+  return tiers[diff] || tiers.medium;
+}
+
+// Erzeugt einen Pool aus positiven und negativen Ganzzahlen bis maxAbs (ohne 0).
+function signedPool(maxAbs) {
+  const pool = [];
+  for (let n = 1; n <= maxAbs; n++) {
+    pool.push(n, -n);
+  }
+  return pool;
+}
 
 const TRICKS = {
   'add-leftright': {
@@ -691,9 +747,10 @@ const TRICKS = {
   },
 
   'pct-value': {
-    build() {
-      const g = randInt(1, 20) * 100;
-      const p = randInt(2, 90);
+    build(diff = 'medium') {
+      const cfg = advCfg('pct', diff);
+      const g = randInt(1, cfg.gSteps) * 100;
+      const p = randInt(cfg.pMin, cfg.pMax);
       const unit = g / 100;
       const w = unit * p;
       return {
@@ -708,9 +765,10 @@ const TRICKS = {
   },
 
   'pct-base': {
-    build() {
-      const g = randInt(1, 20) * 100;
-      const p = randInt(2, 90);
+    build(diff = 'medium') {
+      const cfg = advCfg('pct', diff);
+      const g = randInt(1, cfg.gSteps) * 100;
+      const p = randInt(cfg.pMin, cfg.pMax);
       const unit = g / 100;
       const w = unit * p;
       return {
@@ -725,9 +783,10 @@ const TRICKS = {
   },
 
   'pct-rate': {
-    build() {
-      const g = randInt(1, 20) * 100;
-      const p = randInt(2, 90);
+    build(diff = 'medium') {
+      const cfg = advCfg('pct', diff);
+      const g = randInt(1, cfg.gSteps) * 100;
+      const p = randInt(cfg.pMin, cfg.pMax);
       const unit = g / 100;
       const w = unit * p;
       return {
@@ -742,9 +801,10 @@ const TRICKS = {
   },
 
   'pct-change': {
-    build() {
-      const g = randInt(1, 20) * 100;
-      const p = randInt(2, 50);
+    build(diff = 'medium') {
+      const cfg = advCfg('pct', diff);
+      const g = randInt(1, cfg.gSteps) * 100;
+      const p = randInt(cfg.pMin, cfg.pChangeMax);
       const sign = pick([1, -1]);
       const unit = g / 100;
       const change = unit * p;
@@ -767,12 +827,13 @@ const TRICKS = {
   },
 
   'diff-quotient': {
-    build() {
-      const a = randInt(1, 4);
-      const b = randInt(-4, 4);
-      const x1 = randInt(-4, 4);
-      let x2 = randInt(-4, 4);
-      while (x2 === x1) x2 = randInt(-4, 4);
+    build(diff = 'medium') {
+      const cfg = advCfg('diffq', diff);
+      const a = randInt(1, cfg.aMax);
+      const b = randInt(-cfg.bMax, cfg.bMax);
+      const x1 = randInt(-cfg.xMax, cfg.xMax);
+      let x2 = randInt(-cfg.xMax, cfg.xMax);
+      while (x2 === x1) x2 = randInt(-cfg.xMax, cfg.xMax);
       const fx1 = a * x1 * x1 + b * x1;
       const fx2 = a * x2 * x2 + b * x2;
       const dy = fx2 - fx1;
@@ -796,10 +857,11 @@ const TRICKS = {
   },
 
   'diff-equation': {
-    build() {
-      const a0 = randInt(-5, 8);
-      const k = pick([-2, -1, 1, 2]);
-      const d = randInt(-8, 8);
+    build(diff = 'medium') {
+      const cfg = advCfg('diffeq', diff);
+      const a0 = randInt(cfg.a0Min, cfg.a0Max);
+      const k = pick(cfg.kPool);
+      const d = randInt(-cfg.dMax, cfg.dMax);
       const a1 = k * a0 + d;
       const a2 = k * a1 + d;
       const a3 = k * a2 + d;
@@ -818,9 +880,10 @@ const TRICKS = {
   },
 
   'pq-formula': {
-    build() {
-      const base = randInt(-6, 6);
-      let diffHalf = randInt(-3, 3);
+    build(diff = 'medium') {
+      const cfg = advCfg('pq', diff);
+      const base = randInt(-cfg.baseMax, cfg.baseMax);
+      let diffHalf = randInt(-cfg.halfMax, cfg.halfMax);
       if (base === 0 && diffHalf === 0) diffHalf = 1;
       // Differenz ist immer gerade -> p/2 bleibt ganzzahlig
       const rootA = base + diffHalf;
@@ -853,14 +916,16 @@ const TRICKS = {
   },
 
   'lgs-einsetzen': {
-    build() {
+    build(diff = 'medium') {
+      const cfg = advCfg('lgs', diff);
+      const coefPool = signedPool(cfg.coefMax);
       let x0, y0, m, a, b;
       do {
-        x0 = randInt(-6, 6);
-        y0 = randInt(-6, 6);
-        m = randInt(-3, 3);
-        a = pick([1, 2, 3, 4, -1, -2, -3, -4]);
-        b = pick([1, 2, 3, -1, -2, -3]);
+        x0 = randInt(-cfg.xyMax, cfg.xyMax);
+        y0 = randInt(-cfg.xyMax, cfg.xyMax);
+        m = randInt(-cfg.coefMax, cfg.coefMax);
+        a = pick(coefPool);
+        b = pick(coefPool);
       } while (a + b * m === 0);
       const c = y0 - m * x0;
       const d = a * x0 + b * y0;
@@ -885,13 +950,14 @@ const TRICKS = {
   },
 
   'lgs-gleichsetzen': {
-    build() {
+    build(diff = 'medium') {
+      const cfg = advCfg('lgs', diff);
       let x0, y0, m1, m2;
       do {
-        x0 = randInt(-6, 6);
-        y0 = randInt(-6, 6);
-        m1 = randInt(-4, 4);
-        m2 = randInt(-4, 4);
+        x0 = randInt(-cfg.xyMax, cfg.xyMax);
+        y0 = randInt(-cfg.xyMax, cfg.xyMax);
+        m1 = randInt(-cfg.coefMax, cfg.coefMax);
+        m2 = randInt(-cfg.coefMax, cfg.coefMax);
       } while (m1 === m2);
       const c1 = y0 - m1 * x0;
       const c2 = y0 - m2 * x0;
@@ -912,14 +978,16 @@ const TRICKS = {
   },
 
   'lgs-addition': {
-    build() {
+    build(diff = 'medium') {
+      const cfg = advCfg('lgs', diff);
+      const coefPool = signedPool(cfg.coefMax);
       let x0, y0, a1, b1, a2;
       do {
-        x0 = randInt(-6, 6);
-        y0 = randInt(-6, 6);
-        a1 = pick([1, 2, 3, 4, -1, -2, -3, -4]);
-        b1 = pick([1, 2, 3, -1, -2, -3]);
-        a2 = pick([1, 2, 3, 4, -1, -2, -3, -4]);
+        x0 = randInt(-cfg.xyMax, cfg.xyMax);
+        y0 = randInt(-cfg.xyMax, cfg.xyMax);
+        a1 = pick(coefPool);
+        b1 = pick(coefPool);
+        a2 = pick(coefPool);
       } while (a1 + a2 === 0);
       const b2 = -b1;
       const d1 = a1 * x0 + b1 * y0;
@@ -981,11 +1049,11 @@ const ADVANCED_QUESTION_SUFFIX = {
   'diff-equation': 'a₃ = ?',
 };
 
-function generateAdvancedQuestion(selectedTopics) {
+function generateAdvancedQuestion(selectedTopics, difficulty) {
   const pool = selectedTopics.includes('mix') ? ADVANCED_TOPICS : selectedTopics;
   const topic = pick(pool);
   const trickId = pick(ADVANCED_TOPIC_POOLS[topic]);
-  const ctx = TRICKS[trickId].build();
+  const ctx = TRICKS[trickId].build(difficulty);
   const answerIndex = ADVANCED_ANSWER_INDEX[trickId];
   const answer = answerIndex !== undefined ? ctx.steps[answerIndex].answer : ctx.steps[ctx.steps.length - 1].answer;
   const suffix = ADVANCED_QUESTION_SUFFIX[trickId];
@@ -1207,7 +1275,7 @@ function nextQuestion() {
   }
 
   s.currentQuestion = s.category === 'advanced'
-    ? generateAdvancedQuestion(s.advancedTopics)
+    ? generateAdvancedQuestion(s.advancedTopics, s.difficulty)
     : generateQuestion(s.operations, s.difficulty);
   s.currentInput = '';
   questionStartedAt = performance.now();
