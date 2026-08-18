@@ -137,6 +137,16 @@ body {
 }
 .pill.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
 
+.highscore-line {
+  margin: 14px 2px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--chip-bg);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
 .btn-primary {
   margin-top: 20px;
   width: 100%;

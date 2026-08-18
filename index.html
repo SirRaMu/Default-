@@ -82,6 +82,7 @@
           <button type="button" class="pill" data-time="180">180</button>
         </div>
       </div>
+      <p class="highscore-line" id="setup-highscore" hidden>🏆 Highscore bei <span id="setup-highscore-time">60</span>s: <span id="setup-highscore-value">0</span> richtige Antworten</p>
 
       <button type="button" class="btn-primary" id="start-btn">Training starten</button>
     </div>
@@ -382,6 +383,10 @@
       <div class="result-tile">
         <span class="result-value" id="result-streak">0</span>
         <span class="result-label">Beste Serie</span>
+      </div>
+      <div class="result-tile" id="result-highscore-tile" hidden>
+        <span class="result-value" id="result-highscore">0</span>
+        <span class="result-label">🏆 Highscore</span>
       </div>
     </div>
 

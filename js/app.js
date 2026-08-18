@@ -14,6 +14,7 @@ const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
   history: 'kopfrechnen.history.v1',
   trickCount: 'kopfrechnen.trickCount.v1',
+  highscores: 'kopfrechnen.highscores.v1',
 };
 
 const OPERATIONS = ['add', 'sub', 'mul', 'div'];
@@ -174,6 +175,32 @@ function pushHistory(entry) {
   }
 }
 
+function loadHighscores() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.highscores);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function getHighscore(timeLimit) {
+  return loadHighscores()[timeLimit] || 0;
+}
+
+function saveHighscoreIfBetter(timeLimit, value) {
+  const scores = loadHighscores();
+  const current = scores[timeLimit] || 0;
+  if (value <= current) return false;
+  scores[timeLimit] = value;
+  try {
+    localStorage.setItem(STORAGE_KEYS.highscores, JSON.stringify(scores));
+  } catch (e) {
+    /* ignore */
+  }
+  return true;
+}
+
 /* ---------------- DOM-Referenzen ---------------- */
 
 const el = (id) => document.getElementById(id);
@@ -285,6 +312,12 @@ function renderSetup() {
   el('time-options').hidden = state.setup.mode !== 'time';
 
   el('diff-hint').textContent = DIFFICULTY[state.setup.difficulty].hint;
+
+  el('setup-highscore').hidden = state.setup.mode !== 'time';
+  if (state.setup.mode === 'time') {
+    el('setup-highscore-time').textContent = state.setup.time;
+    el('setup-highscore-value').textContent = getHighscore(state.setup.time);
+  }
 
   saveSettings();
 }
@@ -943,6 +976,17 @@ function finishSession() {
   el('result-avgtime').textContent = avgTimeSec.toFixed(1) + 's';
   el('result-streak').textContent = s.bestStreak;
 
+  if (s.mode === 'time') {
+    const isNewHighscore = saveHighscoreIfBetter(s.timeLimit, s.correct);
+    el('result-highscore-tile').hidden = false;
+    el('result-highscore').textContent = getHighscore(s.timeLimit);
+    if (isNewHighscore) {
+      el('results-title').textContent = 'Neuer Highscore! 🏆';
+    }
+  } else {
+    el('result-highscore-tile').hidden = true;
+  }
+
   const mistakesCard = el('mistakes-card');
   const mistakesList = el('mistakes-list');
   mistakesList.innerHTML = '';
@@ -973,6 +1017,7 @@ function finishSession() {
 el('retry-btn').addEventListener('click', startSession);
 el('back-to-setup-btn').addEventListener('click', () => {
   renderHistory();
+  renderSetup();
   showScreen('setup');
 });
 
