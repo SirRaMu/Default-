@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '1.10';
+const APP_VERSION = '1.11';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',

@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.11",
+    "date": "2026-08-18",
+    "title": "Nur noch ein Weg zu den Einstellungen",
+    "items": [
+      { "icon": "🧹", "text": "Die doppelte \"Einstellungen\"-Kachel auf der Startseite ist weg – der Zugang läuft jetzt nur noch über das Zahnrad oben rechts." }
+    ]
+  },
+  {
     "version": "1.10",
     "date": "2026-08-18",
     "title": "Versionsverlauf in den Einstellungen",
