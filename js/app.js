@@ -206,19 +206,16 @@ function saveHighscoreIfBetter(timeLimit, value) {
 
 const el = (id) => document.getElementById(id);
 
-const screens = {
-  setup: el('screen-setup'),
-  quiz: el('screen-quiz'),
-  results: el('screen-results'),
-  learn: el('screen-learn'),
-  practice: el('screen-practice'),
-  advanced: el('screen-advanced'),
-};
+const screens = {};
+document.querySelectorAll('.screen[data-screen]').forEach((section) => {
+  screens[section.dataset.screen] = section;
+});
 
 function showScreen(name) {
   for (const key of Object.keys(screens)) {
     screens[key].hidden = key !== name;
   }
+  el('home-btn').hidden = name === 'setup';
   window.scrollTo(0, 0);
 }
 
@@ -226,26 +223,24 @@ function showScreen(name) {
  * Verwandelt eine Chip-Gruppe (data-target=Sektions-ID) in echte Registerkarten:
  * immer nur die aktive Sektion ist sichtbar, statt zu ihr zu scrollen.
  */
-function initTabNav(navId, defaultTarget) {
-  const nav = el(navId);
-  const buttons = Array.from(nav.querySelectorAll('button[data-target]'));
-
-  function activate(target) {
-    buttons.forEach((btn) => btn.classList.toggle('selected', btn.dataset.target === target));
-    buttons.forEach((btn) => {
-      const section = el(btn.dataset.target);
-      if (section) section.hidden = btn.dataset.target !== target;
-    });
-  }
-
-  nav.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button[data-target]');
+/**
+ * Jeder Klick auf ein Element mit data-goto="<screen>" navigiert dorthin -
+ * deckt Menüpunkte, Zurück-Pfeile und den Home-Button einheitlich ab.
+ */
+function initGlobalNav() {
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-goto]');
     if (!btn) return;
-    activate(btn.dataset.target);
-    nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showScreen(btn.dataset.goto);
   });
 
-  activate(defaultTarget);
+  el('home-btn').addEventListener('click', () => {
+    if (!screens.quiz.hidden) {
+      if (timerHandle) clearInterval(timerHandle);
+      if (state.session) state.session.finished = true;
+    }
+    showScreen('setup');
+  });
 }
 
 /* ---------------- Setup-Screen ---------------- */
@@ -380,14 +375,6 @@ function renderHistory() {
 }
 
 /* ---------------- Learn-Screen ---------------- */
-
-function initLearnScreen() {
-  el('learn-open-btn').addEventListener('click', () => showScreen('learn'));
-  el('learn-back-btn').addEventListener('click', () => showScreen('setup'));
-  el('learn-to-training-btn').addEventListener('click', () => showScreen('setup'));
-
-  initTabNav('learn-nav', 'sec-add');
-}
 
 /* ---------------- Trick-Übungen (Schritt für Schritt) ---------------- */
 
@@ -853,7 +840,7 @@ const TRICKS = {
 let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
 function openPractice(trickId) {
-  const origin = !screens.advanced.hidden ? 'advanced' : 'learn';
+  const origin = Object.keys(screens).find((key) => key !== 'practice' && !screens[key].hidden) || 'setup';
   practice = { trickId, ctx: null, stepIndex: 0, input: '', origin };
   showScreen('practice');
   loadPracticeProblem();
@@ -986,22 +973,14 @@ function initPracticeScreen() {
     }
   });
 
-  el('practice-cancel-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'learn'));
-  el('practice-exit-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'learn'));
+  el('practice-cancel-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
+  el('practice-exit-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
   el('practice-next-btn').addEventListener('click', loadPracticeProblem);
 
   renderTrickCounter();
 }
 
 /* ---------------- Erweiterte-Aufgaben-Screen ---------------- */
-
-function initAdvancedScreen() {
-  el('advanced-open-btn').addEventListener('click', () => showScreen('advanced'));
-  el('advanced-back-btn').addEventListener('click', () => showScreen('setup'));
-  el('advanced-to-training-btn').addEventListener('click', () => showScreen('setup'));
-
-  initTabNav('advanced-nav', 'sec-pct');
-}
 
 /* ---------------- Quiz-Screen ---------------- */
 
@@ -1321,8 +1300,7 @@ function initUpdateButton() {
 
 loadSettings();
 initSetupScreen();
-initLearnScreen();
-initAdvancedScreen();
+initGlobalNav();
 initPracticeScreen();
 initTheme();
 initUpdateButton();

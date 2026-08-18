@@ -107,6 +107,23 @@ body {
 }
 .theme-toggle-btn:active { transform: scale(0.94); }
 
+.home-btn {
+  position: fixed;
+  top: calc(12px + var(--safe-top));
+  left: calc(max(16px, (100vw - 480px) / 2 + 16px));
+  z-index: 50;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.home-btn:active { transform: scale(0.94); }
+
 .reload-latest-btn {
   display: block;
   margin: 4px auto 0;
@@ -256,12 +273,11 @@ body {
 .learn-banner-text small { color: var(--text-muted); font-size: 0.82rem; }
 .learn-banner-arrow { color: var(--primary); font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
 
+.menu-list { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+
 .learn-title { font-size: 1.05rem; font-weight: 700; }
 .learn-subtitle { text-align: left; margin-top: -8px; }
 
-#learn-nav.chip-group .chip { min-width: 44%; }
-
-.trick-section { margin-top: 4px; }
 .trick-list { display: flex; flex-direction: column; gap: 12px; }
 
 .trick-card {
@@ -360,7 +376,7 @@ body {
 .history-list .h-score { font-weight: 700; }
 
 /* ============ QUIZ ============ */
-.quiz-header { display: flex; align-items: center; gap: 12px; }
+.quiz-header { display: flex; align-items: center; gap: 12px; padding-left: 52px; }
 .btn-icon {
   border: none;
   background: var(--chip-bg);
