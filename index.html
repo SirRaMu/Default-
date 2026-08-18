@@ -153,7 +153,7 @@
 
     <input type="text" class="text-input notiz-title-input" id="notiz-title-input" placeholder="Titel der Notiz" autocomplete="off">
 
-    <div class="notiz-toolbar">
+    <div class="notiz-toolbar" id="notiz-toolbar">
       <div class="notiz-toolbar-row">
         <button type="button" class="notiz-tool-btn" data-cmd="bold" aria-label="Fett"><strong>F</strong></button>
         <button type="button" class="notiz-tool-btn" data-cmd="italic" aria-label="Kursiv"><em>K</em></button>
@@ -178,6 +178,13 @@
     </div>
 
     <div class="notiz-body" id="notiz-body" contenteditable="true"></div>
+
+    <div class="notiz-float-toolbar" id="notiz-float-toolbar" hidden>
+      <button type="button" class="notiz-tool-btn" data-cmd="bold" aria-label="Fett"><strong>F</strong></button>
+      <button type="button" class="notiz-tool-btn" data-cmd="italic" aria-label="Kursiv"><em>K</em></button>
+      <button type="button" class="notiz-tool-btn" data-cmd="underline" aria-label="Unterstrichen"><u>U</u></button>
+      <div class="notiz-float-colors" id="notiz-float-colors"></div>
+    </div>
   </section>
 
   <!-- ===================== FACH: DEUTSCH ===================== -->
@@ -255,6 +262,9 @@
     <p class="diff-hint">Tippe auf Wörter, um sie zu markieren, und ordne die Markierung dann unten einem Stilmittel zu.</p>
 
     <div class="stilmittel-text-card" id="stilmittel-text-card"></div>
+
+    <button type="button" class="btn-primary" id="stilmittel-check-btn">✅ Überprüfen</button>
+    <p class="stilmittel-check-result" id="stilmittel-check-result" hidden></p>
 
     <div class="stilmittel-assign-panel" id="stilmittel-assign-panel" hidden>
       <p class="stilmittel-assign-hint">Markiert: <strong id="stilmittel-selected-preview"></strong></p>

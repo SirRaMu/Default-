@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.4';
+const APP_VERSION = '2.5';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -2023,18 +2023,51 @@ const STIL_TEXTS = [
     title: 'Der Sturm',
     author: 'Übungstext',
     body: 'Der Wind heult und wütet, wild und wütend fegt er über die Felder. Der Himmel weint dicke Tränen, und die Bäume tanzen wie Verrückte im Sturm. Tausend Blitze zerreißen die Nacht, und der Donner brüllt lauter als ein Löwe. Ist das nicht der reinste Weltuntergang? Die Blätter flüstern und rascheln, als wollten sie vor der Wut des Himmels fliehen. Wind, Wind, überall nur Wind, der an den Fenstern rüttelt, an den Türen rüttelt, an den Nerven rüttelt.',
+    expected: [
+      { words: [1, 2, 3, 4], id: 'personifikation' },
+      { words: [5, 6, 7], id: 'alliteration' },
+      { words: [14, 15, 16, 17], id: 'personifikation' },
+      { words: [21, 22, 23], id: 'vergleich' },
+      { words: [26, 27, 28, 29, 30], id: 'hyperbel' },
+      { words: [34, 35, 36, 37, 38], id: 'vergleich' },
+      { words: [39, 40, 41, 42, 43, 44], id: 'rhetorische-frage' },
+      { words: [46, 47, 48, 49], id: 'personifikation' },
+      { words: [59, 60, 61, 62, 63], id: 'wiederholung' },
+      { words: [65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76], id: 'klimax' },
+    ],
   },
   {
     id: 'rede',
     title: 'Die Rede',
     author: 'Übungstext',
     body: 'Wollen wir aufgeben? Wollen wir jetzt, kurz vor dem Ziel, einfach stehen bleiben? Ich sage: nein! Wir haben gekämpft, wir haben durchgehalten, wir haben nie aufgegeben. Der Weg war steinig und steil, aber wir sind ihn gemeinsam gegangen. Heute stehen wir hier: müde, aber stolz. Erschöpft, aber ungebrochen. Dies ist nicht das Ende, liebe Freunde, dies ist erst der Anfang von etwas Großem, etwas Neuem, etwas Unvergesslichem.',
+    expected: [
+      { words: [0, 1], id: 'anapher' },
+      { words: [3, 4], id: 'anapher' },
+      { words: [16, 17], id: 'anapher' },
+      { words: [19, 20], id: 'anapher' },
+      { words: [22, 23], id: 'anapher' },
+      { words: [29, 30, 31], id: 'alliteration' },
+      { words: [42, 43, 44], id: 'antithese' },
+      { words: [45, 46, 47], id: 'antithese' },
+      { words: [61, 62, 63, 64, 65, 66], id: 'klimax' },
+    ],
   },
   {
     id: 'morgen',
     title: 'Der letzte Morgen',
     author: 'Übungstext',
     body: 'Die Sonne lächelte über den Hügeln, als der alte Mann für immer einschlief. Die Bienen summten und brummten im Garten, während die Blätter im Wind raschelten. Ein weißer Schmetterling flog über sein Grab, als wolle er sagen, dass die Seele nun frei sei. Das Leben ist ein Fluss, der unaufhaltsam dem Meer entgegenströmt. Manche nennen es das Ende, andere nennen es den Anfang einer neuen Reise.',
+    expected: [
+      { words: [1, 2], id: 'personifikation' },
+      { words: [10, 11, 12], id: 'euphemismus' },
+      { words: [15, 16, 17], id: 'onomatopoesie' },
+      { words: [25], id: 'onomatopoesie' },
+      { words: [26, 27, 28], id: 'symbol' },
+      { words: [43, 44, 45, 46, 47, 48, 49, 50, 51, 52], id: 'metapher' },
+      { words: [56, 57], id: 'antithese' },
+      { words: [61, 62], id: 'antithese' },
+    ],
   },
 ];
 
@@ -2105,6 +2138,7 @@ const stilUebung = {
   textId: null,
   words: [],
   selection: [],
+  checked: false,
 };
 
 function pickRandomStilText(excludeId) {
@@ -2116,12 +2150,82 @@ function pickRandomStilText(excludeId) {
 function loadStilUebungText() {
   const text = pickRandomStilText(stilUebung.textId);
   stilUebung.textId = text.id;
-  stilUebung.words = text.body.split(/\s+/).filter(Boolean).map((raw) => ({ raw, assignedId: null }));
+  stilUebung.words = text.body.split(/\s+/).filter(Boolean).map((raw) => ({ raw, assignedId: null, checkState: null }));
   stilUebung.selection = [];
+  stilUebung.checked = false;
 
   el('stilmittel-text-meta').textContent = `${text.title} – ${text.author}`;
   renderStilText();
   hideStilAssignPanel();
+  hideStilCheckResult();
+}
+
+function clearStilCheck() {
+  if (!stilUebung.checked) return;
+  stilUebung.checked = false;
+  stilUebung.words.forEach((w) => { w.checkState = null; });
+  hideStilCheckResult();
+}
+
+function hideStilCheckResult() {
+  const result = el('stilmittel-check-result');
+  result.hidden = true;
+  result.classList.remove('success');
+}
+
+function showStilCheckMessage(text, success) {
+  const result = el('stilmittel-check-result');
+  result.textContent = text;
+  result.classList.toggle('success', success);
+  result.hidden = false;
+}
+
+function checkStilUebung() {
+  const text = STIL_TEXTS.find((t) => t.id === stilUebung.textId);
+  if (!text || !text.expected || !text.expected.length) {
+    stilUebung.checked = false;
+    showStilCheckMessage('Für dieses Gedicht gibt es leider keine automatische Überprüfung – probier einen der anderen Übungstexte aus.', false);
+    return;
+  }
+
+  stilUebung.words.forEach((w) => { w.checkState = null; });
+
+  let correctCount = 0;
+  const missedNames = [];
+
+  text.expected.forEach((exp) => {
+    const allCorrect = exp.words.every((i) => stilUebung.words[i] && stilUebung.words[i].assignedId === exp.id);
+    if (allCorrect) {
+      correctCount += 1;
+      exp.words.forEach((i) => { stilUebung.words[i].checkState = 'correct'; });
+    } else {
+      exp.words.forEach((i) => {
+        const word = stilUebung.words[i];
+        if (!word) return;
+        word.checkState = word.assignedId ? 'wrong' : 'missed';
+      });
+      const sm = STILMITTEL.find((s) => s.id === exp.id);
+      missedNames.push(sm ? sm.name : exp.id);
+    }
+  });
+
+  // Zusätzlich markierte Wörter, die zu keinem erwarteten Stilmittel gehören.
+  const expectedIndices = new Set(text.expected.flatMap((e) => e.words));
+  stilUebung.words.forEach((w, i) => {
+    if (w.assignedId && !expectedIndices.has(i) && !w.checkState) {
+      w.checkState = 'wrong';
+    }
+  });
+
+  stilUebung.checked = true;
+  renderStilText();
+
+  const total = text.expected.length;
+  if (correctCount === total) {
+    showStilCheckMessage(`🎉 Super, alle ${total} Stilmittel richtig erkannt!`, true);
+  } else {
+    showStilCheckMessage(`✅ ${correctCount} von ${total} Stilmitteln richtig erkannt. Noch nicht gefunden: ${missedNames.join(', ')}.`, false);
+  }
 }
 
 function renderStilText() {
@@ -2139,6 +2243,9 @@ function renderStilText() {
       span.title = sm.name;
     } else if (stilUebung.selection.includes(idx)) {
       span.classList.add('pending');
+    }
+    if (stilUebung.checked && w.checkState) {
+      span.classList.add(`check-${w.checkState}`);
     }
     card.appendChild(span);
     card.appendChild(document.createTextNode(' '));
@@ -2192,6 +2299,7 @@ function assignSelectionTo(stilmittelId) {
     stilUebung.words[idx].assignedId = stilmittelId;
   });
   stilUebung.selection = [];
+  clearStilCheck();
   renderStilText();
   hideStilAssignPanel();
 }
@@ -2201,6 +2309,7 @@ function onStilWordClick(idx) {
   if (word.assignedId) {
     // Erneuter Klick auf eine bereits zugeordnete Markierung hebt sie auf.
     word.assignedId = null;
+    clearStilCheck();
     renderStilText();
     return;
   }
@@ -2238,6 +2347,7 @@ function initStilmittelUebung() {
   });
 
   el('stilmittel-new-text-btn').addEventListener('click', loadStilUebungText);
+  el('stilmittel-check-btn').addEventListener('click', checkStilUebung);
 
   el('stilmittel-cancel-selection-btn').addEventListener('click', () => {
     stilUebung.selection = [];
@@ -2359,6 +2469,7 @@ function openNoteEditor(id) {
   currentNoteId = id;
   el('notiz-title-input').value = note.title || '';
   el('notiz-body').innerHTML = note.html || '';
+  hideFloatingToolbar();
   showScreen('notiz-editor');
 }
 
@@ -2373,6 +2484,34 @@ function saveCurrentNote() {
   saveNotes(notes);
 }
 
+/**
+ * Zeigt die schwebende Mini-Werkzeugleiste direkt über der markierten
+ * Textstelle an - wie bei Word/Docs, wenn man Text markiert.
+ */
+function positionFloatingToolbar(range) {
+  const toolbar = el('notiz-float-toolbar');
+  const rect = range.getBoundingClientRect();
+  if (!rect || (rect.width === 0 && rect.height === 0)) {
+    hideFloatingToolbar();
+    return;
+  }
+  toolbar.hidden = false;
+  const toolbarRect = toolbar.getBoundingClientRect();
+  let top = rect.top - toolbarRect.height - 10;
+  if (top < 8) top = rect.bottom + 10; // zu wenig Platz oben -> unter die Markierung setzen
+  let left = rect.left + rect.width / 2 - toolbarRect.width / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - toolbarRect.width - 8));
+  toolbar.style.top = `${top}px`;
+  toolbar.style.left = `${left}px`;
+}
+
+function hideFloatingToolbar() {
+  const toolbar = el('notiz-float-toolbar');
+  if (toolbar) toolbar.hidden = true;
+}
+
+let notizLastRange = null;
+
 function trackNotizSelection() {
   document.addEventListener('selectionchange', () => {
     const sel = window.getSelection();
@@ -2382,7 +2521,27 @@ function trackNotizSelection() {
     if (body && body.contains(range.commonAncestorContainer)) {
       notizSavedRange = range.cloneRange();
       updateNotizToolbarActiveState();
+      if (!range.collapsed) {
+        notizLastRange = range.cloneRange();
+        positionFloatingToolbar(range);
+      } else {
+        hideFloatingToolbar();
+      }
     }
+  });
+
+  window.addEventListener('scroll', () => {
+    if (!el('notiz-float-toolbar').hidden && notizLastRange) positionFloatingToolbar(notizLastRange);
+  }, true);
+  window.addEventListener('resize', () => {
+    if (!el('notiz-float-toolbar').hidden && notizLastRange) positionFloatingToolbar(notizLastRange);
+  });
+
+  // Jeder Navigationsklick verlässt vermutlich den Editor - schwebende
+  // Leiste vorsorglich ausblenden, damit sie nicht auf einem anderen
+  // Screen hängen bleibt.
+  document.addEventListener('click', (ev) => {
+    if (ev.target.closest('[data-goto]')) hideFloatingToolbar();
   });
 }
 
@@ -2431,16 +2590,17 @@ function applyNotizStyle(styleProp, value) {
 }
 
 function renderNotizColorRow() {
-  const row = el('notiz-color-row');
-  row.innerHTML = '';
-  NOTIZ_COLORS.forEach((color) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'notiz-color-swatch';
-    btn.style.background = color;
-    btn.setAttribute('aria-label', `Textfarbe ${color}`);
-    btn.addEventListener('click', () => applyNotizStyle('color', color));
-    row.appendChild(btn);
+  [el('notiz-color-row'), el('notiz-float-colors')].forEach((row) => {
+    row.innerHTML = '';
+    NOTIZ_COLORS.forEach((color) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'notiz-color-swatch';
+      btn.style.background = color;
+      btn.setAttribute('aria-label', `Textfarbe ${color}`);
+      btn.addEventListener('click', () => applyNotizStyle('color', color));
+      row.appendChild(btn);
+    });
   });
 }
 

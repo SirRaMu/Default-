@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.5",
+    "date": "2026-08-18",
+    "title": "Auswahl-Werkzeugleiste & Stilmittel überprüfen",
+    "items": [
+      { "icon": "🖋️", "text": "Notizen: Markierst du Text, taucht direkt darüber eine kleine Werkzeugleiste auf – wie in Word." },
+      { "icon": "✅", "text": "Stilmittel üben: neuer Button \"Überprüfen\" zeigt, welche Zuordnungen richtig, falsch oder noch nicht gefunden sind." }
+    ]
+  },
+  {
     "version": "2.4",
     "date": "2026-08-18",
     "title": "Astronomie, Physik & persönliche Notizen",
