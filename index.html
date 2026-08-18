@@ -74,11 +74,11 @@
         <span class="learn-banner-arrow">→</span>
       </button>
 
-      <button type="button" class="learn-banner beta" data-goto="subject-astronomie">
+      <button type="button" class="learn-banner" data-goto="subject-astronomie">
         <span class="learn-banner-icon">🔭</span>
         <span class="learn-banner-text">
-          <strong>Astronomie <span class="beta-badge">Bald</span></strong>
-          <small>Noch in Bearbeitung</small>
+          <strong>Astronomie</strong>
+          <small>Eigene Karteikarten aus Formeln &amp; Notizen lernen</small>
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
@@ -103,15 +103,99 @@
     </div>
   </section>
 
-  <!-- ===================== FACH: ASTRONOMIE (Platzhalter) ===================== -->
+  <!-- ===================== FACH: ASTRONOMIE ===================== -->
   <section class="screen" id="screen-subject-astronomie" data-screen="subject-astronomie" hidden>
+    <header class="app-header">
+      <h1>🔭 Astronomie</h1>
+      <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="astro-karteikarten">
+      <span class="learn-banner-icon">📇</span>
+      <span class="learn-banner-text">
+        <strong>Karteikarten</strong>
+        <small>Eigene Formeln &amp; Notizen als Karteikarten anlegen und lernen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== ASTRONOMIE: KARTEIKARTEN-LISTE ===================== -->
+  <section class="screen" id="screen-astro-karteikarten" data-screen="astro-karteikarten" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" data-goto="subject-astronomie" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
-        <span class="learn-title">🔭 Astronomie</span>
+        <span class="learn-title">📇 Karteikarten</span>
       </div>
     </header>
-    <div class="beta-note">🚧 Astronomie ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+    <p class="diff-hint">Mach ein Foto von deiner Formel oder Notiz, schreib die Formel auf die Vorderseite und überleg dir selbst eine passende Frage für die Rückseite.</p>
+
+    <button type="button" class="btn-primary" id="karte-new-btn">✏️ Neue Karteikarte</button>
+    <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Karteikarten lernen</button>
+
+    <div class="karte-list" id="karte-list"></div>
+    <p class="karte-empty-hint" id="karte-empty-hint" hidden>Noch keine Karteikarten vorhanden – leg mit "Neue Karteikarte" los.</p>
+  </section>
+
+  <!-- ===================== ASTRONOMIE: KARTEIKARTEN-EDITOR ===================== -->
+  <section class="screen" id="screen-astro-karte-editor" data-screen="astro-karte-editor" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="astro-karteikarten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">Karteikarte</span>
+      </div>
+      <button type="button" class="btn-icon" id="karte-delete-btn" aria-label="Karteikarte löschen">🗑️</button>
+    </header>
+
+    <input type="file" accept="image/*" capture="environment" id="karte-photo-input" hidden>
+    <button type="button" class="btn-secondary" id="karte-photo-btn">📷 Foto von Formel/Notiz hinzufügen</button>
+    <div class="karte-photo-preview" id="karte-photo-preview" hidden>
+      <img id="karte-photo-img" alt="Foto zur Karteikarte">
+      <button type="button" class="btn-text" id="karte-photo-remove-btn">Foto entfernen</button>
+    </div>
+
+    <div class="karte-field">
+      <label class="karte-field-label" for="karte-front-input">Vorderseite (z. B. die Formel)</label>
+      <textarea class="text-input karte-textarea" id="karte-front-input" rows="3" placeholder="z. B. v = s / t"></textarea>
+    </div>
+
+    <div class="karte-field">
+      <label class="karte-field-label" for="karte-back-input">Rückseite (die passende Frage dazu)</label>
+      <textarea class="text-input karte-textarea" id="karte-back-input" rows="3" placeholder="z. B. Wie berechnet man die Geschwindigkeit aus Strecke und Zeit?"></textarea>
+    </div>
+  </section>
+
+  <!-- ===================== ASTRONOMIE: KARTEIKARTEN LERNEN ===================== -->
+  <section class="screen" id="screen-astro-lernen" data-screen="astro-lernen" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="astro-karteikarten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="progress-label" id="karte-lernen-progress">Karte 1 von 1</span>
+      </div>
+    </header>
+
+    <div class="karte-flip-outer" id="karte-flip-outer">
+      <div class="karte-flip-card" id="karte-flip-card">
+        <div class="karte-flip-face karte-flip-front">
+          <span class="karte-flip-label">Vorderseite</span>
+          <img class="karte-flip-photo" id="karte-lernen-photo" hidden alt="Foto zur Karteikarte">
+          <p class="karte-flip-text" id="karte-lernen-front-text"></p>
+        </div>
+        <div class="karte-flip-face karte-flip-back">
+          <span class="karte-flip-label">Rückseite</span>
+          <p class="karte-flip-text" id="karte-lernen-back-text"></p>
+        </div>
+      </div>
+    </div>
+    <p class="diff-hint" id="karte-flip-hint">Tippe auf die Karte, um sie umzudrehen.</p>
+
+    <button type="button" class="btn-primary" id="karte-lernen-next-btn">Weiter →</button>
+
+    <div class="karte-lernen-done" id="karte-lernen-done" hidden>
+      <h2>🎉 Alle Karten durch!</h2>
+      <button type="button" class="btn-primary" id="karte-lernen-again-btn">🔀 Nochmal (neu gemischt)</button>
+      <button type="button" class="btn-secondary" id="karte-lernen-exit-btn">Zur Übersicht</button>
+    </div>
   </section>
 
   <!-- ===================== FACH: PHYSIK (Platzhalter) ===================== -->

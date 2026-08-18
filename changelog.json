@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.7",
+    "date": "2026-08-18",
+    "title": "Astronomie: eigene Karteikarten mit Foto",
+    "items": [
+      { "icon": "📇", "text": "Neu unter Astronomie: Karteikarten anlegen, mit Foto (z. B. von deiner Formel-Notiz), Vorderseite und Rückseite." },
+      { "icon": "🔀", "text": "\"Karteikarten lernen\" zeigt sie gemischt zum Umdrehen an – klassisches Lernkarten-Prinzip." },
+      { "icon": "🔒", "text": "Auch hier gilt: Karten und Fotos werden nur auf deinem Gerät gespeichert, kein Server, keine Kosten." }
+    ]
+  },
+  {
     "version": "2.6",
     "date": "2026-08-18",
     "title": "Neuer Ordner: Terme",

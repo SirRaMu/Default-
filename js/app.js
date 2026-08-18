@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.6';
+const APP_VERSION = '2.7';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -23,6 +23,7 @@ const STORAGE_KEYS = {
   theme: 'kopfrechnen.theme.v1',
   accent: 'kopfrechnen.accent.v1',
   notes: 'kopfrechnen.notes.v1',
+  flashcards: 'kopfrechnen.flashcards.v1',
 };
 
 // Akzentfarben-Paletten für die Farbgestaltung in den Einstellungen.
@@ -2699,6 +2700,273 @@ function initNotizen() {
   renderNotesList();
 }
 
+/* ---------------- Astronomie: Karteikarten ---------------- */
+
+// Wie die Notizen leben auch die Karteikarten (inkl. Foto) ausschließlich in
+// localStorage auf diesem Gerät - keine Uploads, kein Server, kein Konto.
+let currentCardId = null;
+let pendingCardPhoto = undefined; // undefined = unverändert, null = entfernt, string = neues Foto
+
+function loadFlashcards() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.flashcards);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveFlashcards(cards) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.flashcards, JSON.stringify(cards));
+  } catch (e) {
+    /* z.B. Speicher voll (Fotos sind groß) - Karte bleibt dann unverändert */
+  }
+}
+
+function makeCardId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `karte-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function shuffle(arr) {
+  const copy = arr.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Verkleinert ein Foto auf eine vernünftige Kantenlänge und komprimiert es
+ * als JPEG, bevor es in localStorage landet - sonst wäre der Speicher
+ * (ca. 5-10 MB pro Gerät) mit ein paar Fotos schon voll.
+ */
+function resizeImageFile(file, maxDim = 900, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderKarteList() {
+  const cards = loadFlashcards();
+  const list = el('karte-list');
+  list.innerHTML = '';
+  el('karte-empty-hint').hidden = cards.length > 0;
+  el('karte-lernen-btn').hidden = cards.length === 0;
+
+  cards.forEach((card) => {
+    const row = document.createElement('div');
+    row.className = 'karte-card';
+
+    if (card.photo) {
+      const thumb = document.createElement('img');
+      thumb.className = 'karte-card-thumb';
+      thumb.src = card.photo;
+      thumb.alt = '';
+      row.appendChild(thumb);
+    }
+
+    const main = document.createElement('div');
+    main.className = 'karte-card-main';
+    const front = document.createElement('p');
+    front.className = 'karte-card-front';
+    front.textContent = card.front || 'Ohne Vorderseite';
+    const back = document.createElement('p');
+    back.className = 'karte-card-back';
+    back.textContent = card.back || 'Ohne Rückseite';
+    main.appendChild(front);
+    main.appendChild(back);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'karte-card-delete';
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.setAttribute('aria-label', 'Karteikarte löschen');
+    deleteBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      deleteCard(card.id);
+    });
+
+    row.appendChild(main);
+    row.appendChild(deleteBtn);
+    row.addEventListener('click', () => openCardEditor(card.id));
+    list.appendChild(row);
+  });
+}
+
+function deleteCard(id) {
+  const cards = loadFlashcards().filter((c) => c.id !== id);
+  saveFlashcards(cards);
+  if (currentCardId === id) {
+    currentCardId = null;
+    showScreen('astro-karteikarten');
+  }
+  renderKarteList();
+}
+
+function createNewCard() {
+  const cards = loadFlashcards();
+  const card = { id: makeCardId(), front: '', back: '', photo: null, createdAt: new Date().toISOString() };
+  cards.push(card);
+  saveFlashcards(cards);
+  openCardEditor(card.id);
+}
+
+function renderCardPhotoPreview(photo) {
+  const preview = el('karte-photo-preview');
+  if (photo) {
+    el('karte-photo-img').src = photo;
+    preview.hidden = false;
+  } else {
+    el('karte-photo-img').src = '';
+    preview.hidden = true;
+  }
+}
+
+function openCardEditor(id) {
+  const card = loadFlashcards().find((c) => c.id === id);
+  if (!card) return;
+  currentCardId = id;
+  pendingCardPhoto = undefined;
+  el('karte-front-input').value = card.front || '';
+  el('karte-back-input').value = card.back || '';
+  renderCardPhotoPreview(card.photo || null);
+  showScreen('astro-karte-editor');
+}
+
+function saveCurrentCard() {
+  if (!currentCardId) return;
+  const cards = loadFlashcards();
+  const card = cards.find((c) => c.id === currentCardId);
+  if (!card) return;
+  card.front = el('karte-front-input').value;
+  card.back = el('karte-back-input').value;
+  if (pendingCardPhoto !== undefined) card.photo = pendingCardPhoto;
+  saveFlashcards(cards);
+  renderKarteList();
+}
+
+/* ---------------- Astronomie: Karteikarten lernen (Umdrehen) ---------------- */
+
+const astroLernen = { order: [], index: 0, flipped: false };
+
+function renderAstroLernenCard() {
+  const cards = loadFlashcards();
+  const card = cards.find((c) => c.id === astroLernen.order[astroLernen.index]);
+  if (!card) return;
+
+  el('karte-lernen-progress').textContent = `Karte ${astroLernen.index + 1} von ${astroLernen.order.length}`;
+  el('karte-lernen-front-text').textContent = card.front || 'Ohne Vorderseite';
+  el('karte-lernen-back-text').textContent = card.back || 'Ohne Rückseite';
+
+  const photoEl = el('karte-lernen-photo');
+  if (card.photo) {
+    photoEl.src = card.photo;
+    photoEl.hidden = false;
+  } else {
+    photoEl.hidden = true;
+  }
+
+  astroLernen.flipped = false;
+  el('karte-flip-card').classList.remove('flipped');
+  el('karte-lernen-next-btn').textContent = astroLernen.index < astroLernen.order.length - 1 ? 'Weiter →' : 'Fertig ✓';
+}
+
+function startAstroLernen() {
+  const cards = loadFlashcards();
+  if (!cards.length) return;
+  astroLernen.order = shuffle(cards.map((c) => c.id));
+  astroLernen.index = 0;
+  el('karte-lernen-done').hidden = true;
+  el('karte-flip-outer').hidden = false;
+  el('karte-flip-hint').hidden = false;
+  el('karte-lernen-next-btn').hidden = false;
+  renderAstroLernenCard();
+  showScreen('astro-lernen');
+}
+
+function flipAstroCard() {
+  astroLernen.flipped = !astroLernen.flipped;
+  el('karte-flip-card').classList.toggle('flipped', astroLernen.flipped);
+}
+
+function nextAstroCard() {
+  if (astroLernen.index < astroLernen.order.length - 1) {
+    astroLernen.index += 1;
+    renderAstroLernenCard();
+  } else {
+    el('karte-flip-outer').hidden = true;
+    el('karte-flip-hint').hidden = true;
+    el('karte-lernen-next-btn').hidden = true;
+    el('karte-lernen-done').hidden = false;
+  }
+}
+
+function initAstroKarteikarten() {
+  el('karte-new-btn').addEventListener('click', createNewCard);
+  el('karte-lernen-btn').addEventListener('click', startAstroLernen);
+
+  el('karte-front-input').addEventListener('input', saveCurrentCard);
+  el('karte-back-input').addEventListener('input', saveCurrentCard);
+
+  el('karte-photo-btn').addEventListener('click', () => el('karte-photo-input').click());
+  el('karte-photo-input').addEventListener('change', async (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    ev.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await resizeImageFile(file);
+      pendingCardPhoto = dataUrl;
+      renderCardPhotoPreview(dataUrl);
+      saveCurrentCard();
+    } catch (e) {
+      /* Foto konnte nicht gelesen werden - Karte bleibt ohne Foto */
+    }
+  });
+  el('karte-photo-remove-btn').addEventListener('click', () => {
+    pendingCardPhoto = null;
+    renderCardPhotoPreview(null);
+    saveCurrentCard();
+  });
+
+  el('karte-delete-btn').addEventListener('click', () => {
+    if (currentCardId) deleteCard(currentCardId);
+  });
+
+  el('karte-flip-card').addEventListener('click', flipAstroCard);
+  el('karte-lernen-next-btn').addEventListener('click', nextAstroCard);
+  el('karte-lernen-again-btn').addEventListener('click', startAstroLernen);
+  el('karte-lernen-exit-btn').addEventListener('click', () => showScreen('astro-karteikarten'));
+
+  renderKarteList();
+}
+
 /* ---------------- Init ---------------- */
 
 loadSettings();
@@ -2712,6 +2980,7 @@ enhanceTrickCards();
 renderStilmittelListe();
 initStilmittelUebung();
 initNotizen();
+initAstroKarteikarten();
 showScreen('home');
 initUpdateChecker();
 renderVersionHistory();
