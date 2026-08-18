@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.1",
+    "date": "2026-08-18",
+    "title": "Browser-Tab zeigt jetzt sofort das neue Icon",
+    "items": [
+      { "icon": "🔄", "text": "Browser merken sich das Tab-Icon oft hartnäckig, auch wenn die Datei sich ändert. Das neue Icon wird jetzt über einen eigenen Link geladen, damit es beim Update sofort mit übernommen wird." },
+      { "icon": "📱", "text": "Wichtig: Falls du die App über \"Zum Home-Bildschirm\" aufs Display gelegt hast, entscheidet dort iOS/Android, nicht die App, wann Icon und Name aktualisiert werden. Am schnellsten geht's, wenn du das Symbol einmal vom Home-Bildschirm entfernst und neu hinzufügst." }
+    ]
+  },
+  {
     "version": "2.0",
     "date": "2026-08-18",
     "title": "Neuer Name: Lernhelfer",

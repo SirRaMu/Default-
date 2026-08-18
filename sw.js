@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kopfrechnen-v26';
+const CACHE_NAME = 'kopfrechnen-v27';
 const ASSETS = [
   './',
   './index.html',
