@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kopfrechnen-v18';
+const CACHE_NAME = 'kopfrechnen-v20';
 const ASSETS = [
   './',
   './index.html',
@@ -10,9 +10,19 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Kein automatisches skipWaiting mehr: der neue Service Worker wartet,
+  // bis die Seite (nach Nutzer-Bestätigung im Update-Dialog) explizit per
+  // postMessage grünes Licht gibt. So entscheidet die Nutzerin/der Nutzer,
+  // wann aktualisiert wird, statt dass es unbemerkt im Hintergrund passiert.
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

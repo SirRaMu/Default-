@@ -1591,6 +1591,112 @@ function initUpdateButton() {
   el('reload-latest-btn').addEventListener('click', loadLatestVersion);
 }
 
+/* ---------------- Automatische Update-Erkennung ---------------- */
+
+// Nur true, nachdem die Nutzerin/der Nutzer im Update-Dialog aktiv auf
+// "Jetzt aktualisieren" getippt hat. Verhindert, dass ein ganz normales
+// Erst-Laden (der Service Worker "claimt" frische Tabs beim allerersten
+// Aktivieren) fälschlich als Update erkannt wird und die Seite neu lädt.
+let updateAccepted = false;
+
+/**
+ * Zeigt den Änderungen-Eintrag (Version, Titel, Icons + Texte) im
+ * Update-Dialog an. `entry` kommt aus changelog.json.
+ */
+function renderUpdateChangelog(entry) {
+  el('update-modal-subtitle').textContent = entry.title || 'Was ist neu';
+  const list = el('update-changelog');
+  list.innerHTML = '';
+  (entry.items || []).forEach((item) => {
+    const row = document.createElement('div');
+    row.className = 'update-changelog-item';
+    const icon = document.createElement('div');
+    icon.className = 'update-changelog-icon';
+    icon.textContent = item.icon || '✨';
+    icon.setAttribute('aria-hidden', 'true');
+    const text = document.createElement('div');
+    text.className = 'update-changelog-text';
+    text.textContent = item.text || '';
+    row.appendChild(icon);
+    row.appendChild(text);
+    list.appendChild(row);
+  });
+}
+
+/**
+ * Ein neuer Service Worker wartet auf Aktivierung (`registration.waiting`).
+ * Lädt die Änderungsübersicht und zeigt den Update-Dialog, statt einfach
+ * unbemerkt im Hintergrund zu aktualisieren - die Nutzerin/der Nutzer
+ * entscheidet selbst, wann umgeschaltet wird.
+ */
+async function showUpdateBanner(registration) {
+  const overlay = el('update-overlay');
+  if (!overlay.hidden) return; // schon sichtbar
+
+  try {
+    const res = await fetch('changelog.json', { cache: 'no-store' });
+    const changelog = await res.json();
+    if (Array.isArray(changelog) && changelog.length) {
+      renderUpdateChangelog(changelog[0]);
+    }
+  } catch (e) {
+    /* Änderungsübersicht ist ein Bonus - ohne sie trotzdem Update anbieten */
+  }
+
+  overlay.hidden = false;
+
+  const nowBtn = el('update-now-btn');
+  const laterBtn = el('update-later-btn');
+
+  const onNow = () => {
+    nowBtn.disabled = true;
+    nowBtn.textContent = '🔄 Wird aktualisiert …';
+    updateAccepted = true;
+    const waiting = registration.waiting;
+    if (waiting) {
+      waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  };
+  const onLater = () => {
+    overlay.hidden = true;
+    nowBtn.removeEventListener('click', onNow);
+    laterBtn.removeEventListener('click', onLater);
+  };
+
+  nowBtn.addEventListener('click', onNow);
+  laterBtn.addEventListener('click', onLater);
+}
+
+function initUpdateChecker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing || !updateAccepted) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((registration) => {
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        showUpdateBanner(registration);
+      }
+      registration.addEventListener('updatefound', () => {
+        const installing = registration.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner(registration);
+          }
+        });
+      });
+    }).catch(() => {
+      /* Offline-Support ist optional – Fehler hier sind unkritisch */
+    });
+  });
+}
+
 /* ---------------- Erklär-Assistent (Maskottchen + Sprechblase) ---------------- */
 
 /**
@@ -1645,11 +1751,4 @@ initTheme();
 initUpdateButton();
 enhanceTrickCards();
 showScreen('setup');
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {
-      /* Offline-Support ist optional – Fehler hier sind unkritisch */
-    });
-  });
-}
+initUpdateChecker();

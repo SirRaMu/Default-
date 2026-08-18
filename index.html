@@ -27,6 +27,18 @@
   <button type="button" class="home-btn" id="home-btn" aria-label="Zur Startseite" hidden>🏠</button>
   <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Hell-/Dunkelmodus wechseln">🌙</button>
 
+  <!-- ===================== UPDATE-DIALOG ===================== -->
+  <div class="update-overlay" id="update-overlay" hidden>
+    <div class="update-modal">
+      <div class="update-modal-icon">🎉</div>
+      <h2 class="update-modal-heading">Update verfügbar!</h2>
+      <p class="update-modal-subtitle" id="update-modal-subtitle">Was ist neu</p>
+      <div class="update-changelog" id="update-changelog"></div>
+      <button type="button" class="btn-primary" id="update-now-btn">🔄 Jetzt aktualisieren</button>
+      <button type="button" class="btn-secondary" id="update-later-btn">Vorhandene Version behalten</button>
+    </div>
+  </div>
+
   <!-- ===================== SETUP SCREEN ===================== -->
   <section class="screen" id="screen-setup" data-screen="setup">
     <header class="app-header">

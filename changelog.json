@@ -1,0 +1,65 @@
+[
+  {
+    "version": "1.7",
+    "date": "2026-08-18",
+    "title": "Update-Hinweis mit Änderungsübersicht",
+    "items": [
+      { "icon": "🔔", "text": "Wenn eine neue Version bereitsteht, bekommst du das jetzt angezeigt – mit Übersicht, was sich geändert hat." },
+      { "icon": "🕹️", "text": "Du entscheidest selbst: sofort aktualisieren oder erstmal bei der vorhandenen Version bleiben." }
+    ]
+  },
+  {
+    "version": "1.6",
+    "date": "2026-08-18",
+    "title": "Maskottchen erklärt jetzt Schritt für Schritt",
+    "items": [
+      { "icon": "🤖", "text": "Im Erklären-Modus zeigt ein kleines Maskottchen oben, warum ein Trick funktioniert – darunter siehst du das passende Rechenbeispiel." },
+      { "icon": "🔁", "text": "Im Üben-Modus bekommst du jetzt 3 Versuche pro Schritt, bevor du dir die Lösung anzeigen lassen kannst." }
+    ]
+  },
+  {
+    "version": "1.5",
+    "date": "2026-08-18",
+    "title": "Erweiterte Themen jetzt auch im Speed-Training",
+    "items": [
+      { "icon": "🧮", "text": "Neuer Umschalter auf der Startseite: Grundlegend oder Erweitert (Prozentrechnung, PQ-Formel, Gleichungssysteme, Differenzenquotient, Differenzengleichung)." },
+      { "icon": "🎚️", "text": "Auch für die erweiterten Themen wählbar: Schwierigkeit von Leicht bis Experte." },
+      { "icon": "📈", "text": "Differenzenquotient und Differenzengleichung sind neu dabei (als Beta gekennzeichnet)." }
+    ]
+  },
+  {
+    "version": "1.4",
+    "date": "2026-08-18",
+    "title": "Übersichtlichere Navigation",
+    "items": [
+      { "icon": "🏠", "text": "Neuer Home-Button oben links bringt dich von überall direkt zur Startseite zurück." },
+      { "icon": "🌗", "text": "Hell-/Dunkelmodus lässt sich jetzt manuell umschalten, unabhängig von der Systemeinstellung." },
+      { "icon": "📂", "text": "Rechentricks & Erweiterte Aufgaben sind jetzt aufklappbare Menüs statt einer langen Liste." }
+    ]
+  },
+  {
+    "version": "1.3",
+    "date": "2026-08-18",
+    "title": "Highscore für den Zeit-Sprint",
+    "items": [
+      { "icon": "🏆", "text": "Im Zeit-Sprint-Modus wird jetzt dein bester Wert gespeichert – pro Zeit-Dauer getrennt." }
+    ]
+  },
+  {
+    "version": "1.2",
+    "date": "2026-08-18",
+    "title": "Rechentricks zum Üben",
+    "items": [
+      { "icon": "🧠", "text": "Jeder Rechentrick lässt sich jetzt Schritt für Schritt selbst üben, nicht nur nachlesen." },
+      { "icon": "🎓", "text": "Erweiterte Aufgaben dazugekommen: Prozentrechnung, PQ-Formel und lineare Gleichungssysteme." }
+    ]
+  },
+  {
+    "version": "1.0",
+    "date": "2026-08-18",
+    "title": "Kopfrechnen Trainer",
+    "items": [
+      { "icon": "🚀", "text": "Erste Version: Addition, Subtraktion, Multiplikation, Division – mit Schwierigkeit, Anzahl- oder Zeit-Modus." }
+    ]
+  }
+]
