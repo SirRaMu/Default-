@@ -226,10 +226,6 @@ function showScreen(name) {
 }
 
 /**
- * Verwandelt eine Chip-Gruppe (data-target=Sektions-ID) in echte Registerkarten:
- * immer nur die aktive Sektion ist sichtbar, statt zu ihr zu scrollen.
- */
-/**
  * Jeder Klick auf ein Element mit data-goto="<screen>" navigiert dorthin -
  * deckt Menüpunkte, Zurück-Pfeile und den Home-Button einheitlich ab.
  */
@@ -1068,9 +1064,9 @@ let practice = null; // { trickId, ctx: { headline, steps }, stepIndex, input }
 
 const PRACTICE_MAX_ATTEMPTS = 3;
 
-function openPractice(trickId) {
+function openPractice(trickId, mode = 'practice') {
   const origin = Object.keys(screens).find((key) => key !== 'practice' && !screens[key].hidden) || 'setup';
-  practice = { trickId, ctx: null, stepIndex: 0, input: '', attempts: 0, origin };
+  practice = { trickId, ctx: null, stepIndex: 0, input: '', attempts: 0, mode, origin };
   showScreen('practice');
   loadPracticeProblem();
 }
@@ -1095,13 +1091,20 @@ function renderPracticeStep() {
   el('practice-progress-fill').style.width = `${(practice.stepIndex / ctx.steps.length) * 100}%`;
   el('practice-problem').textContent = ctx.headline;
   el('practice-prompt').textContent = step.prompt;
-  el('practice-answer-display').textContent = ' ';
   el('practice-feedback').textContent = '';
   el('practice-feedback').className = 'feedback';
-
-  el('practice-numpad').hidden = false;
   el('practice-reveal-btn').hidden = true;
-  el('practice-continue-btn').hidden = true;
+
+  if (practice.mode === 'explain') {
+    el('practice-answer-display').textContent = String(step.answer);
+    el('practice-numpad').hidden = true;
+    el('practice-continue-btn').hidden = false;
+    el('practice-continue-btn').textContent = 'Weiter →';
+  } else {
+    el('practice-answer-display').textContent = ' ';
+    el('practice-numpad').hidden = false;
+    el('practice-continue-btn').hidden = true;
+  }
 }
 
 function handlePracticeInput(action, num) {
@@ -1177,7 +1180,7 @@ function revealPracticeSolution() {
   el('practice-continue-btn').hidden = false;
 }
 
-function continuePracticeAfterReveal() {
+function advancePracticeStep() {
   const ctx = practice.ctx;
   practice.stepIndex += 1;
   practice.input = '';
@@ -1194,11 +1197,19 @@ function finishPracticeProblem() {
   el('practice-progress-fill').style.width = '100%';
   el('practice-card').hidden = true;
   el('practice-numpad').hidden = true;
+  el('practice-continue-btn').hidden = true;
   el('practice-done').hidden = false;
   const finalAnswer = ctx.steps[ctx.steps.length - 1].answer;
   el('practice-done-sub').textContent = ctx.resultText || ctx.headline.replace(/\?\s*$/, String(finalAnswer));
 
-  incrementTrickCounter();
+  if (practice.mode === 'explain') {
+    el('practice-done-title').textContent = 'Alles klar? 🎓';
+    el('practice-next-btn').textContent = '🧠 Jetzt selbst üben';
+  } else {
+    el('practice-done-title').textContent = 'Super gemacht! 🎉';
+    el('practice-next-btn').textContent = 'Nächste Aufgabe';
+    incrementTrickCounter();
+  }
 }
 
 function getTrickCounter() {
@@ -1240,9 +1251,14 @@ function initPracticeScreen() {
 
   el('practice-cancel-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
   el('practice-exit-btn').addEventListener('click', () => showScreen(practice ? practice.origin : 'setup'));
-  el('practice-next-btn').addEventListener('click', loadPracticeProblem);
+  el('practice-next-btn').addEventListener('click', () => {
+    if (practice && practice.mode === 'explain') {
+      practice.mode = 'practice';
+    }
+    loadPracticeProblem();
+  });
   el('practice-reveal-btn').addEventListener('click', revealPracticeSolution);
-  el('practice-continue-btn').addEventListener('click', continuePracticeAfterReveal);
+  el('practice-continue-btn').addEventListener('click', advancePracticeStep);
 
   renderTrickCounter();
 }
@@ -1598,59 +1614,17 @@ function enhanceTrickCards() {
       rule.replaceWith(row);
     }
 
-    const blocks = Array.from(card.querySelectorAll('.trick-steps, .trick-bullets'));
-    if (!blocks.length) return;
-
-    // Jeden Block in einzeln aufdeckbare Häppchen zerlegen: bei .trick-steps
-    // gehört ein Text-Span + sein direkt folgender Pfeil-Span zusammen,
-    // bei .trick-bullets ist jedes <li> ein eigener Happen.
-    const items = [];
-    blocks.forEach((block) => {
-      block.hidden = true;
-      if (block.classList.contains('trick-bullets')) {
-        Array.from(block.children).forEach((li) => {
-          li.hidden = true;
-          items.push({ parent: block, elements: [li] });
-        });
-      } else {
-        const children = Array.from(block.children);
-        let i = 0;
-        while (i < children.length) {
-          const group = [children[i]];
-          children[i].hidden = true;
-          i += 1;
-          if (i < children.length && (children[i].classList.contains('arrow') || children[i].classList.contains('result'))) {
-            group.push(children[i]);
-            children[i].hidden = true;
-            i += 1;
-          }
-          items.push({ parent: block, elements: group });
-        }
-      }
-    });
-
-    let revealed = 0;
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'example-toggle';
-    toggle.textContent = '🎓 Erklären';
-
-    toggle.addEventListener('click', () => {
-      if (revealed >= items.length) {
-        items.forEach(({ elements }) => elements.forEach((el) => { el.hidden = true; }));
-        blocks.forEach((block) => { block.hidden = true; });
-        revealed = 0;
-        toggle.textContent = '🎓 Erklären';
-        return;
-      }
-      const { parent, elements } = items[revealed];
-      parent.hidden = false;
-      elements.forEach((el) => { el.hidden = false; });
-      revealed += 1;
-      toggle.textContent = revealed >= items.length ? '✓ Ausblenden' : 'Weiter →';
-    });
-
-    blocks[0].parentNode.insertBefore(toggle, blocks[0]);
+    // "Erklären" führt Schritt für Schritt durch denselben Bildschirm wie
+    // "Üben" - nur dass dort direkt die Lösung gezeigt wird statt einer Eingabe.
+    const trickBtn = card.querySelector('.btn-practice');
+    if (trickBtn) {
+      const explainBtn = document.createElement('button');
+      explainBtn.type = 'button';
+      explainBtn.className = 'btn-explain';
+      explainBtn.textContent = '🎓 Erklären';
+      explainBtn.addEventListener('click', () => openPractice(trickBtn.dataset.trick, 'explain'));
+      trickBtn.parentNode.insertBefore(explainBtn, trickBtn);
+    }
   });
 }
 

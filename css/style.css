@@ -355,19 +355,19 @@ body {
   border-color: transparent var(--chip-bg) transparent transparent;
 }
 
-.example-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--primary);
+.btn-explain {
+  margin-top: 12px;
+  width: 100%;
+  padding: 11px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
   font-weight: 700;
-  font-size: 0.82rem;
-  padding: 0 0 12px 44px;
+  font-size: 0.9rem;
   cursor: pointer;
 }
-.example-toggle:active { opacity: 0.7; }
+.btn-explain:active { transform: scale(0.98); background: var(--chip-bg); }
 
 .trick-steps {
   display: flex;
