@@ -355,6 +355,23 @@ body {
   border-color: transparent var(--chip-bg) transparent transparent;
 }
 
+.practice-teacher-row {
+  width: 100%;
+  margin-bottom: 6px;
+}
+.practice-teacher-row .teacher-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 1.15rem;
+}
+.practice-bubble {
+  font-size: clamp(1.15rem, 5.5vw, 1.6rem);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  white-space: pre-line;
+}
+
 .btn-explain {
   margin-top: 12px;
   width: 100%;
