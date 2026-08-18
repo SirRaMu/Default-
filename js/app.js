@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.7';
+const APP_VERSION = '2.8';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -2700,20 +2700,42 @@ function initNotizen() {
   renderNotesList();
 }
 
-/* ---------------- Astronomie: Karteikarten ---------------- */
+/* ---------------- Karteikarten (Astronomie, Physik, Englisch, Deutsch) ---------------- */
 
 // Wie die Notizen leben auch die Karteikarten (inkl. Foto) ausschließlich in
 // localStorage auf diesem Gerät - keine Uploads, kein Server, kein Konto.
+// Eine gemeinsame Liste/Editor/Lern-Ansicht wird von mehreren Fächern genutzt;
+// karteContext merkt sich, aus welchem Fach man gerade kommt (für Titel,
+// Zurück-Button und Filterung der angezeigten Karten).
+const karteContext = { subject: null, screen: null, icon: '', label: '' };
 let currentCardId = null;
 let pendingCardPhoto = undefined; // undefined = unverändert, null = entfernt, string = neues Foto
 
-function loadFlashcards() {
+function loadAllFlashcards() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.flashcards);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const cards = JSON.parse(raw);
+    // Karten aus der Zeit, bevor Karteikarten für mehrere Fächer nutzbar
+    // waren, haben noch kein "subject" - damals gab es sie nur bei
+    // Astronomie, also ordnen wir sie einmalig dort ein statt sie
+    // kommentarlos verschwinden zu lassen.
+    let migrated = false;
+    cards.forEach((c) => {
+      if (!c.subject) {
+        c.subject = 'astronomie';
+        migrated = true;
+      }
+    });
+    if (migrated) saveFlashcards(cards);
+    return cards;
   } catch (e) {
     return [];
   }
+}
+
+function loadFlashcardsForSubject(subject) {
+  return loadAllFlashcards().filter((c) => c.subject === subject);
 }
 
 function saveFlashcards(cards) {
@@ -2774,7 +2796,7 @@ function resizeImageFile(file, maxDim = 900, quality = 0.75) {
 }
 
 function renderKarteList() {
-  const cards = loadFlashcards();
+  const cards = loadFlashcardsForSubject(karteContext.subject);
   const list = el('karte-list');
   list.innerHTML = '';
   el('karte-empty-hint').hidden = cards.length > 0;
@@ -2821,18 +2843,18 @@ function renderKarteList() {
 }
 
 function deleteCard(id) {
-  const cards = loadFlashcards().filter((c) => c.id !== id);
+  const cards = loadAllFlashcards().filter((c) => c.id !== id);
   saveFlashcards(cards);
   if (currentCardId === id) {
     currentCardId = null;
-    showScreen('astro-karteikarten');
+    showScreen('karteikarten');
   }
   renderKarteList();
 }
 
 function createNewCard() {
-  const cards = loadFlashcards();
-  const card = { id: makeCardId(), front: '', back: '', photo: null, createdAt: new Date().toISOString() };
+  const cards = loadAllFlashcards();
+  const card = { id: makeCardId(), subject: karteContext.subject, front: '', back: '', photo: null, createdAt: new Date().toISOString() };
   cards.push(card);
   saveFlashcards(cards);
   openCardEditor(card.id);
@@ -2850,19 +2872,19 @@ function renderCardPhotoPreview(photo) {
 }
 
 function openCardEditor(id) {
-  const card = loadFlashcards().find((c) => c.id === id);
+  const card = loadAllFlashcards().find((c) => c.id === id);
   if (!card) return;
   currentCardId = id;
   pendingCardPhoto = undefined;
   el('karte-front-input').value = card.front || '';
   el('karte-back-input').value = card.back || '';
   renderCardPhotoPreview(card.photo || null);
-  showScreen('astro-karte-editor');
+  showScreen('karte-editor');
 }
 
 function saveCurrentCard() {
   if (!currentCardId) return;
-  const cards = loadFlashcards();
+  const cards = loadAllFlashcards();
   const card = cards.find((c) => c.id === currentCardId);
   if (!card) return;
   card.front = el('karte-front-input').value;
@@ -2872,16 +2894,16 @@ function saveCurrentCard() {
   renderKarteList();
 }
 
-/* ---------------- Astronomie: Karteikarten lernen (Umdrehen) ---------------- */
+/* ---------------- Karteikarten lernen (Umdrehen) ---------------- */
 
-const astroLernen = { order: [], index: 0, flipped: false };
+const karteLernen = { order: [], index: 0, flipped: false };
 
-function renderAstroLernenCard() {
-  const cards = loadFlashcards();
-  const card = cards.find((c) => c.id === astroLernen.order[astroLernen.index]);
+function renderKarteLernenCard() {
+  const cards = loadAllFlashcards();
+  const card = cards.find((c) => c.id === karteLernen.order[karteLernen.index]);
   if (!card) return;
 
-  el('karte-lernen-progress').textContent = `Karte ${astroLernen.index + 1} von ${astroLernen.order.length}`;
+  el('karte-lernen-progress').textContent = `Karte ${karteLernen.index + 1} von ${karteLernen.order.length}`;
   el('karte-lernen-front-text').textContent = card.front || 'Ohne Vorderseite';
   el('karte-lernen-back-text').textContent = card.back || 'Ohne Rückseite';
 
@@ -2893,33 +2915,33 @@ function renderAstroLernenCard() {
     photoEl.hidden = true;
   }
 
-  astroLernen.flipped = false;
+  karteLernen.flipped = false;
   el('karte-flip-card').classList.remove('flipped');
-  el('karte-lernen-next-btn').textContent = astroLernen.index < astroLernen.order.length - 1 ? 'Weiter →' : 'Fertig ✓';
+  el('karte-lernen-next-btn').textContent = karteLernen.index < karteLernen.order.length - 1 ? 'Weiter →' : 'Fertig ✓';
 }
 
-function startAstroLernen() {
-  const cards = loadFlashcards();
+function startKarteLernen() {
+  const cards = loadFlashcardsForSubject(karteContext.subject);
   if (!cards.length) return;
-  astroLernen.order = shuffle(cards.map((c) => c.id));
-  astroLernen.index = 0;
+  karteLernen.order = shuffle(cards.map((c) => c.id));
+  karteLernen.index = 0;
   el('karte-lernen-done').hidden = true;
   el('karte-flip-outer').hidden = false;
   el('karte-flip-hint').hidden = false;
   el('karte-lernen-next-btn').hidden = false;
-  renderAstroLernenCard();
-  showScreen('astro-lernen');
+  renderKarteLernenCard();
+  showScreen('karte-lernen');
 }
 
-function flipAstroCard() {
-  astroLernen.flipped = !astroLernen.flipped;
-  el('karte-flip-card').classList.toggle('flipped', astroLernen.flipped);
+function flipKarteCard() {
+  karteLernen.flipped = !karteLernen.flipped;
+  el('karte-flip-card').classList.toggle('flipped', karteLernen.flipped);
 }
 
-function nextAstroCard() {
-  if (astroLernen.index < astroLernen.order.length - 1) {
-    astroLernen.index += 1;
-    renderAstroLernenCard();
+function nextKarteCard() {
+  if (karteLernen.index < karteLernen.order.length - 1) {
+    karteLernen.index += 1;
+    renderKarteLernenCard();
   } else {
     el('karte-flip-outer').hidden = true;
     el('karte-flip-hint').hidden = true;
@@ -2928,9 +2950,29 @@ function nextAstroCard() {
   }
 }
 
-function initAstroKarteikarten() {
+/**
+ * Öffnet die (fachübergreifend geteilte) Karteikarten-Liste für ein
+ * bestimmtes Fach: merkt sich den Kontext (für Titel, Zurück-Button und
+ * Filterung) und aktualisiert die Liste entsprechend.
+ */
+function openKarteikartenForSubject(btn) {
+  karteContext.subject = btn.dataset.karteSubject;
+  karteContext.screen = btn.dataset.karteScreen;
+  karteContext.icon = btn.dataset.karteIcon;
+  karteContext.label = btn.dataset.karteLabel;
+
+  el('karten-back-btn').dataset.goto = karteContext.screen;
+  el('karten-header-title').textContent = `${karteContext.icon} Karteikarten`;
+  renderKarteList();
+}
+
+function initKarteikarten() {
+  document.querySelectorAll('[data-karte-subject]').forEach((btn) => {
+    btn.addEventListener('click', () => openKarteikartenForSubject(btn));
+  });
+
   el('karte-new-btn').addEventListener('click', createNewCard);
-  el('karte-lernen-btn').addEventListener('click', startAstroLernen);
+  el('karte-lernen-btn').addEventListener('click', startKarteLernen);
 
   el('karte-front-input').addEventListener('input', saveCurrentCard);
   el('karte-back-input').addEventListener('input', saveCurrentCard);
@@ -2959,12 +3001,10 @@ function initAstroKarteikarten() {
     if (currentCardId) deleteCard(currentCardId);
   });
 
-  el('karte-flip-card').addEventListener('click', flipAstroCard);
-  el('karte-lernen-next-btn').addEventListener('click', nextAstroCard);
-  el('karte-lernen-again-btn').addEventListener('click', startAstroLernen);
-  el('karte-lernen-exit-btn').addEventListener('click', () => showScreen('astro-karteikarten'));
-
-  renderKarteList();
+  el('karte-flip-card').addEventListener('click', flipKarteCard);
+  el('karte-lernen-next-btn').addEventListener('click', nextKarteCard);
+  el('karte-lernen-again-btn').addEventListener('click', startKarteLernen);
+  el('karte-lernen-exit-btn').addEventListener('click', () => showScreen('karteikarten'));
 }
 
 /* ---------------- Init ---------------- */
@@ -2980,7 +3020,7 @@ enhanceTrickCards();
 renderStilmittelListe();
 initStilmittelUebung();
 initNotizen();
-initAstroKarteikarten();
+initKarteikarten();
 showScreen('home');
 initUpdateChecker();
 renderVersionHistory();

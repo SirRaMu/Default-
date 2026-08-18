@@ -65,11 +65,11 @@
         <span class="learn-banner-arrow">→</span>
       </button>
 
-      <button type="button" class="learn-banner beta" data-goto="subject-englisch">
+      <button type="button" class="learn-banner" data-goto="subject-englisch">
         <span class="learn-banner-icon">🇬🇧</span>
         <span class="learn-banner-text">
-          <strong>Englisch <span class="beta-badge">Bald</span></strong>
-          <small>Noch in Bearbeitung</small>
+          <strong>Englisch</strong>
+          <small>Eigene Karteikarten aus Vokabeln &amp; Notizen lernen</small>
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
@@ -83,11 +83,11 @@
         <span class="learn-banner-arrow">→</span>
       </button>
 
-      <button type="button" class="learn-banner beta" data-goto="subject-physik">
+      <button type="button" class="learn-banner" data-goto="subject-physik">
         <span class="learn-banner-icon">⚛️</span>
         <span class="learn-banner-text">
-          <strong>Physik <span class="beta-badge">Bald</span></strong>
-          <small>Noch in Bearbeitung</small>
+          <strong>Physik</strong>
+          <small>Eigene Karteikarten aus Formeln &amp; Notizen lernen</small>
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
@@ -110,7 +110,7 @@
       <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
 
-    <button type="button" class="learn-banner" data-goto="astro-karteikarten">
+    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="astronomie" data-karte-screen="subject-astronomie" data-karte-icon="🔭" data-karte-label="Astronomie">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
         <strong>Karteikarten</strong>
@@ -120,12 +120,12 @@
     </button>
   </section>
 
-  <!-- ===================== ASTRONOMIE: KARTEIKARTEN-LISTE ===================== -->
-  <section class="screen" id="screen-astro-karteikarten" data-screen="astro-karteikarten" hidden>
+  <!-- ===================== KARTEIKARTEN-LISTE (gemeinsam für alle Fächer) ===================== -->
+  <section class="screen" id="screen-karteikarten" data-screen="karteikarten" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="subject-astronomie" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" id="karten-back-btn" data-goto="subject-astronomie" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
-        <span class="learn-title">📇 Karteikarten</span>
+        <span class="learn-title" id="karten-header-title">📇 Karteikarten</span>
       </div>
     </header>
     <p class="diff-hint">Mach ein Foto von deiner Formel oder Notiz, schreib die Formel auf die Vorderseite und überleg dir selbst eine passende Frage für die Rückseite.</p>
@@ -137,10 +137,10 @@
     <p class="karte-empty-hint" id="karte-empty-hint" hidden>Noch keine Karteikarten vorhanden – leg mit "Neue Karteikarte" los.</p>
   </section>
 
-  <!-- ===================== ASTRONOMIE: KARTEIKARTEN-EDITOR ===================== -->
-  <section class="screen" id="screen-astro-karte-editor" data-screen="astro-karte-editor" hidden>
+  <!-- ===================== KARTEIKARTEN-EDITOR (gemeinsam für alle Fächer) ===================== -->
+  <section class="screen" id="screen-karte-editor" data-screen="karte-editor" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="astro-karteikarten" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" data-goto="karteikarten" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
         <span class="learn-title">Karteikarte</span>
       </div>
@@ -165,10 +165,10 @@
     </div>
   </section>
 
-  <!-- ===================== ASTRONOMIE: KARTEIKARTEN LERNEN ===================== -->
-  <section class="screen" id="screen-astro-lernen" data-screen="astro-lernen" hidden>
+  <!-- ===================== KARTEIKARTEN LERNEN (gemeinsam für alle Fächer) ===================== -->
+  <section class="screen" id="screen-karte-lernen" data-screen="karte-lernen" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="astro-karteikarten" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" data-goto="karteikarten" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
         <span class="progress-label" id="karte-lernen-progress">Karte 1 von 1</span>
       </div>
@@ -198,15 +198,21 @@
     </div>
   </section>
 
-  <!-- ===================== FACH: PHYSIK (Platzhalter) ===================== -->
+  <!-- ===================== FACH: PHYSIK ===================== -->
   <section class="screen" id="screen-subject-physik" data-screen="subject-physik" hidden>
-    <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
-      <div class="quiz-progress">
-        <span class="learn-title">⚛️ Physik</span>
-      </div>
+    <header class="app-header">
+      <h1>⚛️ Physik</h1>
+      <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
-    <div class="beta-note">🚧 Physik ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+
+    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="physik" data-karte-screen="subject-physik" data-karte-icon="⚛️" data-karte-label="Physik">
+      <span class="learn-banner-icon">📇</span>
+      <span class="learn-banner-text">
+        <strong>Karteikarten</strong>
+        <small>Eigene Formeln &amp; Notizen als Karteikarten anlegen und lernen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
   </section>
 
   <!-- ===================== NOTIZEN ===================== -->
@@ -283,6 +289,15 @@
       <span class="learn-banner-text">
         <strong>Stilmittel</strong>
         <small>Stilmittel lernen und im Text erkennen üben</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
+      <span class="learn-banner-icon">📇</span>
+      <span class="learn-banner-text">
+        <strong>Karteikarten</strong>
+        <small>Eigene Vokabeln &amp; Notizen als Karteikarten anlegen und lernen</small>
       </span>
       <span class="learn-banner-arrow">→</span>
     </button>
@@ -366,13 +381,19 @@
 
   <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->
   <section class="screen" id="screen-subject-englisch" data-screen="subject-englisch" hidden>
-    <header class="quiz-header">
-      <button type="button" class="btn-icon" data-goto="home" aria-label="Zurück">✕</button>
-      <div class="quiz-progress">
-        <span class="learn-title">🇬🇧 Englisch</span>
-      </div>
+    <header class="app-header">
+      <h1>🇬🇧 Englisch</h1>
+      <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
-    <div class="beta-note">🚧 Englisch ist noch in Bearbeitung – schau bald wieder vorbei!</div>
+
+    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="englisch" data-karte-screen="subject-englisch" data-karte-icon="🇬🇧" data-karte-label="Englisch">
+      <span class="learn-banner-icon">📇</span>
+      <span class="learn-banner-text">
+        <strong>Karteikarten</strong>
+        <small>Eigene Vokabeln &amp; Notizen als Karteikarten anlegen und lernen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
   </section>
 
   <!-- ===================== FACH: MATHE (ORDNER) ===================== -->

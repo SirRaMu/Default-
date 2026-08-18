@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.8",
+    "date": "2026-08-18",
+    "title": "Karteikarten jetzt auch bei Englisch, Physik & Deutsch",
+    "items": [
+      { "icon": "📇", "text": "Die Karteikarten-Funktion (Foto, Vorderseite, Rückseite, Umdrehen zum Lernen) gibt es jetzt auch bei Englisch, Physik und Deutsch – nicht mehr nur bei Astronomie." },
+      { "icon": "🗂️", "text": "Jedes Fach hat seine eigenen Karteikarten, sauber getrennt voneinander." }
+    ]
+  },
+  {
     "version": "2.7",
     "date": "2026-08-18",
     "title": "Astronomie: eigene Karteikarten mit Foto",
