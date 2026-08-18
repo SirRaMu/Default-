@@ -682,3 +682,39 @@ body {
 .update-changelog-text { font-size: 0.9rem; line-height: 1.35; }
 
 .update-modal .btn-secondary { margin-top: 10px; }
+
+/* ============ EINSTELLUNGEN ============ */
+.settings-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.swatch-group { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+
+.swatch {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: var(--swatch-color);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+.swatch:active { transform: scale(0.92); }
+.swatch.selected { border-color: var(--text); }
+.swatch.selected::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}

@@ -16,6 +16,37 @@ const STORAGE_KEYS = {
   trickCount: 'kopfrechnen.trickCount.v1',
   highscores: 'kopfrechnen.highscores.v1',
   theme: 'kopfrechnen.theme.v1',
+  accent: 'kopfrechnen.accent.v1',
+};
+
+// Akzentfarben-Paletten für die Farbgestaltung in den Einstellungen.
+// Jede Palette hat eigene Hell-/Dunkel-Varianten, damit die Farbe in
+// beiden Modi gut lesbar und stimmig bleibt.
+const ACCENT_PALETTES = {
+  indigo: {
+    light: { primary: '#4f46e5', primaryDark: '#4338ca', accent: '#0ea5e9' },
+    dark: { primary: '#818cf8', primaryDark: '#6366f1', accent: '#38bdf8' },
+  },
+  green: {
+    light: { primary: '#16a34a', primaryDark: '#15803d', accent: '#22c55e' },
+    dark: { primary: '#4ade80', primaryDark: '#22c55e', accent: '#86efac' },
+  },
+  orange: {
+    light: { primary: '#ea580c', primaryDark: '#c2410c', accent: '#f97316' },
+    dark: { primary: '#fb923c', primaryDark: '#f97316', accent: '#fdba74' },
+  },
+  pink: {
+    light: { primary: '#db2777', primaryDark: '#be185d', accent: '#ec4899' },
+    dark: { primary: '#f472b6', primaryDark: '#ec4899', accent: '#f9a8d4' },
+  },
+  teal: {
+    light: { primary: '#0d9488', primaryDark: '#0f766e', accent: '#14b8a6' },
+    dark: { primary: '#2dd4bf', primaryDark: '#14b8a6', accent: '#5eead4' },
+  },
+  violet: {
+    light: { primary: '#7c3aed', primaryDark: '#6d28d9', accent: '#a855f7' },
+    dark: { primary: '#a78bfa', primaryDark: '#8b5cf6', accent: '#c4b5fd' },
+  },
 };
 
 const OPERATIONS = ['add', 'sub', 'mul', 'div'];
@@ -1549,21 +1580,75 @@ function getEffectiveTheme() {
   return getStoredTheme() || (getSystemPrefersDark() ? 'dark' : 'light');
 }
 
+function renderThemeSelection(theme) {
+  document.querySelectorAll('#theme-pill-group .pill').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.themeChoice === theme);
+  });
+}
+
+function setTheme(theme) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.theme, theme);
+  } catch (e) {
+    /* ignore */
+  }
+  applyTheme(theme);
+}
+
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   el('theme-toggle-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+  renderThemeSelection(theme);
+  applyAccent(getStoredAccent());
 }
 
 function initTheme() {
   applyTheme(getEffectiveTheme());
   el('theme-toggle-btn').addEventListener('click', () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    try {
-      localStorage.setItem(STORAGE_KEYS.theme, next);
-    } catch (e) {
-      /* ignore */
-    }
-    applyTheme(next);
+    setTheme(next);
+  });
+}
+
+/* ---------------- Farbgestaltung (Akzentfarbe) ---------------- */
+
+function getStoredAccent() {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.accent) || 'indigo';
+  } catch (e) {
+    return 'indigo';
+  }
+}
+
+function applyAccent(accentId) {
+  const palette = ACCENT_PALETTES[accentId] || ACCENT_PALETTES.indigo;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const colors = isDark ? palette.dark : palette.light;
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty('--primary', colors.primary);
+  rootStyle.setProperty('--primary-dark', colors.primaryDark);
+  rootStyle.setProperty('--accent', colors.accent);
+
+  document.querySelectorAll('#accent-group .swatch').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.accent === accentId);
+  });
+}
+
+function setAccent(accentId) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.accent, accentId);
+  } catch (e) {
+    /* ignore */
+  }
+  applyAccent(accentId);
+}
+
+function initSettingsScreen() {
+  document.querySelectorAll('#theme-pill-group .pill').forEach((btn) => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
+  });
+  document.querySelectorAll('#accent-group .swatch').forEach((btn) => {
+    btn.addEventListener('click', () => setAccent(btn.dataset.accent));
   });
 }
 
@@ -1747,6 +1832,7 @@ loadSettings();
 initSetupScreen();
 initGlobalNav();
 initPracticeScreen();
+initSettingsScreen();
 initTheme();
 initUpdateButton();
 enhanceTrickCards();

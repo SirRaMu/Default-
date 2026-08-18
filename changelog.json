@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.8",
+    "date": "2026-08-18",
+    "title": "Neues Einstellungen-Menü",
+    "items": [
+      { "icon": "⚙️", "text": "Neuer Menüpunkt \"Einstellungen\" auf der Startseite." },
+      { "icon": "🌗", "text": "Hell-/Dunkelmodus lässt sich dort jetzt übersichtlich per Auswahl umschalten." },
+      { "icon": "🎨", "text": "Unter Visuelles → Farbgestaltung kannst du die Akzentfarbe der App aus 6 Farben wählen." }
+    ]
+  },
+  {
     "version": "1.7",
     "date": "2026-08-18",
     "title": "Update-Hinweis mit Änderungsübersicht",

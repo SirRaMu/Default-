@@ -64,6 +64,15 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
+    <button type="button" class="learn-banner" data-goto="settings">
+      <span class="learn-banner-icon">⚙️</span>
+      <span class="learn-banner-text">
+        <strong>Einstellungen</strong>
+        <small>Hell/Dunkel-Modus &amp; Farbgestaltung</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <div class="setup-card">
       <h2 class="section-title">Kategorie</h2>
       <div class="chip-group" id="category-toggle" role="group" aria-label="Kategorie">
@@ -135,6 +144,41 @@
     </div>
 
     <button type="button" class="reload-latest-btn" id="reload-latest-btn">🔄 Neueste Version laden</button>
+  </section>
+
+  <!-- ===================== EINSTELLUNGEN ===================== -->
+  <section class="screen" id="screen-settings" data-screen="settings" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="setup" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">Einstellungen</span>
+      </div>
+    </header>
+
+    <div class="setup-card">
+      <h2 class="section-title">Darstellung</h2>
+      <div class="option-row">
+        <span class="option-label">Design:</span>
+        <div class="pill-group" id="theme-pill-group">
+          <button type="button" class="pill" data-theme-choice="light">☀️ Hell</button>
+          <button type="button" class="pill" data-theme-choice="dark">🌙 Dunkel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h2 class="section-title">Visuelles</h2>
+      <h3 class="settings-subtitle">Farbgestaltung</h3>
+      <p class="diff-hint">Wähle die Akzentfarbe der App.</p>
+      <div class="swatch-group" id="accent-group" role="group" aria-label="Farbgestaltung">
+        <button type="button" class="swatch" data-accent="indigo" style="--swatch-color:#4f46e5" aria-label="Indigo"></button>
+        <button type="button" class="swatch" data-accent="green" style="--swatch-color:#16a34a" aria-label="Grün"></button>
+        <button type="button" class="swatch" data-accent="orange" style="--swatch-color:#ea580c" aria-label="Orange"></button>
+        <button type="button" class="swatch" data-accent="pink" style="--swatch-color:#db2777" aria-label="Pink"></button>
+        <button type="button" class="swatch" data-accent="teal" style="--swatch-color:#0d9488" aria-label="Türkis"></button>
+        <button type="button" class="swatch" data-accent="violet" style="--swatch-color:#7c3aed" aria-label="Violett"></button>
+      </div>
+    </div>
   </section>
 
   <!-- ===================== QUIZ SCREEN ===================== -->
