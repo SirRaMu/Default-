@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.14",
+    "date": "2026-08-19",
+    "title": "Neuer Ordner: Einheiten umrechnen",
+    "items": [
+      { "icon": "📏", "text": "Mathe hat jetzt einen Ordner \"Einheiten\" mit Längen (mm, cm, m, km), Gewichten (mg, g, kg, t) und Volumen (ml, l, hl) umrechnen." },
+      { "icon": "📘", "text": "Wie bei Terme: \"Lernen & Üben\" erklärt die Umrechnungszahlen und lässt Schritt für Schritt üben, \"Einheiten rechnen\" springt direkt ins Kopfrechnen-Setup mit Anzahl- oder Zeit-Modus." },
+      { "icon": "🎓", "text": "Einheiten umrechnen ist außerdem als neues Thema unter \"Erweitert\" im normalen Kopfrechnen wählbar." }
+    ]
+  },
+  {
     "version": "2.13",
     "date": "2026-08-19",
     "title": "Getrennte Fotos für Karteikarten & neuer Papierkorb",

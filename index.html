@@ -603,6 +603,15 @@
       </span>
       <span class="learn-banner-arrow">→</span>
     </button>
+
+    <button type="button" class="learn-banner" data-goto="mathe-einheiten">
+      <span class="learn-banner-icon">📏</span>
+      <span class="learn-banner-text">
+        <strong>Einheiten</strong>
+        <small>Längen, Gewichte &amp; Volumen umrechnen, z. B. cm in m</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
   </section>
 
   <!-- ===================== TERME (ORDNER) ===================== -->
@@ -677,6 +686,77 @@
     </div>
   </section>
 
+  <!-- ===================== EINHEITEN (ORDNER) ===================== -->
+  <section class="screen" id="screen-mathe-einheiten" data-screen="mathe-einheiten" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="subject-mathe" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📏 Einheiten</span>
+      </div>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="mathe-einheiten-uebung">
+      <span class="learn-banner-icon">📘</span>
+      <span class="learn-banner-text">
+        <strong>Lernen &amp; Üben</strong>
+        <small>Längen, Gewichte &amp; Volumen umrechnen – erklärt und Schritt für Schritt</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="setup" id="einheiten-rechnen-btn">
+      <span class="learn-banner-icon">🧮</span>
+      <span class="learn-banner-text">
+        <strong>Einheiten rechnen</strong>
+        <small>Wie beim Kopfrechnen: direkt Aufgaben lösen, mit Anzahl- oder Zeit-Modus</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== EINHEITEN: LERNEN & ÜBEN ===================== -->
+  <section class="screen" id="screen-mathe-einheiten-uebung" data-screen="mathe-einheiten-uebung" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="mathe-einheiten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📘 Einheiten: Lernen &amp; Üben</span>
+      </div>
+    </header>
+
+    <div class="trick-list">
+      <div class="trick-card">
+        <h3>Längen umrechnen</h3>
+        <p class="trick-rule">1 cm = 10 mm, 1 m = 100 cm, 1 km = 1000 m. Wandelst du eine größere Einheit in eine kleinere um, multiplizierst du mit der Umrechnungszahl. Umgekehrt (kleiner → größer) dividierst du.</p>
+        <div class="trick-steps">
+          <span>3 m = ? cm</span><span class="arrow">→</span>
+          <span>3 × 100</span><span class="arrow">=</span>
+          <span class="result">300 cm</span>
+        </div>
+        <button type="button" class="btn-practice" data-trick="einheiten-laenge">🧠 Üben</button>
+      </div>
+      <div class="trick-card">
+        <h3>Gewichte umrechnen</h3>
+        <p class="trick-rule">1 g = 1000 mg, 1 kg = 1000 g, 1 t = 1000 kg. Größere Einheit in kleinere: multiplizieren. Kleinere Einheit in größere: dividieren.</p>
+        <div class="trick-steps">
+          <span>2 kg = ? g</span><span class="arrow">→</span>
+          <span>2 × 1000</span><span class="arrow">=</span>
+          <span class="result">2000 g</span>
+        </div>
+        <button type="button" class="btn-practice" data-trick="einheiten-gewicht">🧠 Üben</button>
+      </div>
+      <div class="trick-card">
+        <h3>Volumen umrechnen</h3>
+        <p class="trick-rule">1 l = 1000 ml, 1 hl = 100 l. Größere Einheit in kleinere: multiplizieren. Kleinere Einheit in größere: dividieren.</p>
+        <div class="trick-steps">
+          <span>5000 ml = ? l</span><span class="arrow">→</span>
+          <span>5000 ÷ 1000</span><span class="arrow">=</span>
+          <span class="result">5 l</span>
+        </div>
+        <button type="button" class="btn-practice" data-trick="einheiten-volumen">🧠 Üben</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== SETUP SCREEN (KOPFRECHNEN) ===================== -->
   <section class="screen" id="screen-setup" data-screen="setup" hidden>
     <header class="quiz-header">
@@ -709,6 +789,7 @@
         <button type="button" class="chip" data-adv-op="diffq">📈 Differenzenquotient</button>
         <button type="button" class="chip" data-adv-op="diffeq">🔁 Differenzengleichung</button>
         <button type="button" class="chip" data-adv-op="terme">🧩 Terme</button>
+        <button type="button" class="chip" data-adv-op="einheiten">📏 Einheiten</button>
         <button type="button" class="chip" data-adv-op="mix">🔀 Gemischt</button>
       </div>
 

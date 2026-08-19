@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.13';
+const APP_VERSION = '2.14';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -368,11 +368,16 @@ function initSetupScreen() {
     });
   });
 
-  // "Terme rechnen"-Banner im Terme-Ordner springt direkt mit vorausgewählter
-  // Kategorie/Thema auf den normalen Kopfrechnen-Setup-Screen.
+  // "Terme rechnen"- bzw. "Einheiten rechnen"-Banner springen direkt mit
+  // vorausgewählter Kategorie/Thema auf den normalen Kopfrechnen-Setup-Screen.
   el('terme-rechnen-btn').addEventListener('click', () => {
     state.setup.category = 'advanced';
     state.setup.advancedTopics = ['terme'];
+    renderSetup();
+  });
+  el('einheiten-rechnen-btn').addEventListener('click', () => {
+    state.setup.category = 'advanced';
+    state.setup.advancedTopics = ['einheiten'];
     renderSetup();
   });
 
@@ -515,6 +520,12 @@ const ADV_DIFFICULTY = {
     hard: { coefMax: 14, constMax: 14, valMax: 14 },
     expert: { coefMax: 20, constMax: 20, valMax: 20 },
   },
+  einheiten: {
+    easy: { valMax: 9 },
+    medium: { valMax: 20 },
+    hard: { valMax: 60 },
+    expert: { valMax: 99 },
+  },
 };
 
 const ADVANCED_DIFFICULTY_HINT = {
@@ -536,6 +547,65 @@ function signedPool(maxAbs) {
     pool.push(n, -n);
   }
   return pool;
+}
+
+// Einheiten-Listen für "Einheiten umrechnen": jede Einheit trägt ihren Wert
+// in der jeweils kleinsten Basiseinheit (mm/mg/ml), damit sich der
+// Umrechnungsfaktor zwischen zwei benachbarten Einheiten einfach berechnen
+// lässt. Es werden bewusst nur benachbarte Einheiten abgefragt (z.B. cm↔m,
+// nicht mm↔km), damit die Umrechnungszahlen im Kopf machbar bleiben.
+const LAENGE_UNITS = [
+  { id: 'mm', label: 'mm', toBase: 1 },
+  { id: 'cm', label: 'cm', toBase: 10 },
+  { id: 'm', label: 'm', toBase: 1000 },
+  { id: 'km', label: 'km', toBase: 1000000 },
+];
+const GEWICHT_UNITS = [
+  { id: 'mg', label: 'mg', toBase: 1 },
+  { id: 'g', label: 'g', toBase: 1000 },
+  { id: 'kg', label: 'kg', toBase: 1000000 },
+  { id: 't', label: 't', toBase: 1000000000 },
+];
+const VOLUMEN_UNITS = [
+  { id: 'ml', label: 'ml', toBase: 1 },
+  { id: 'l', label: 'l', toBase: 1000 },
+  { id: 'hl', label: 'hl', toBase: 100000 },
+];
+
+/**
+ * Baut eine Umrechnungsaufgabe zwischen zwei benachbarten Einheiten aus
+ * "units". Die Richtung (größer→kleiner = multiplizieren, kleiner→größer =
+ * dividieren) wird zufällig gewählt; der "unbekannte" Wert wird so
+ * konstruiert, dass immer ein ganzzahliges Ergebnis herauskommt (das
+ * Zahlenfeld kennt kein Komma).
+ */
+function buildEinheitenProblem(units, diff = 'medium') {
+  const cfg = advCfg('einheiten', diff);
+  const i = randInt(0, units.length - 2);
+  const small = units[i];
+  const big = units[i + 1];
+  const factor = big.toBase / small.toBase;
+  const bigToSmall = pick([true, false]);
+
+  let fromUnit, toUnit, fromValue, answer;
+  if (bigToSmall) {
+    fromUnit = big; toUnit = small;
+    fromValue = randInt(1, cfg.valMax);
+    answer = fromValue * factor;
+  } else {
+    fromUnit = small; toUnit = big;
+    answer = randInt(1, cfg.valMax);
+    fromValue = answer * factor;
+  }
+
+  return {
+    headline: `${fromValue} ${fromUnit.label} = ? ${toUnit.label}`,
+    resultText: `${fromValue} ${fromUnit.label} = ${answer} ${toUnit.label}`,
+    steps: [
+      { prompt: `Hilfswert: Wie viele ${small.label} sind 1 ${big.label}?`, answer: factor },
+      { prompt: `${fromValue} ${fromUnit.label} ${bigToSmall ? '×' : '÷'} ${factor} = ? ${toUnit.label}`, answer },
+    ],
+  };
 }
 
 const TRICKS = {
@@ -856,6 +926,24 @@ const TRICKS = {
     },
   },
 
+  'einheiten-laenge': {
+    build(diff = 'medium') {
+      return buildEinheitenProblem(LAENGE_UNITS, diff);
+    },
+  },
+
+  'einheiten-gewicht': {
+    build(diff = 'medium') {
+      return buildEinheitenProblem(GEWICHT_UNITS, diff);
+    },
+  },
+
+  'einheiten-volumen': {
+    build(diff = 'medium') {
+      return buildEinheitenProblem(VOLUMEN_UNITS, diff);
+    },
+  },
+
   'pct-value': {
     build(diff = 'medium') {
       const cfg = advCfg('pct', diff);
@@ -1123,7 +1211,7 @@ const TRICKS = {
 
 /* ---------------- Erweiterte Themen im Speed-Modus ---------------- */
 
-const ADVANCED_TOPICS = ['pct', 'pq', 'lgs', 'diffq', 'diffeq', 'terme'];
+const ADVANCED_TOPICS = ['pct', 'pq', 'lgs', 'diffq', 'diffeq', 'terme', 'einheiten'];
 
 const ADVANCED_TOPIC_LABEL = {
   pct: 'Prozentrechnung',
@@ -1132,6 +1220,7 @@ const ADVANCED_TOPIC_LABEL = {
   diffq: 'Differenzenquotient',
   diffeq: 'Differenzengleichung',
   terme: 'Terme',
+  einheiten: 'Einheiten umrechnen',
 };
 
 const ADVANCED_TOPIC_POOLS = {
@@ -1141,6 +1230,7 @@ const ADVANCED_TOPIC_POOLS = {
   diffq: ['diff-quotient'],
   diffeq: ['diff-equation'],
   terme: ['term-vereinfachen', 'term-klammern', 'term-einsetzen'],
+  einheiten: ['einheiten-laenge', 'einheiten-gewicht', 'einheiten-volumen'],
 };
 
 // Manche Tricks liefern mehrere Werte (z.B. x und y) - im Speed-Modus wird
