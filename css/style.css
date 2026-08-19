@@ -946,6 +946,32 @@ body {
 
 .notiz-empty-hint { color: var(--text-muted); text-align: center; margin-top: 20px; }
 
+/* ============ PAPIERKORB ============ */
+.trash-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+
+.trash-item-main { flex: 1; min-width: 0; }
+.trash-item-title {
+  font-weight: 700;
+  font-size: 0.94rem;
+  margin: 0 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trash-item-meta { color: var(--text-muted); font-size: 0.78rem; margin: 0; }
+
+.trash-empty-hint { color: var(--text-muted); text-align: center; margin-top: 20px; }
+
 .notiz-title-input { font-size: 1.05rem; font-weight: 700; }
 
 .notiz-toolbar {

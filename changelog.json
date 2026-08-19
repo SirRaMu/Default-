@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.13",
+    "date": "2026-08-19",
+    "title": "Getrennte Fotos für Karteikarten & neuer Papierkorb",
+    "items": [
+      { "icon": "📷", "text": "Bei Karteikarten kannst du jetzt für Vorderseite und Rückseite jeweils ein eigenes Foto machen, statt nur eines für die ganze Karte." },
+      { "icon": "🗑️", "text": "Neu in den Einstellungen: ein Papierkorb. Gelöschte Notizen und Karteikarten landen dort und lassen sich wiederherstellen, bevor sie nach 2 Tagen automatisch endgültig gelöscht werden." }
+    ]
+  },
+  {
     "version": "2.12",
     "date": "2026-08-19",
     "title": "Terme-Ordner aufgeräumt",

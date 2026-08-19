@@ -128,7 +128,7 @@
         <span class="learn-title" id="karten-header-title">📇 Karteikarten</span>
       </div>
     </header>
-    <p class="diff-hint">Mach ein Foto von deiner Formel oder Notiz, schreib die Formel auf die Vorderseite und überleg dir selbst eine passende Frage für die Rückseite.</p>
+    <p class="diff-hint">Für Vorderseite und Rückseite kannst du jeweils ein eigenes Foto machen (z. B. Formel vorne, Lösung hinten) und zusätzlich Text dazuschreiben.</p>
 
     <button type="button" class="btn-primary" id="karte-new-btn">✏️ Neue Karteikarte</button>
     <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Karteikarten lernen</button>
@@ -147,20 +147,25 @@
       <button type="button" class="btn-icon" id="karte-delete-btn" aria-label="Karteikarte löschen">🗑️</button>
     </header>
 
-    <input type="file" accept="image/*" capture="environment" id="karte-photo-input" hidden>
-    <button type="button" class="btn-secondary" id="karte-photo-btn">📷 Foto von Formel/Notiz hinzufügen</button>
-    <div class="karte-photo-preview" id="karte-photo-preview" hidden>
-      <img id="karte-photo-img" alt="Foto zur Karteikarte">
-      <button type="button" class="btn-text" id="karte-photo-remove-btn">Foto entfernen</button>
-    </div>
-
     <div class="karte-field">
       <label class="karte-field-label" for="karte-front-input">Vorderseite (z. B. die Formel)</label>
+      <input type="file" accept="image/*" capture="environment" id="karte-photo-front-input" hidden>
+      <button type="button" class="btn-secondary" id="karte-photo-front-btn">📷 Foto für Vorderseite</button>
+      <div class="karte-photo-preview" id="karte-photo-front-preview" hidden>
+        <img id="karte-photo-front-img" alt="Foto zur Vorderseite">
+        <button type="button" class="btn-text" id="karte-photo-front-remove-btn">Foto entfernen</button>
+      </div>
       <textarea class="text-input karte-textarea" id="karte-front-input" rows="3" placeholder="z. B. v = s / t"></textarea>
     </div>
 
     <div class="karte-field">
       <label class="karte-field-label" for="karte-back-input">Rückseite (die passende Frage dazu)</label>
+      <input type="file" accept="image/*" capture="environment" id="karte-photo-back-input" hidden>
+      <button type="button" class="btn-secondary" id="karte-photo-back-btn">📷 Foto für Rückseite</button>
+      <div class="karte-photo-preview" id="karte-photo-back-preview" hidden>
+        <img id="karte-photo-back-img" alt="Foto zur Rückseite">
+        <button type="button" class="btn-text" id="karte-photo-back-remove-btn">Foto entfernen</button>
+      </div>
       <textarea class="text-input karte-textarea" id="karte-back-input" rows="3" placeholder="z. B. Wie berechnet man die Geschwindigkeit aus Strecke und Zeit?"></textarea>
     </div>
   </section>
@@ -178,11 +183,12 @@
       <div class="karte-flip-card" id="karte-flip-card">
         <div class="karte-flip-face karte-flip-front">
           <span class="karte-flip-label">Vorderseite</span>
-          <img class="karte-flip-photo" id="karte-lernen-photo" hidden alt="Foto zur Karteikarte">
+          <img class="karte-flip-photo" id="karte-lernen-front-photo" hidden alt="Foto zur Vorderseite">
           <p class="karte-flip-text" id="karte-lernen-front-text"></p>
         </div>
         <div class="karte-flip-face karte-flip-back">
           <span class="karte-flip-label">Rückseite</span>
+          <img class="karte-flip-photo" id="karte-lernen-back-photo" hidden alt="Foto zur Rückseite">
           <p class="karte-flip-text" id="karte-lernen-back-text"></p>
         </div>
       </div>
@@ -787,6 +793,18 @@
     </div>
 
     <div class="setup-card">
+      <h2 class="section-title">Daten</h2>
+      <button type="button" class="learn-banner" data-goto="trash">
+        <span class="learn-banner-icon">🗑️</span>
+        <span class="learn-banner-text">
+          <strong>Papierkorb</strong>
+          <small>Gelöschte Notizen &amp; Karteikarten – werden nach 2 Tagen endgültig gelöscht</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
+    </div>
+
+    <div class="setup-card">
       <h2 class="section-title">App-Version</h2>
       <p class="version-current">Du nutzt Version <strong id="settings-current-version">–</strong></p>
       <button type="button" class="reload-latest-btn" id="reload-latest-btn">🔄 Neueste Version laden</button>
@@ -794,6 +812,22 @@
       <h3 class="settings-subtitle" id="version-history-title" hidden>Versionsverlauf</h3>
       <div class="version-history" id="version-history"></div>
     </div>
+  </section>
+
+  <!-- ===================== PAPIERKORB (global) ===================== -->
+  <section class="screen" id="screen-trash" data-screen="trash" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="settings" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🗑️ Papierkorb</span>
+      </div>
+    </header>
+    <p class="diff-hint">Gelöschte Notizen und Karteikarten landen hier und werden nach 2 Tagen automatisch endgültig gelöscht. Bis dahin kannst du sie wiederherstellen.</p>
+
+    <button type="button" class="btn-text" id="trash-empty-btn" hidden>🗑️ Papierkorb jetzt endgültig leeren</button>
+
+    <div class="trash-list" id="trash-list"></div>
+    <p class="trash-empty-hint" id="trash-empty-hint" hidden>Der Papierkorb ist leer.</p>
   </section>
 
   <!-- ===================== QUIZ SCREEN ===================== -->

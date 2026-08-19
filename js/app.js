@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.12';
+const APP_VERSION = '2.13';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   accent: 'kopfrechnen.accent.v1',
   notes: 'kopfrechnen.notes.v1',
   flashcards: 'kopfrechnen.flashcards.v1',
+  trash: 'kopfrechnen.trash.v1',
 };
 
 // Akzentfarben-Paletten für die Farbgestaltung in den Einstellungen.
@@ -3136,6 +3137,142 @@ function initTextartenUebung() {
   loadTextartUebungText();
 }
 
+/* ---------------- Papierkorb (global, für Notizen & Karteikarten) ---------------- */
+
+// Gelöschte Notizen und Karteikarten landen hier statt sofort endgültig
+// entfernt zu werden, und werden erst nach Ablauf der Aufbewahrungszeit
+// beim nächsten Öffnen der App automatisch aussortiert (ein rein
+// clientseitiges Setup ohne Server kann keinen Hintergrund-Timer haben,
+// deshalb passiert das Aufräumen beim nächsten Laden bzw. beim Öffnen des
+// Papierkorbs).
+const TRASH_RETENTION_MS = 2 * 24 * 60 * 60 * 1000; // 2 Tage
+
+function loadTrash() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.trash);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveTrash(items) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.trash, JSON.stringify(items));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function makeTrashId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `trash-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function moveToTrash(type, data) {
+  const items = loadTrash();
+  items.push({ id: makeTrashId(), type, deletedAt: new Date().toISOString(), data });
+  saveTrash(items);
+}
+
+/** Entfernt Papierkorb-Einträge, deren Aufbewahrungszeit abgelaufen ist. */
+function purgeExpiredTrash() {
+  const items = loadTrash();
+  const now = Date.now();
+  const kept = items.filter((t) => now - new Date(t.deletedAt).getTime() < TRASH_RETENTION_MS);
+  if (kept.length !== items.length) saveTrash(kept);
+  return kept;
+}
+
+function formatTrashRemaining(deletedAt) {
+  const msLeft = TRASH_RETENTION_MS - (Date.now() - new Date(deletedAt).getTime());
+  if (msLeft <= 0) return 'wird gleich endgültig gelöscht';
+  const hoursLeft = Math.ceil(msLeft / (60 * 60 * 1000));
+  if (hoursLeft >= 24) {
+    const daysLeft = Math.ceil(hoursLeft / 24);
+    return `wird in ${daysLeft} Tag${daysLeft === 1 ? '' : 'en'} endgültig gelöscht`;
+  }
+  return `wird in ${hoursLeft} Stunde${hoursLeft === 1 ? '' : 'n'} endgültig gelöscht`;
+}
+
+function trashItemLabel(item) {
+  if (item.type === 'notiz') {
+    return { icon: '📝', title: item.data.title || 'Ohne Titel', subtitle: 'Notiz' };
+  }
+  return { icon: '📇', title: item.data.front || 'Ohne Vorderseite', subtitle: `Karteikarte (${item.data.subject || '–'})` };
+}
+
+function renderTrashList() {
+  const items = purgeExpiredTrash().slice().sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));
+  const list = el('trash-list');
+  list.innerHTML = '';
+  el('trash-empty-hint').hidden = items.length > 0;
+  el('trash-empty-btn').hidden = items.length === 0;
+
+  items.forEach((item) => {
+    const { icon, title, subtitle } = trashItemLabel(item);
+    const row = document.createElement('div');
+    row.className = 'trash-item';
+
+    const main = document.createElement('div');
+    main.className = 'trash-item-main';
+    const titleEl = document.createElement('p');
+    titleEl.className = 'trash-item-title';
+    titleEl.textContent = `${icon} ${title}`;
+    const metaEl = document.createElement('p');
+    metaEl.className = 'trash-item-meta';
+    metaEl.textContent = `${subtitle} · ${formatTrashRemaining(item.deletedAt)}`;
+    main.appendChild(titleEl);
+    main.appendChild(metaEl);
+
+    const restoreBtn = document.createElement('button');
+    restoreBtn.type = 'button';
+    restoreBtn.className = 'btn-text';
+    restoreBtn.textContent = '↩️ Wiederherstellen';
+    restoreBtn.addEventListener('click', () => restoreTrashItem(item.id));
+
+    row.appendChild(main);
+    row.appendChild(restoreBtn);
+    list.appendChild(row);
+  });
+}
+
+function restoreTrashItem(trashId) {
+  const items = loadTrash();
+  const idx = items.findIndex((t) => t.id === trashId);
+  if (idx === -1) return;
+  const [item] = items.splice(idx, 1);
+  saveTrash(items);
+
+  if (item.type === 'notiz') {
+    const notes = loadNotes();
+    notes.push(item.data);
+    saveNotes(notes);
+    renderNotesList();
+  } else if (item.type === 'karte') {
+    const cards = loadAllFlashcards();
+    cards.push(item.data);
+    saveFlashcards(cards);
+    renderKarteList();
+  }
+  renderTrashList();
+}
+
+function emptyTrash() {
+  saveTrash([]);
+  renderTrashList();
+}
+
+function initTrash() {
+  el('trash-empty-btn').addEventListener('click', emptyTrash);
+  // Neu rendern, sobald der Papierkorb geöffnet wird (Restzeit-Anzeige und
+  // evtl. inzwischen abgelaufene Einträge sollen dann aktuell sein).
+  document.querySelectorAll('[data-goto="trash"]').forEach((btn) => {
+    btn.addEventListener('click', renderTrashList);
+  });
+  renderTrashList();
+}
+
 /* ---------------- Notizen ---------------- */
 
 // Notizen leben ausschließlich in localStorage auf diesem Gerät - es gibt
@@ -3220,8 +3357,10 @@ function renderNotesList() {
 }
 
 function deleteNote(id) {
-  const notes = loadNotes().filter((n) => n.id !== id);
-  saveNotes(notes);
+  const notes = loadNotes();
+  const note = notes.find((n) => n.id === id);
+  if (note) moveToTrash('notiz', note);
+  saveNotes(notes.filter((n) => n.id !== id));
   if (currentNoteId === id) {
     currentNoteId = null;
     showScreen('notizen');
@@ -3425,7 +3564,8 @@ function initNotizen() {
 // Zurück-Button und Filterung der angezeigten Karten).
 const karteContext = { subject: null, screen: null, icon: '', label: '' };
 let currentCardId = null;
-let pendingCardPhoto = undefined; // undefined = unverändert, null = entfernt, string = neues Foto
+let pendingFrontPhoto = undefined; // undefined = unverändert, null = entfernt, string = neues Foto
+let pendingBackPhoto = undefined;
 
 function loadAllFlashcards() {
   try {
@@ -3442,6 +3582,15 @@ function loadAllFlashcards() {
         c.subject = 'astronomie';
         migrated = true;
       }
+      // Karten aus der Zeit vor getrennten Vorder-/Rückseiten-Fotos hatten
+      // ein einzelnes "photo" - das wird als Vorderseiten-Foto übernommen.
+      if (c.photo !== undefined) {
+        if (c.frontPhoto === undefined) c.frontPhoto = c.photo;
+        delete c.photo;
+        migrated = true;
+      }
+      if (c.frontPhoto === undefined) { c.frontPhoto = null; migrated = true; }
+      if (c.backPhoto === undefined) { c.backPhoto = null; migrated = true; }
     });
     if (migrated) saveFlashcards(cards);
     return cards;
@@ -3522,10 +3671,11 @@ function renderKarteList() {
     const row = document.createElement('div');
     row.className = 'karte-card';
 
-    if (card.photo) {
+    const thumbPhoto = card.frontPhoto || card.backPhoto;
+    if (thumbPhoto) {
       const thumb = document.createElement('img');
       thumb.className = 'karte-card-thumb';
-      thumb.src = card.photo;
+      thumb.src = thumbPhoto;
       thumb.alt = '';
       row.appendChild(thumb);
     }
@@ -3559,8 +3709,10 @@ function renderKarteList() {
 }
 
 function deleteCard(id) {
-  const cards = loadAllFlashcards().filter((c) => c.id !== id);
-  saveFlashcards(cards);
+  const cards = loadAllFlashcards();
+  const card = cards.find((c) => c.id === id);
+  if (card) moveToTrash('karte', card);
+  saveFlashcards(cards.filter((c) => c.id !== id));
   if (currentCardId === id) {
     currentCardId = null;
     showScreen('karteikarten');
@@ -3570,19 +3722,19 @@ function deleteCard(id) {
 
 function createNewCard() {
   const cards = loadAllFlashcards();
-  const card = { id: makeCardId(), subject: karteContext.subject, front: '', back: '', photo: null, createdAt: new Date().toISOString() };
+  const card = { id: makeCardId(), subject: karteContext.subject, front: '', back: '', frontPhoto: null, backPhoto: null, createdAt: new Date().toISOString() };
   cards.push(card);
   saveFlashcards(cards);
   openCardEditor(card.id);
 }
 
-function renderCardPhotoPreview(photo) {
-  const preview = el('karte-photo-preview');
+function renderCardPhotoPreview(side, photo) {
+  const preview = el(`karte-photo-${side}-preview`);
   if (photo) {
-    el('karte-photo-img').src = photo;
+    el(`karte-photo-${side}-img`).src = photo;
     preview.hidden = false;
   } else {
-    el('karte-photo-img').src = '';
+    el(`karte-photo-${side}-img`).src = '';
     preview.hidden = true;
   }
 }
@@ -3591,10 +3743,12 @@ function openCardEditor(id) {
   const card = loadAllFlashcards().find((c) => c.id === id);
   if (!card) return;
   currentCardId = id;
-  pendingCardPhoto = undefined;
+  pendingFrontPhoto = undefined;
+  pendingBackPhoto = undefined;
   el('karte-front-input').value = card.front || '';
   el('karte-back-input').value = card.back || '';
-  renderCardPhotoPreview(card.photo || null);
+  renderCardPhotoPreview('front', card.frontPhoto || null);
+  renderCardPhotoPreview('back', card.backPhoto || null);
   showScreen('karte-editor');
 }
 
@@ -3605,7 +3759,8 @@ function saveCurrentCard() {
   if (!card) return;
   card.front = el('karte-front-input').value;
   card.back = el('karte-back-input').value;
-  if (pendingCardPhoto !== undefined) card.photo = pendingCardPhoto;
+  if (pendingFrontPhoto !== undefined) card.frontPhoto = pendingFrontPhoto;
+  if (pendingBackPhoto !== undefined) card.backPhoto = pendingBackPhoto;
   saveFlashcards(cards);
   renderKarteList();
 }
@@ -3623,12 +3778,20 @@ function renderKarteLernenCard() {
   el('karte-lernen-front-text').textContent = card.front || 'Ohne Vorderseite';
   el('karte-lernen-back-text').textContent = card.back || 'Ohne Rückseite';
 
-  const photoEl = el('karte-lernen-photo');
-  if (card.photo) {
-    photoEl.src = card.photo;
-    photoEl.hidden = false;
+  const frontPhotoEl = el('karte-lernen-front-photo');
+  if (card.frontPhoto) {
+    frontPhotoEl.src = card.frontPhoto;
+    frontPhotoEl.hidden = false;
   } else {
-    photoEl.hidden = true;
+    frontPhotoEl.hidden = true;
+  }
+
+  const backPhotoEl = el('karte-lernen-back-photo');
+  if (card.backPhoto) {
+    backPhotoEl.src = card.backPhoto;
+    backPhotoEl.hidden = false;
+  } else {
+    backPhotoEl.hidden = true;
   }
 
   karteLernen.flipped = false;
@@ -3693,24 +3856,26 @@ function initKarteikarten() {
   el('karte-front-input').addEventListener('input', saveCurrentCard);
   el('karte-back-input').addEventListener('input', saveCurrentCard);
 
-  el('karte-photo-btn').addEventListener('click', () => el('karte-photo-input').click());
-  el('karte-photo-input').addEventListener('change', async (ev) => {
-    const file = ev.target.files && ev.target.files[0];
-    ev.target.value = '';
-    if (!file) return;
-    try {
-      const dataUrl = await resizeImageFile(file);
-      pendingCardPhoto = dataUrl;
-      renderCardPhotoPreview(dataUrl);
+  ['front', 'back'].forEach((side) => {
+    el(`karte-photo-${side}-btn`).addEventListener('click', () => el(`karte-photo-${side}-input`).click());
+    el(`karte-photo-${side}-input`).addEventListener('change', async (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!file) return;
+      try {
+        const dataUrl = await resizeImageFile(file);
+        if (side === 'front') pendingFrontPhoto = dataUrl; else pendingBackPhoto = dataUrl;
+        renderCardPhotoPreview(side, dataUrl);
+        saveCurrentCard();
+      } catch (e) {
+        /* Foto konnte nicht gelesen werden - Karte bleibt ohne Foto */
+      }
+    });
+    el(`karte-photo-${side}-remove-btn`).addEventListener('click', () => {
+      if (side === 'front') pendingFrontPhoto = null; else pendingBackPhoto = null;
+      renderCardPhotoPreview(side, null);
       saveCurrentCard();
-    } catch (e) {
-      /* Foto konnte nicht gelesen werden - Karte bleibt ohne Foto */
-    }
-  });
-  el('karte-photo-remove-btn').addEventListener('click', () => {
-    pendingCardPhoto = null;
-    renderCardPhotoPreview(null);
-    saveCurrentCard();
+    });
   });
 
   el('karte-delete-btn').addEventListener('click', () => {
@@ -3739,6 +3904,7 @@ renderVersmassListe();
 initVersmassUebung();
 renderTextartenListe();
 initTextartenUebung();
+initTrash();
 initNotizen();
 initKarteikarten();
 showScreen('home');
