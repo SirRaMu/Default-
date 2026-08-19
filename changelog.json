@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.11",
+    "date": "2026-08-19",
+    "title": "Versmaß üben: viel mehr Übungssätze",
+    "items": [
+      { "icon": "🗑️", "text": "Spondeus entfernt – ein ganzer Vers im reinen Spondeus kommt im Deutschen praktisch nie vor und eignet sich nicht zum Üben." },
+      { "icon": "🔀", "text": "\"Versmaß üben\" erzeugt Übungssätze jetzt aus einem geprüften Wortschatz statt aus einer festen Liste – so gibt es weit über 100 verschiedene Kombinationen je Versmaß, und jede davon lässt sich automatisch überprüfen." },
+      { "icon": "📖", "text": "Die beiden echten Gedichte ohne automatische Überprüfung sind dafür herausgenommen worden, damit wirklich jeder Übungssatz eine direkte Lösung hat." }
+    ]
+  },
+  {
     "version": "2.10",
     "date": "2026-08-19",
     "title": "Terme rechnen & Deutsch: Textarten erkennen",

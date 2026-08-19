@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.10';
+const APP_VERSION = '2.11';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -2483,12 +2483,6 @@ const VERSMASS_TYPES = [
     erkennung: 'Zähle wieder in Dreiergruppen, diesmal mit der Betonung am Ende: un-be-TONT, un-be-TONT, … Auch der Anapäst ist im Deutschen eher selten und wirkt oft schwungvoll oder eilig.',
     beispiel: '„Elefant, General, Sekretär“ – e le FANT ge ne RAL se kre TÄR (eigener Übungssatz).',
   },
-  {
-    id: 'spondeus', name: 'Spondeus', color: '#d8b4fe', muster: 'ˉ  ˉ',
-    definition: 'Zwei aufeinanderfolgende betonte Silben ohne unbetonte Silbe dazwischen (ˉ ˉ).',
-    erkennung: 'Ein ganzer Vers im reinen Spondeus ist im Deutschen sehr selten. Meist taucht er nur als einzelner „Ausnahme-Versfuß“ in einem sonst regelmäßigen Vers auf, um ein Wort besonders hervorzuheben.',
-    beispiel: '„Stopp! Halt!“ – STOPP HALT, beide Silben gleich stark betont.',
-  },
 ];
 
 /**
@@ -2554,83 +2548,167 @@ function renderVersmassListe() {
   });
 }
 
-// Übungstexte: eigene, komplett durchgeplante Verse haben ein "meter" (die
-// erwartete Lösung) und lassen sich automatisch überprüfen. Bei echten
-// Gedichten ist die Betonung im Detail nicht immer eindeutig, deshalb gibt
-// es dort – genau wie bei den Stilmittel-Übungstexten – keine automatische
-// Überprüfung, sondern nur freies Üben.
+// Übungstexte werden aus einem geprüften Wortschatz zufällig zusammengebaut,
+// statt aus einer festen Liste zu stammen. Jedes Wort ist mit seinem
+// bekannten Betonungsmuster hinterlegt (X = betont, x = unbetont), sodass
+// jede erzeugte Zeile durch ihre Konstruktion garantiert zum gewählten
+// Versmaß passt und sich automatisch überprüfen lässt – anders als bei
+// echten Gedichten, wo die Betonung im Detail nicht immer eindeutig ist
+// (deshalb gibt es hier, im Unterschied zu den Stilmittel-Übungstexten,
+// keine Ausnahme-Texte ohne Lösung mehr). Aus diesem Wortschatz lassen sich
+// je Versmaß tausende verschiedene Zeilenkombinationen erzeugen – weit mehr
+// als die geforderten 100 Übungstexte.
 function syl(text, stress) {
   return { text, stress };
 }
 
-const VERS_TEXTS = [
-  {
-    id: 'mond-wald', title: 'Der Mond im Wald', author: 'eigener Übungstext', meterId: 'jambus',
-    lines: [
-      [syl('Ich', false), syl('seh', true), syl('den', false), syl('Mond', true), syl('im', false), syl('dun', true), syl('klen', false), syl('Wald,', true)],
-      [syl('er', false), syl('scheint', true), syl('so', false), syl('hell', true), syl('im', false), syl('stil', true), syl('len', false), syl('Tal.', true)],
-    ],
-  },
-  {
-    id: 'sonne-wiesen', title: 'Sonne über den Wiesen', author: 'eigener Übungstext', meterId: 'trochaeus',
-    lines: [
-      [syl('Son', true), syl('ne', false), syl('scheint', true), syl('auf', false), syl('grü', true), syl('ne', false), syl('Wie', true), syl('sen,', false)],
-      [syl('Vö', true), syl('gel', false), syl('sin', true), syl('gen', false), syl('fro', true), syl('he', false), syl('Lie', true), syl('der.', false)],
-    ],
-  },
-  {
-    id: 'abendrot', title: 'Abendrot', author: 'eigener Übungstext', meterId: 'daktylus',
-    lines: [
-      [syl('A', true), syl('bend', false), syl('rot,', false), syl('Kin', true), syl('der', false), syl('lied,', false), syl('fröh', true), syl('li', false), syl('cher', false), syl('Klang.', true)],
-    ],
-  },
-  {
-    id: 'berufe', title: 'Drei Berufe', author: 'eigener Übungstext', meterId: 'anapaest',
-    lines: [
-      [syl('E', false), syl('le', false), syl('fant,', true), syl('Ge', false), syl('ne', false), syl('ral,', true), syl('Se', false), syl('kre', false), syl('tär.', true)],
-    ],
-  },
-  {
-    id: 'mond-aufgegangen', title: 'Der Mond ist aufgegangen (1. Strophe)', author: 'Matthias Claudius', meterId: null,
-    lines: [
-      [syl('Der'), syl('Mond'), syl('ist'), syl('auf'), syl('ge'), syl('gan'), syl('gen,')],
-      [syl('die'), syl('gold'), syl('nen'), syl('Stern'), syl('lein'), syl('pran'), syl('gen')],
-      [syl('am'), syl('Him'), syl('mel'), syl('hell'), syl('und'), syl('klar;')],
-      [syl('der'), syl('Wald'), syl('steht'), syl('schwarz'), syl('und'), syl('schwei'), syl('get,')],
-      [syl('und'), syl('aus'), syl('den'), syl('Wie'), syl('sen'), syl('stei'), syl('get')],
-      [syl('der'), syl('wei'), syl('ße'), syl('Ne'), syl('bel'), syl('wun'), syl('der'), syl('bar.')],
-    ],
-  },
-  {
-    id: 'willkommen-abschied', title: 'Willkommen und Abschied (1. Strophe)', author: 'Johann Wolfgang von Goethe', meterId: null,
-    lines: [
-      [syl('Es'), syl('schlug'), syl('mein'), syl('Herz,'), syl('ge'), syl('schwind'), syl('zu'), syl('Pfer'), syl('de!')],
-      [syl('Es'), syl('war'), syl('ge'), syl('tan'), syl('fast'), syl('eh'), syl('ge'), syl('dacht.')],
-      [syl('Der'), syl('A'), syl('bend'), syl('wieg'), syl('te'), syl('schon'), syl('die'), syl('Er'), syl('de,')],
-      [syl('und'), syl('an'), syl('den'), syl('Ber'), syl('gen'), syl('hing'), syl('die'), syl('Nacht.')],
-    ],
-  },
-];
+// [betonte Silbe, unbetonte Silbe(n)] - jeweils als fertig getrennte,
+// korrekt großgeschriebene Silben, damit sie direkt als Übungssilben
+// gerendert werden können.
+const VERS_WORDBANK = {
+  // Bewusst nur Artikel/Präpositionen statt Pronomen - vor einem Nomen
+  // ergeben sie auch bei zufälliger Kombination noch eine erkennbare
+  // Wortgruppe (z.B. "im Tal", "und Herz") statt einer wirren Wortfolge.
+  unbetont: ['der', 'die', 'das', 'ein', 'und', 'im', 'zu', 'so', 'in', 'an', 'auf', 'um', 'als', 'vom', 'beim', 'zum'],
+  betont: ['Mond', 'Wald', 'Baum', 'Wind', 'Tag', 'Nacht', 'Stern', 'Feld', 'Berg', 'Meer', 'Fluss', 'Herz', 'Licht', 'Schnee', 'Eis', 'Glück', 'Haus', 'Tal', 'Gold', 'Salz', 'Brot', 'Rot', 'Blau', 'Grün'],
+  // Zweisilbige Wörter mit Betonung auf der ersten Silbe (füllen einen ganzen Trochäus-Versfuß).
+  trochaeusWort: [['Son', 'ne'], ['Vö', 'gel'], ['sin', 'gen'], ['fröh', 'lich'], ['Blu', 'men'], ['Wie', 'sen'], ['gol', 'den'], ['hel', 'le'], ['lei', 'se'], ['Wol', 'ke'], ['Re', 'gen'], ['flie', 'gen'], ['sprin', 'gen'], ['la', 'chen'], ['schau', 'en'], ['Was', 'ser'], ['Feu', 'er'], ['Him', 'mel'], ['Er', 'de'], ['Win', 'ter'], ['Som', 'mer'], ['A', 'bend'], ['Mor', 'gen'], ['Gar', 'ten']],
+  // Zweisilbige Wörter mit Betonung auf der zweiten Silbe (füllen einen ganzen Jambus-Versfuß).
+  jambusWort: [['ge', 'fällt'], ['ge', 'macht'], ['ent', 'steht'], ['be', 'reit'], ['so', 'fort'], ['vor', 'bei'], ['Ge', 'bet'], ['Ge', 'stalt'], ['Ver', 'stand'], ['ge', 'weckt'], ['ge', 'sagt'], ['ge', 'dacht'], ['er', 'wacht'], ['ver', 'schwand'], ['ge', 'schieht'], ['er', 'zählt']],
+  // Dreisilbige Wörter mit Betonung auf der ersten Silbe (füllen einen ganzen Daktylus-Versfuß).
+  daktylusWort: [['A', 'bend', 'rot'], ['Kin', 'der', 'lied'], ['fröh', 'li', 'cher'], ['Son', 'nen', 'schein'], ['Vo', 'gel', 'schwarm'], ['Mor', 'gen', 'tau']],
+  // Dreisilbige Wörter mit Betonung auf der letzten Silbe (füllen einen ganzen Anapäst-Versfuß).
+  anapaestWort: [['E', 'le', 'fant'], ['Ge', 'ne', 'ral'], ['Se', 'kre', 'tär'], ['Of', 'fi', 'zier'], ['Ka', 'va', 'lier'], ['Me', 'lo', 'die']],
+};
 
-// Zustand der aktuellen Versmaß-Übung: welcher Text, aktueller Markier-Modus
-// (betont/unbetont) und die vom Nutzer vergebenen Markierungen pro Silbe.
+function pickBank(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function capitalizeSyl(s) {
+  return { text: s.text.charAt(0).toUpperCase() + s.text.slice(1), stress: s.stress };
+}
+
+// Zieht zwei unterschiedliche Einträge aus derselben Liste, damit z.B. bei
+// Daktylus/Anapäst nicht zufällig zweimal hintereinander dasselbe Füllwort
+// gezogen wird (das würde sich unnatürlich wiederholend lesen).
+function pickTwoDistinct(list) {
+  const a = pickBank(list);
+  let b = pickBank(list);
+  while (b === a && list.length > 1) b = pickBank(list);
+  return [a, b];
+}
+
+// Ein ganzes, mehrsilbiges Wort aus dem Wortschatz liest sich natürlicher
+// als zwei zufällig aneinandergereihte Einzelsilben-Wörter, deshalb wird es
+// deutlich häufiger gewählt - die Einzelsilben-Variante sorgt trotzdem für
+// zusätzliche Abwechslung.
+const WHOLE_WORD_CHANCE = 0.7;
+
+// Baut eine Jambus-Zeile (x ˉ | x ˉ | …) aus "feetCount" Versfüßen. Jeder
+// Versfuß ist entweder ein unbetontes + ein betontes Einzelwort oder ein
+// zweisilbiges Wort, das die Betonung schon selbst mitbringt.
+function buildJambusLine(feetCount) {
+  const line = [];
+  for (let i = 0; i < feetCount; i++) {
+    if (Math.random() < WHOLE_WORD_CHANCE) {
+      const [a, b] = pickBank(VERS_WORDBANK.jambusWort);
+      line.push(syl(a, false), syl(b, true));
+    } else {
+      line.push(syl(pickBank(VERS_WORDBANK.unbetont), false), syl(pickBank(VERS_WORDBANK.betont), true));
+    }
+  }
+  line[0] = capitalizeSyl(line[0]);
+  return line;
+}
+
+function buildTrochaeusLine(feetCount) {
+  const line = [];
+  for (let i = 0; i < feetCount; i++) {
+    if (Math.random() < WHOLE_WORD_CHANCE) {
+      const [a, b] = pickBank(VERS_WORDBANK.trochaeusWort);
+      line.push(syl(a, true), syl(b, false));
+    } else {
+      line.push(syl(pickBank(VERS_WORDBANK.betont), true), syl(pickBank(VERS_WORDBANK.unbetont), false));
+    }
+  }
+  line[0] = capitalizeSyl(line[0]);
+  return line;
+}
+
+function buildDaktylusLine(feetCount) {
+  const line = [];
+  for (let i = 0; i < feetCount; i++) {
+    if (Math.random() < WHOLE_WORD_CHANCE) {
+      const [a, b, c] = pickBank(VERS_WORDBANK.daktylusWort);
+      line.push(syl(a, true), syl(b, false), syl(c, false));
+    } else {
+      const [x1, x2] = pickTwoDistinct(VERS_WORDBANK.unbetont);
+      line.push(syl(pickBank(VERS_WORDBANK.betont), true), syl(x1, false), syl(x2, false));
+    }
+  }
+  // Häufig endet ein Daktylus-Vers "verkürzt" auf einer einzelnen betonten Silbe.
+  if (Math.random() < 0.5) line.push(syl(pickBank(VERS_WORDBANK.betont), true));
+  line[0] = capitalizeSyl(line[0]);
+  return line;
+}
+
+function buildAnapaestLine(feetCount) {
+  const line = [];
+  for (let i = 0; i < feetCount; i++) {
+    if (Math.random() < WHOLE_WORD_CHANCE) {
+      const [a, b, c] = pickBank(VERS_WORDBANK.anapaestWort);
+      line.push(syl(a, false), syl(b, false), syl(c, true));
+    } else {
+      const [x1, x2] = pickTwoDistinct(VERS_WORDBANK.unbetont);
+      line.push(syl(x1, false), syl(x2, false), syl(pickBank(VERS_WORDBANK.betont), true));
+    }
+  }
+  line[0] = capitalizeSyl(line[0]);
+  return line;
+}
+
+const VERS_LINE_BUILDERS = {
+  jambus: () => buildJambusLine(pick([3, 4])),
+  trochaeus: () => buildTrochaeusLine(pick([3, 4])),
+  daktylus: () => buildDaktylusLine(pick([2, 3])),
+  anapaest: () => buildAnapaestLine(pick([2, 3])),
+};
+
+// Hängt an die letzte Silbe einer Zeile ein Satzzeichen an, rein optisch -
+// die Betonungsmarkierung bezieht sich weiterhin nur auf die Silbe selbst.
+function withPunctuation(line, mark) {
+  const last = line[line.length - 1];
+  line[line.length - 1] = { text: last.text + mark, stress: last.stress };
+  return line;
+}
+
+function generateVersText(excludeMeterId) {
+  const meterPool = VERSMASS_TYPES.map((m) => m.id).filter((id) => id !== excludeMeterId);
+  const meterId = meterPool.length ? pick(meterPool) : pick(VERSMASS_TYPES.map((m) => m.id));
+  const buildLine = VERS_LINE_BUILDERS[meterId];
+  const lines = [
+    withPunctuation(buildLine(), ','),
+    withPunctuation(buildLine(), '.'),
+  ];
+  const meter = VERSMASS_TYPES.find((m) => m.id === meterId);
+  return { title: 'Übungssatz', author: meter.name, meterId, lines };
+}
+
+// Zustand der aktuellen Versmaß-Übung: welcher (zufällig erzeugte) Text,
+// aktueller Markier-Modus (betont/unbetont) und die vom Nutzer vergebenen
+// Markierungen pro Silbe.
 const versUebung = {
-  textId: null,
+  currentText: null,
   mode: 'betont',
   marks: [], // marks[lineIdx][sylIdx] = 'betont' | 'unbetont' | null
   checked: false,
   checkStates: [], // gleiche Struktur wie marks, Werte: 'correct' | 'wrong' | null
 };
 
-function pickRandomVersText(excludeId) {
-  const pool = VERS_TEXTS.filter((t) => t.id !== excludeId);
-  const source = pool.length ? pool : VERS_TEXTS;
-  return source[Math.floor(Math.random() * source.length)];
-}
-
 function loadVersUebungText() {
-  const text = pickRandomVersText(versUebung.textId);
-  versUebung.textId = text.id;
+  const text = generateVersText(versUebung.currentText ? versUebung.currentText.meterId : null);
+  versUebung.currentText = text;
   versUebung.marks = text.lines.map((line) => line.map(() => null));
   versUebung.checked = false;
   versUebung.checkStates = text.lines.map((line) => line.map(() => null));
@@ -2661,7 +2739,7 @@ function clearVersCheck() {
 }
 
 function renderVersText() {
-  const text = VERS_TEXTS.find((t) => t.id === versUebung.textId);
+  const text = versUebung.currentText;
   const card = el('versmass-text-card');
   card.innerHTML = '';
   text.lines.forEach((line, lineIdx) => {
@@ -2702,13 +2780,8 @@ function onVersSyllableClick(lineIdx, sylIdx) {
 }
 
 function checkVersUebung() {
-  const text = VERS_TEXTS.find((t) => t.id === versUebung.textId);
+  const text = versUebung.currentText;
   const meter = VERSMASS_TYPES.find((m) => m.id === text.meterId);
-  if (!text.meterId || !meter) {
-    versUebung.checked = false;
-    showVersCheckMessage('Für dieses Gedicht gibt es leider keine automatische Überprüfung – die Betonung realer Verse ist nicht immer eindeutig. Nutze es zum freien Üben oder probier einen der anderen Übungstexte aus.', false);
-    return;
-  }
 
   let correctCount = 0;
   let total = 0;
