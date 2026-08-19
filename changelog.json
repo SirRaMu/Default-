@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.15",
+    "date": "2026-08-19",
+    "title": "Einheiten umrechnen: jetzt auch mit Komma",
+    "items": [
+      { "icon": "🔢", "text": "Neuer Komma-Knopf im Zahlenfeld – bei Einheiten umrechnen kannst du zwischen \"Ganze Zahlen\" und \"Mit Komma\" wählen, sowohl bei \"Lernen & Üben\" als auch bei \"Einheiten rechnen\"." },
+      { "icon": "🎯", "text": "Bei \"Mit Komma\" entstehen Aufgaben wie \"350 cm = ? m\" mit der Lösung 3,5 statt immer nur glatte Ergebnisse." }
+    ]
+  },
+  {
     "version": "2.14",
     "date": "2026-08-19",
     "title": "Neuer Ordner: Einheiten umrechnen",

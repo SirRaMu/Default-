@@ -723,6 +723,14 @@
       </div>
     </header>
 
+    <div class="option-row">
+      <span class="option-label">Zahlen:</span>
+      <div class="pill-group" id="einheiten-uebung-decimal-group">
+        <button type="button" class="pill" data-einheiten-decimal="false">Ganze Zahlen</button>
+        <button type="button" class="pill" data-einheiten-decimal="true">Mit Komma</button>
+      </div>
+    </div>
+
     <div class="trick-list">
       <div class="trick-card">
         <h3>Längen umrechnen</h3>
@@ -791,6 +799,14 @@
         <button type="button" class="chip" data-adv-op="terme">🧩 Terme</button>
         <button type="button" class="chip" data-adv-op="einheiten">📏 Einheiten</button>
         <button type="button" class="chip" data-adv-op="mix">🔀 Gemischt</button>
+      </div>
+
+      <div class="option-row" id="einheiten-decimal-row" hidden>
+        <span class="option-label">Zahlen:</span>
+        <div class="pill-group" id="einheiten-decimal-group">
+          <button type="button" class="pill" data-einheiten-decimal="false">Ganze Zahlen</button>
+          <button type="button" class="pill" data-einheiten-decimal="true">Mit Komma</button>
+        </div>
       </div>
 
       <div id="difficulty-section">
@@ -949,6 +965,7 @@
       <button type="button" class="num-btn subtle" data-action="minus">−</button>
       <button type="button" class="num-btn" data-num="0">0</button>
       <button type="button" class="num-btn subtle" data-action="back">⌫</button>
+      <button type="button" class="num-btn subtle" data-action="comma">,</button>
       <button type="button" class="num-btn confirm" id="submit-btn" data-action="submit">✓ Prüfen</button>
     </div>
   </section>
@@ -1452,6 +1469,7 @@
       <button type="button" class="num-btn subtle" data-action="minus">−</button>
       <button type="button" class="num-btn" data-num="0">0</button>
       <button type="button" class="num-btn subtle" data-action="back">⌫</button>
+      <button type="button" class="num-btn subtle" data-action="comma">,</button>
       <button type="button" class="num-btn confirm" data-action="submit">✓ Prüfen</button>
     </div>
 

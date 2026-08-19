@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.14';
+const APP_VERSION = '2.15';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -114,6 +114,23 @@ function pick(arr) {
   return arr[randInt(0, arr.length - 1)];
 }
 
+// Zeigt eine Zahl auf Deutsch an (Komma statt Punkt als Dezimaltrennzeichen).
+function fmtDe(n) {
+  return String(n).replace('.', ',');
+}
+
+// Wandelt eine mit Komma eingegebene Zahl in eine JS-Zahl um.
+function parseDeInput(input) {
+  return Number(input.replace(',', '.'));
+}
+
+// Vergleich mit kleiner Toleranz statt strikter Gleichheit, damit
+// Kommazahlen (z.B. bei Einheiten umrechnen) nicht an Fließkomma-
+// Rundungsungenauigkeiten scheitern.
+function answersMatch(given, answer) {
+  return Math.abs(given - answer) < 1e-9;
+}
+
 function pickOperation(selectedOps) {
   const pool = selectedOps.includes('mix') ? OPERATIONS : selectedOps;
   return pool[randInt(0, pool.length - 1)];
@@ -170,6 +187,7 @@ const state = {
     category: 'basic', // 'basic' | 'advanced'
     operations: ['add'],
     advancedTopics: ['pct'],
+    einheitenDecimal: false, // nur beim Thema "Einheiten": auch Kommazahlen zulassen
     difficulty: 'easy',
     mode: 'count', // 'count' | 'time'
     count: 10,
@@ -343,6 +361,14 @@ function initSetupScreen() {
     });
   });
 
+  // Einheiten: Ganze Zahlen / Mit Komma
+  Array.from(document.querySelectorAll('#einheiten-decimal-group .pill')).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.setup.einheitenDecimal = btn.dataset.einheitenDecimal === 'true';
+      renderSetup();
+    });
+  });
+
   // Modus-Chips
   const modeButtons = Array.from(document.querySelectorAll('#mode-group .chip'));
   modeButtons.forEach((btn) => {
@@ -395,6 +421,27 @@ function initSetupScreen() {
   renderHistory();
 }
 
+// Zwei Stellen zeigen denselben "Ganze Zahlen / Mit Komma"-Umschalter für
+// Einheiten umrechnen (Kopfrechnen-Setup und "Lernen & Üben"-Screen) - beide
+// greifen auf denselben state.setup.einheitenDecimal zu und werden hier
+// gemeinsam synchron gehalten.
+function syncEinheitenDecimalUI() {
+  document.querySelectorAll('#einheiten-decimal-group .pill, #einheiten-uebung-decimal-group .pill').forEach((btn) => {
+    btn.classList.toggle('selected', (btn.dataset.einheitenDecimal === 'true') === state.setup.einheitenDecimal);
+  });
+}
+
+function initEinheitenUebungToggle() {
+  el('einheiten-uebung-decimal-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.pill');
+    if (!btn) return;
+    state.setup.einheitenDecimal = btn.dataset.einheitenDecimal === 'true';
+    syncEinheitenDecimalUI();
+    saveSettings();
+  });
+  syncEinheitenDecimalUI();
+}
+
 function renderSetup() {
   const isAdvanced = state.setup.category === 'advanced';
 
@@ -410,6 +457,10 @@ function renderSetup() {
   document.querySelectorAll('#adv-op-group .chip').forEach((btn) => {
     btn.classList.toggle('selected', state.setup.advancedTopics.includes(btn.dataset.advOp));
   });
+
+  el('einheiten-decimal-row').hidden = !(isAdvanced && state.setup.advancedTopics.includes('einheiten'));
+  syncEinheitenDecimalUI();
+
   document.querySelectorAll('#diff-group .chip').forEach((btn) => {
     btn.classList.toggle('selected', btn.dataset.diff === state.setup.difficulty);
   });
@@ -579,31 +630,40 @@ const VOLUMEN_UNITS = [
  * konstruiert, dass immer ein ganzzahliges Ergebnis herauskommt (das
  * Zahlenfeld kennt kein Komma).
  */
-function buildEinheitenProblem(units, diff = 'medium') {
+function buildEinheitenProblem(units, diff = 'medium', allowDecimal = false) {
   const cfg = advCfg('einheiten', diff);
   const i = randInt(0, units.length - 2);
   const small = units[i];
   const big = units[i + 1];
-  const factor = big.toBase / small.toBase;
+  const factor = big.toBase / small.toBase; // immer eine Zehnerpotenz (10, 100 oder 1000)
   const bigToSmall = pick([true, false]);
+
+  // Im Komma-Modus darf die "freie" Seite (die Zahl, aus der die andere
+  // berechnet wird) Nachkommastellen haben - maximal so viele, wie der
+  // Umrechnungsfaktor Nullen hat, damit die berechnete Seite garantiert
+  // exakt aufgeht (z.B. Faktor 100 -> höchstens 2 Nachkommastellen).
+  const maxDecimals = Math.min(2, Math.log10(factor));
+  const decimals = allowDecimal ? randInt(1, maxDecimals) : 0;
+  const scale = 10 ** decimals;
+  const freeValue = randInt(1, cfg.valMax * scale) / scale;
 
   let fromUnit, toUnit, fromValue, answer;
   if (bigToSmall) {
     fromUnit = big; toUnit = small;
-    fromValue = randInt(1, cfg.valMax);
-    answer = fromValue * factor;
+    fromValue = freeValue;
+    answer = Math.round(fromValue * factor * 1000) / 1000;
   } else {
     fromUnit = small; toUnit = big;
-    answer = randInt(1, cfg.valMax);
-    fromValue = answer * factor;
+    answer = freeValue;
+    fromValue = Math.round(answer * factor * 1000) / 1000;
   }
 
   return {
-    headline: `${fromValue} ${fromUnit.label} = ? ${toUnit.label}`,
-    resultText: `${fromValue} ${fromUnit.label} = ${answer} ${toUnit.label}`,
+    headline: `${fmtDe(fromValue)} ${fromUnit.label} = ? ${toUnit.label}`,
+    resultText: `${fmtDe(fromValue)} ${fromUnit.label} = ${fmtDe(answer)} ${toUnit.label}`,
     steps: [
       { prompt: `Hilfswert: Wie viele ${small.label} sind 1 ${big.label}?`, answer: factor },
-      { prompt: `${fromValue} ${fromUnit.label} ${bigToSmall ? '×' : '÷'} ${factor} = ? ${toUnit.label}`, answer },
+      { prompt: `${fmtDe(fromValue)} ${fromUnit.label} ${bigToSmall ? '×' : '÷'} ${factor} = ? ${toUnit.label}`, answer },
     ],
   };
 }
@@ -927,20 +987,20 @@ const TRICKS = {
   },
 
   'einheiten-laenge': {
-    build(diff = 'medium') {
-      return buildEinheitenProblem(LAENGE_UNITS, diff);
+    build(diff = 'medium', opts = {}) {
+      return buildEinheitenProblem(LAENGE_UNITS, diff, opts.allowDecimal);
     },
   },
 
   'einheiten-gewicht': {
-    build(diff = 'medium') {
-      return buildEinheitenProblem(GEWICHT_UNITS, diff);
+    build(diff = 'medium', opts = {}) {
+      return buildEinheitenProblem(GEWICHT_UNITS, diff, opts.allowDecimal);
     },
   },
 
   'einheiten-volumen': {
-    build(diff = 'medium') {
-      return buildEinheitenProblem(VOLUMEN_UNITS, diff);
+    build(diff = 'medium', opts = {}) {
+      return buildEinheitenProblem(VOLUMEN_UNITS, diff, opts.allowDecimal);
     },
   },
 
@@ -1251,11 +1311,11 @@ const ADVANCED_QUESTION_SUFFIX = {
   'diff-equation': 'a₃ = ?',
 };
 
-function generateAdvancedQuestion(selectedTopics, difficulty) {
+function generateAdvancedQuestion(selectedTopics, difficulty, einheitenDecimal) {
   const pool = selectedTopics.includes('mix') ? ADVANCED_TOPICS : selectedTopics;
   const topic = pick(pool);
   const trickId = pick(ADVANCED_TOPIC_POOLS[topic]);
-  const ctx = TRICKS[trickId].build(difficulty);
+  const ctx = TRICKS[trickId].build(difficulty, { allowDecimal: einheitenDecimal });
 
   // "Klammern auflösen" hat zwei Lücken (Koeffizient und Zahl) - im
   // Speed-Modus wird zufällig nur eine davon abgefragt, die andere Lücke
@@ -1292,7 +1352,7 @@ function openPractice(trickId, mode = 'practice', ruleText = '') {
 
 function loadPracticeProblem() {
   const trick = TRICKS[practice.trickId];
-  practice.ctx = trick.build();
+  practice.ctx = trick.build(undefined, { allowDecimal: state.setup.einheitenDecimal });
   practice.stepIndex = 0;
   practice.input = '';
   el('practice-done').hidden = true;
@@ -1319,7 +1379,7 @@ function renderPracticeStep() {
   el('practice-example-label').hidden = !isExplain;
   if (isExplain) {
     el('practice-why-text').textContent = practice.ruleText;
-    el('practice-answer-display').textContent = String(step.answer);
+    el('practice-answer-display').textContent = fmtDe(step.answer);
     el('practice-numpad').hidden = true;
     el('practice-continue-btn').hidden = false;
     el('practice-continue-btn').textContent = 'Weiter →';
@@ -1339,6 +1399,8 @@ function handlePracticeInput(action, num) {
     practice.input = practice.input.slice(0, -1);
   } else if (action === 'minus') {
     practice.input = practice.input.startsWith('-') ? practice.input.slice(1) : '-' + practice.input;
+  } else if (action === 'comma') {
+    if (!practice.input.includes(',')) practice.input += ',';
   } else if (action === 'submit') {
     submitPracticeAnswer();
     return;
@@ -1350,8 +1412,8 @@ function submitPracticeAnswer() {
   if (!practice.input) return;
   const ctx = practice.ctx;
   const step = ctx.steps[practice.stepIndex];
-  const given = Number(practice.input);
-  const correct = given === step.answer;
+  const given = parseDeInput(practice.input);
+  const correct = answersMatch(given, step.answer);
   const card = el('practice-card');
   const feedback = el('practice-feedback');
 
@@ -1396,7 +1458,7 @@ function revealPracticeSolution() {
   const ctx = practice.ctx;
   const step = ctx.steps[practice.stepIndex];
 
-  el('practice-feedback').textContent = `Lösung: ${step.answer}`;
+  el('practice-feedback').textContent = `Lösung: ${fmtDe(step.answer)}`;
   el('practice-feedback').className = 'feedback wrong';
   el('practice-numpad').hidden = true;
   el('practice-reveal-btn').hidden = true;
@@ -1423,7 +1485,7 @@ function finishPracticeProblem() {
   el('practice-continue-btn').hidden = true;
   el('practice-done').hidden = false;
   const finalAnswer = ctx.steps[ctx.steps.length - 1].answer;
-  el('practice-done-sub').textContent = ctx.resultText || ctx.headline.replace(/\?\s*$/, String(finalAnswer));
+  el('practice-done-sub').textContent = ctx.resultText || ctx.headline.replace(/\?\s*$/, fmtDe(finalAnswer));
 
   if (practice.mode === 'explain') {
     el('practice-done-title').textContent = 'Alles klar? 🎓';
@@ -1494,13 +1556,14 @@ let timerHandle = null;
 let questionStartedAt = 0;
 
 function startSession() {
-  const { category, operations, advancedTopics, difficulty, mode, count, time } = state.setup;
+  const { category, operations, advancedTopics, difficulty, mode, count, time, einheitenDecimal } = state.setup;
 
   state.session = {
     category,
     operations,
     advancedTopics,
     difficulty,
+    einheitenDecimal,
     mode,
     totalQuestions: mode === 'count' ? count : Infinity,
     timeLimit: mode === 'time' ? time : null,
@@ -1554,7 +1617,7 @@ function nextQuestion() {
   }
 
   s.currentQuestion = s.category === 'advanced'
-    ? generateAdvancedQuestion(s.advancedTopics, s.difficulty)
+    ? generateAdvancedQuestion(s.advancedTopics, s.difficulty, s.einheitenDecimal)
     : generateQuestion(s.operations, s.difficulty);
   s.currentInput = '';
   questionStartedAt = performance.now();
@@ -1600,6 +1663,8 @@ function handleNumpadInput(action, num) {
     } else {
       s.currentInput = '-' + s.currentInput;
     }
+  } else if (action === 'comma') {
+    if (!s.currentInput.includes(',')) s.currentInput += ',';
   } else if (action === 'submit') {
     submitAnswer();
     return;
@@ -1612,8 +1677,8 @@ function submitAnswer() {
   const s = state.session;
   if (!s.currentInput) return;
 
-  const given = Number(s.currentInput);
-  const correct = given === s.currentQuestion.answer;
+  const given = parseDeInput(s.currentInput);
+  const correct = answersMatch(given, s.currentQuestion.answer);
   const elapsed = performance.now() - questionStartedAt;
   s.totalTimeMs += elapsed;
   s.index += 1;
@@ -1638,7 +1703,7 @@ function submitAnswer() {
       given,
       answer: s.currentQuestion.answer,
     });
-    feedback.textContent = `Leider falsch. Richtig: ${s.currentQuestion.answer}`;
+    feedback.textContent = `Leider falsch. Richtig: ${fmtDe(s.currentQuestion.answer)}`;
     feedback.className = 'feedback wrong';
     card.classList.remove('flash-correct');
     void card.offsetWidth;
@@ -1721,7 +1786,7 @@ function finishSession() {
     mistakesCard.hidden = false;
     for (const m of s.mistakes) {
       const li = document.createElement('li');
-      li.innerHTML = `<span>${m.text}</span><span><span class="m-wrong">${m.given}</span> → <span class="m-right">${m.answer}</span></span>`;
+      li.innerHTML = `<span>${m.text}</span><span><span class="m-wrong">${fmtDe(m.given)}</span> → <span class="m-right">${fmtDe(m.answer)}</span></span>`;
       mistakesList.appendChild(li);
     }
   } else {
@@ -3995,6 +4060,7 @@ initVersmassUebung();
 renderTextartenListe();
 initTextartenUebung();
 initTrash();
+initEinheitenUebungToggle();
 initNotizen();
 initKarteikarten();
 showScreen('home');
