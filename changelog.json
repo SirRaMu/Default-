@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.10",
+    "date": "2026-08-19",
+    "title": "Terme rechnen & Deutsch: Textarten erkennen",
+    "items": [
+      { "icon": "🧮", "text": "Terme sind jetzt auch beim Kopfrechnen als eigenes Thema unter \"Erweitert\" wählbar – inklusive Schwierigkeitsstufen." },
+      { "icon": "🔢", "text": "Neuer Button \"Terme rechnen\" im Terme-Ordner: direkt Aufgaben lösen wie beim Kopfrechnen, mit Anzahl- oder Zeit-Modus." },
+      { "icon": "🎭", "text": "Neu bei Deutsch: \"Textarten\" – lernen, was fiktionale und nicht-fiktionale Texte sind, dazu Lyrik, Epik, Dramatik und fünf Sachtext-Arten wie Bericht, Reportage oder Interview." },
+      { "icon": "🔎", "text": "\"Textarten üben\": Texte lesen und der richtigen Textart zuordnen, mit direkter Überprüfung." }
+    ]
+  },
+  {
     "version": "2.9",
     "date": "2026-08-19",
     "title": "Deutsch: Versmaß lernen & üben",

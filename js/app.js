@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.9';
+const APP_VERSION = '2.10';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -367,6 +367,14 @@ function initSetupScreen() {
     });
   });
 
+  // "Terme rechnen"-Banner im Terme-Ordner springt direkt mit vorausgewählter
+  // Kategorie/Thema auf den normalen Kopfrechnen-Setup-Screen.
+  el('terme-rechnen-btn').addEventListener('click', () => {
+    state.setup.category = 'advanced';
+    state.setup.advancedTopics = ['terme'];
+    renderSetup();
+  });
+
   el('start-btn').addEventListener('click', startSession);
   el('clear-history-btn').addEventListener('click', () => {
     try {
@@ -499,6 +507,12 @@ const ADV_DIFFICULTY = {
     medium: { a0Min: -5, a0Max: 8, kPool: [-2, -1, 1, 2], dMax: 8 },
     hard: { a0Min: -8, a0Max: 12, kPool: [-3, -2, 2, 3], dMax: 12 },
     expert: { a0Min: -12, a0Max: 20, kPool: [-3, -2, 2, 3, 4], dMax: 15 },
+  },
+  terme: {
+    easy: { coefMax: 5, constMax: 5, valMax: 5 },
+    medium: { coefMax: 9, constMax: 9, valMax: 9 },
+    hard: { coefMax: 14, constMax: 14, valMax: 14 },
+    expert: { coefMax: 20, constMax: 20, valMax: 20 },
   },
 };
 
@@ -781,10 +795,11 @@ const TRICKS = {
   },
 
   'term-vereinfachen': {
-    build() {
-      const a = randInt(2, 9);
-      const b = randInt(2, 9);
-      const c = randInt(1, 8);
+    build(diff = 'medium') {
+      const cfg = advCfg('terme', diff);
+      const a = randInt(2, cfg.coefMax);
+      const b = randInt(2, cfg.coefMax);
+      const c = randInt(1, cfg.constMax);
       const bSign = pick([1, -1]);
       const cSign = pick([1, -1]);
       const partial = a + bSign * b;
@@ -802,12 +817,14 @@ const TRICKS = {
   },
 
   'term-klammern': {
-    build() {
-      const a = randInt(2, 9);
-      const b = randInt(2, 9);
-      const c = randInt(1, 9);
+    build(diff = 'medium') {
+      const cfg = advCfg('terme', diff);
+      const a = randInt(2, cfg.coefMax);
+      const b = randInt(2, cfg.coefMax);
+      const c = randInt(1, cfg.constMax);
       return {
         headline: `${a}(${b}x + ${c}) = ?x + ?`,
+        vars: { a, b, c },
         steps: [
           { prompt: `Multipliziere zuerst mit dem x-Glied: ${a} · ${b}x = ___x. Welche Zahl gehört vor das x?`, answer: a * b },
           { prompt: `Jetzt mit der Zahl: ${a} · ${c} =`, answer: a * c },
@@ -817,11 +834,12 @@ const TRICKS = {
   },
 
   'term-einsetzen': {
-    build() {
-      const a = randInt(2, 9);
-      const b = randInt(2, 9);
-      const xVal = randInt(1, 9) * pick([1, -1]);
-      const yVal = randInt(1, 9) * pick([1, -1]);
+    build(diff = 'medium') {
+      const cfg = advCfg('terme', diff);
+      const a = randInt(2, cfg.coefMax);
+      const b = randInt(2, cfg.coefMax);
+      const xVal = randInt(1, cfg.valMax) * pick([1, -1]);
+      const yVal = randInt(1, cfg.valMax) * pick([1, -1]);
       const ax = a * xVal;
       const by = b * yVal;
       const result = ax + by;
@@ -1104,7 +1122,7 @@ const TRICKS = {
 
 /* ---------------- Erweiterte Themen im Speed-Modus ---------------- */
 
-const ADVANCED_TOPICS = ['pct', 'pq', 'lgs', 'diffq', 'diffeq'];
+const ADVANCED_TOPICS = ['pct', 'pq', 'lgs', 'diffq', 'diffeq', 'terme'];
 
 const ADVANCED_TOPIC_LABEL = {
   pct: 'Prozentrechnung',
@@ -1112,6 +1130,7 @@ const ADVANCED_TOPIC_LABEL = {
   lgs: 'Gleichungssysteme',
   diffq: 'Differenzenquotient',
   diffeq: 'Differenzengleichung',
+  terme: 'Terme',
 };
 
 const ADVANCED_TOPIC_POOLS = {
@@ -1120,6 +1139,7 @@ const ADVANCED_TOPIC_POOLS = {
   lgs: ['lgs-einsetzen', 'lgs-gleichsetzen', 'lgs-addition'],
   diffq: ['diff-quotient'],
   diffeq: ['diff-equation'],
+  terme: ['term-vereinfachen', 'term-klammern', 'term-einsetzen'],
 };
 
 // Manche Tricks liefern mehrere Werte (z.B. x und y) - im Speed-Modus wird
@@ -1145,6 +1165,19 @@ function generateAdvancedQuestion(selectedTopics, difficulty) {
   const topic = pick(pool);
   const trickId = pick(ADVANCED_TOPIC_POOLS[topic]);
   const ctx = TRICKS[trickId].build(difficulty);
+
+  // "Klammern auflösen" hat zwei Lücken (Koeffizient und Zahl) - im
+  // Speed-Modus wird zufällig nur eine davon abgefragt, die andere Lücke
+  // wird direkt in der Fragestellung mit aufgelöst.
+  if (trickId === 'term-klammern') {
+    const { a, b, c } = ctx.vars;
+    const askConst = Math.random() < 0.5;
+    return {
+      text: askConst ? `${a}(${b}x + ${c}) = ${a * b}x + ?` : `${a}(${b}x + ${c}) = ?x + ${a * c}`,
+      answer: askConst ? a * c : a * b,
+    };
+  }
+
   const answerIndex = ADVANCED_ANSWER_INDEX[trickId];
   const answer = answerIndex !== undefined ? ctx.steps[answerIndex].answer : ctx.steps[ctx.steps.length - 1].answer;
   const suffix = ADVANCED_QUESTION_SUFFIX[trickId];
@@ -2723,6 +2756,313 @@ function initVersmassUebung() {
   loadVersUebungText();
 }
 
+/* ---------------- Deutsch: Textarten ---------------- */
+
+// Erste beide Einträge sind die Überblicks-Kategorien (nicht selbst wählbar
+// in der Übung), danach folgen die drei literarischen Gattungen und
+// zuletzt fünf Sachtext-Arten - jeweils mit "gattung": 'fiktional' oder
+// 'sachtext', damit sich daraus automatisch die auswählbaren Textarten und
+// die Fiktional/Sachtext-Zuordnung für die Übung ableiten lassen.
+const TEXTARTEN = [
+  {
+    id: 'fiktional-uebersicht', name: 'Fiktionale Texte', color: '#93c5fd',
+    definition: 'Erfundene, literarische Texte – die Handlung, Figuren oder Ereignisse sind (ganz oder teilweise) ausgedacht, auch wenn sie an echte Orte oder Ereignisse angelehnt sein können.',
+    erkennung: 'Frage dich: Erhebt der Text den Anspruch, wortwörtlich wahr zu sein, oder erzählt er eine erfundene Geschichte? Fiktionale Texte gehören zu einer von drei literarischen Gattungen: Lyrik, Epik oder Dramatik.',
+    beispiel: 'Ein Gedicht, ein Roman, eine Kurzgeschichte oder ein Theaterstück.',
+  },
+  {
+    id: 'lyrik', name: 'Lyrik', color: '#7dd3fc', gattung: 'fiktional',
+    definition: 'Eine der drei literarischen Gattungen: meist in Versen und Strophen geschrieben, oft mit Reim und Versmaß, drückt häufig Gefühle oder Stimmungen aus.',
+    erkennung: 'Kurze Zeilen, die zu Strophen gruppiert sind; oft Reime, Wiederholungen und Sprachbilder (Metaphern, Vergleiche); meist keine durchgehende Handlung.',
+    beispiel: 'Ein Gedicht wie Goethes „Heidenröslein“.',
+  },
+  {
+    id: 'epik', name: 'Epik', color: '#86efac', gattung: 'fiktional',
+    definition: 'Eine der drei literarischen Gattungen: erzählende Texte in Prosa (durchgehendem Fließtext), meist mit einem Erzähler, Figuren und einer Handlung.',
+    erkennung: 'Fließtext (keine Verse), oft eine erzählende Stimme („Er ging…“), eine Handlung mit Anfang, Verlauf und Ende.',
+    beispiel: 'Ein Roman, eine Kurzgeschichte, ein Märchen oder eine Fabel.',
+  },
+  {
+    id: 'dramatik', name: 'Dramatik', color: '#fca5a5', gattung: 'fiktional',
+    definition: 'Eine der drei literarischen Gattungen: für die Bühne geschrieben, besteht fast nur aus wörtlicher Rede der Figuren und Regieanweisungen.',
+    erkennung: 'Figurennamen vor den Sätzen (oft in Großbuchstaben), Regieanweisungen in Klammern oder kursiv, kein erzählender Text dazwischen.',
+    beispiel: 'Ein Theaterstück, eine Tragödie oder eine Komödie.',
+  },
+  {
+    id: 'sachtext-uebersicht', name: 'Nicht-fiktionale Texte (Sachtexte)', color: '#fdba74',
+    definition: 'Texte, die reale Sachverhalte, Ereignisse oder Meinungen wiedergeben, ohne eine erfundene Geschichte zu erzählen. Sie wollen informieren, erklären oder überzeugen.',
+    erkennung: 'Sachtexte beziehen sich auf echte Personen, Fakten oder Ereignisse. Typische Beispiele: Bericht, Reportage, Kommentar, Anleitung, Interview.',
+    beispiel: 'Eine Zeitungsmeldung, eine Bedienungsanleitung oder ein Interview.',
+  },
+  {
+    id: 'bericht', name: 'Bericht', color: '#fde047', gattung: 'sachtext',
+    definition: 'Ein Sachtext, der ein reales Ereignis sachlich, knapp und in der Vergangenheit wiedergibt – meist mit den W-Fragen (wer, was, wann, wo, wie, warum).',
+    erkennung: 'Sachlicher, neutraler Ton, keine persönliche Meinung, klare zeitliche Reihenfolge der Ereignisse.',
+    beispiel: 'Ein Zeitungsbericht über ein Fußballspiel oder ein Schulereignis.',
+  },
+  {
+    id: 'reportage', name: 'Reportage', color: '#fdba74', gattung: 'sachtext',
+    definition: 'Ein Sachtext über ein reales Ereignis, bei dem der Autor selbst dabei war und seine persönlichen Eindrücke lebendig miterzählt.',
+    erkennung: 'Anschauliche, oft im Präsens erzählte Beobachtungen „vor Ort“, persönliche Eindrücke, aber auf realen Fakten basierend.',
+    beispiel: 'Ein Live-Bericht von einem Konzert oder einer Reise.',
+  },
+  {
+    id: 'kommentar', name: 'Kommentar', color: '#c4b5fd', gattung: 'sachtext',
+    definition: 'Ein Sachtext, in dem der Autor zu einem aktuellen Thema klar Stellung bezieht und seine Meinung begründet.',
+    erkennung: 'Deutliche Meinungsäußerungen („Ich finde“, „Meiner Meinung nach“), wertende Wörter, eine klare Position wird vertreten und begründet.',
+    beispiel: 'Ein Meinungsbeitrag zu einem aktuellen Thema in der Zeitung.',
+  },
+  {
+    id: 'anleitung', name: 'Anleitung', color: '#5eead4', gattung: 'sachtext',
+    definition: 'Ein Sachtext, der in klaren Schritten erklärt, wie man etwas tut oder herstellt.',
+    erkennung: 'Nummerierte oder klar abgegrenzte Schritte, Befehlsform (Imperativ: „Nimm…“, „Rühre…“), meist ohne Handlung oder Figuren.',
+    beispiel: 'Eine Bedienungsanleitung oder ein Kochrezept.',
+  },
+  {
+    id: 'interview', name: 'Interview', color: '#a5b4fc', gattung: 'sachtext',
+    definition: 'Ein Sachtext in Frage-Antwort-Form zwischen einer interviewenden und einer befragten Person.',
+    erkennung: 'Abwechselnd Frage und Antwort, oft mit Namen oder Kürzel gekennzeichnet (z. B. „Frage:“ / „Antwort:“).',
+    beispiel: 'Ein Interview mit einer bekannten Persönlichkeit in einer Zeitschrift.',
+  },
+];
+
+// Die konkreten, in der Übung auswählbaren Textarten - alles außer den
+// beiden Überblicks-Einträgen ganz oben.
+const TEXTART_TYPES = TEXTARTEN.filter((t) => t.gattung);
+
+function renderTextartenListe() {
+  const list = el('textarten-list');
+  list.innerHTML = '';
+  TEXTARTEN.forEach((ta) => {
+    const item = document.createElement('div');
+    item.className = 'stilmittel-item';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'stilmittel-toggle';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'stilmittel-swatch';
+    swatch.style.background = ta.color;
+    swatch.setAttribute('aria-hidden', 'true');
+
+    const name = document.createElement('span');
+    name.className = 'stilmittel-name';
+    name.textContent = ta.name;
+
+    const chevron = document.createElement('span');
+    chevron.className = 'stilmittel-chevron';
+    chevron.textContent = '⌄';
+    chevron.setAttribute('aria-hidden', 'true');
+
+    toggle.appendChild(swatch);
+    toggle.appendChild(name);
+    toggle.appendChild(chevron);
+
+    const body = document.createElement('div');
+    body.className = 'stilmittel-body';
+    body.hidden = true;
+
+    const pDef = document.createElement('p');
+    pDef.innerHTML = `<strong>Was es ist:</strong> ${ta.definition}`;
+    const pErk = document.createElement('p');
+    pErk.innerHTML = `<strong>Woran du es erkennst:</strong> ${ta.erkennung}`;
+    const pBsp = document.createElement('p');
+    pBsp.className = 'stilmittel-example';
+    pBsp.innerHTML = `<strong>Beispiel:</strong> <em>${ta.beispiel}</em>`;
+    body.appendChild(pDef);
+    body.appendChild(pErk);
+    body.appendChild(pBsp);
+
+    toggle.addEventListener('click', () => {
+      const willOpen = body.hidden;
+      body.hidden = !willOpen;
+      item.classList.toggle('open', willOpen);
+    });
+
+    item.appendChild(toggle);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+}
+
+// Textsorten-Erkennung ist – anders als die Interpretation von Stilmitteln
+// oder die Betonung in echten Gedichten – in der Regel eindeutig an
+// formalen Merkmalen (Verse, Regieanweisungen, Frage/Antwort, …) erkennbar.
+// Deshalb bekommt hier jeder Übungstext eine automatische Überprüfung,
+// auch das echte Gedicht.
+const TEXTART_TEXTS = [
+  {
+    id: 'heidenroeslein', title: 'Heidenröslein', author: 'Johann Wolfgang von Goethe', typeId: 'lyrik',
+    body: "Sah ein Knab' ein Röslein stehn, Röslein auf der Heiden, war so jung und morgenschön, lief er schnell, es nah zu sehn, sah's mit vielen Freuden. Röslein, Röslein, Röslein rot, Röslein auf der Heiden.",
+  },
+  {
+    id: 'heimweg', title: 'Der Heimweg', author: 'eigener Übungstext', typeId: 'epik',
+    body: 'Als die Sonne hinter den Bergen verschwand, machte sich Lena auf den Weg nach Hause. Sie hatte den ganzen Tag im Wald verbracht und war müde, aber glücklich. Plötzlich hörte sie ein Rascheln im Gebüsch. Ihr Herz klopfte schneller, doch dann sah sie nur einen kleinen Fuchs, der neugierig zu ihr herüberblickte. Lena lächelte und ging weiter, während die ersten Sterne am Himmel erschienen.',
+  },
+  {
+    id: 'gute-nachricht', title: 'Die gute Nachricht (Szenenausschnitt)', author: 'eigener Übungstext', typeId: 'dramatik',
+    body: 'MARIE (aufgeregt, läuft im Zimmer hin und her): Ich kann das nicht glauben! Er hat wirklich gewonnen! TOM (skeptisch, die Arme verschränkt): Bist du dir sicher? Das klingt zu gut, um wahr zu sein. MARIE (hält ihm ein Blatt Papier hin): Hier, lies selbst! TOM (nimmt das Blatt, liest, lächelt langsam): Na so was.',
+  },
+  {
+    id: 'schulfest', title: 'Schulfest in der Stadthalle', author: 'eigener Übungstext', typeId: 'bericht',
+    body: 'Am vergangenen Samstag fand in der Stadthalle das jährliche Schulfest statt. Rund 300 Schülerinnen und Schüler sowie ihre Familien nahmen daran teil. Neben verschiedenen Verkaufsständen gab es ein Bühnenprogramm mit Musik- und Tanzvorführungen. Die Veranstaltung endete gegen 18 Uhr mit einer abschließenden Verlosung. Der Erlös des Fests in Höhe von 1200 Euro geht an die Schulbibliothek.',
+  },
+  {
+    id: 'finale', title: 'Live vom 100-Meter-Finale', author: 'eigener Übungstext', typeId: 'reportage',
+    body: 'Kurz vor dem Start ist die Anspannung im Stadion förmlich zu spüren. Zehntausende Zuschauer verstummen für einen Moment, dann ertönt der Startschuss. Die Läuferinnen schießen wie Pfeile aus dem Startblock, während die Menge in ohrenbetäubenden Jubel ausbricht. Ich stehe mitten in der ersten Reihe und spüre, wie der Boden unter den Anfeuerungsrufen regelrecht vibriert.',
+  },
+  {
+    id: 'zeit-zu-handeln', title: 'Zeit zu handeln', author: 'eigener Übungstext', typeId: 'kommentar',
+    body: 'Meiner Meinung nach sollte an unserer Schule endlich mehr für den Klimaschutz getan werden. Es kann nicht sein, dass im Sommer bei über 30 Grad die Fenster nicht richtig verdunkelt werden können und im Winter die Heizung tagelang ausfällt. Ich finde, die Schulleitung muss hier dringend handeln, statt das Problem weiter auszusitzen.',
+  },
+  {
+    id: 'vogelhaus', title: 'Ein Vogelhaus bauen', author: 'eigener Übungstext', typeId: 'anleitung',
+    body: 'So baust du ein einfaches Vogelhaus: 1. Schneide sechs Holzbretter in die passende Größe zu. 2. Verschraube die Seitenwände und den Boden zu einem Kasten. 3. Setze das Dach schräg auf, damit Regen ablaufen kann. 4. Bohre ein rundes Einflugloch in die Vorderseite. 5. Streiche das Vogelhaus mit wetterfester Farbe an und lass es trocknen.',
+  },
+  {
+    id: 'kletterin', title: 'Interview mit einer Kletterin', author: 'eigener Übungstext', typeId: 'interview',
+    body: 'Frage: Wie bist du zum Klettern gekommen? Antwort: Ein Freund hat mich vor drei Jahren mal mitgenommen, und seitdem lässt es mich nicht mehr los. Frage: Was fasziniert dich am meisten daran? Antwort: Die Mischung aus Konzentration und dem Gefühl, wenn man oben ankommt. Das ist jedes Mal wieder besonders.',
+  },
+];
+
+const textartUebung = {
+  textId: null,
+  gattungChoice: null,
+  typeChoice: null,
+  checked: false,
+};
+
+function pickRandomTextartText(excludeId) {
+  const pool = TEXTART_TEXTS.filter((t) => t.id !== excludeId);
+  const source = pool.length ? pool : TEXTART_TEXTS;
+  return source[Math.floor(Math.random() * source.length)];
+}
+
+function loadTextartUebungText() {
+  const text = pickRandomTextartText(textartUebung.textId);
+  textartUebung.textId = text.id;
+  textartUebung.gattungChoice = null;
+  textartUebung.typeChoice = null;
+  textartUebung.checked = false;
+
+  el('textart-text-meta').textContent = `${text.title} – ${text.author}`;
+  el('textart-text-card').textContent = text.body;
+  renderTextartChips();
+  hideTextartCheckResult();
+}
+
+function hideTextartCheckResult() {
+  const result = el('textart-check-result');
+  result.hidden = true;
+  result.classList.remove('success');
+}
+
+function showTextartCheckMessage(text, success) {
+  const result = el('textart-check-result');
+  result.textContent = text;
+  result.classList.toggle('success', success);
+  result.hidden = false;
+}
+
+function renderTextartChips() {
+  const gattungGroup = el('textart-gattung-group');
+  gattungGroup.innerHTML = '';
+  [{ id: 'fiktional', label: '📖 Fiktional' }, { id: 'sachtext', label: '📰 Nicht-fiktional' }].forEach((g) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+    btn.textContent = g.label;
+    btn.dataset.gattung = g.id;
+    btn.classList.toggle('selected', textartUebung.gattungChoice === g.id);
+    if (textartUebung.checked) {
+      const text = TEXTART_TEXTS.find((t) => t.id === textartUebung.textId);
+      const correctGattung = TEXTART_TYPES.find((t) => t.id === text.typeId).gattung;
+      if (g.id === textartUebung.gattungChoice) {
+        btn.classList.add(g.id === correctGattung ? 'check-correct' : 'check-wrong');
+      } else if (g.id === correctGattung) {
+        btn.classList.add('check-correct');
+      }
+    }
+    gattungGroup.appendChild(btn);
+  });
+
+  const typeGroup = el('textart-type-group');
+  typeGroup.innerHTML = '';
+  TEXTART_TYPES.forEach((t) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+    btn.textContent = t.name;
+    btn.dataset.textartType = t.id;
+    btn.classList.toggle('selected', textartUebung.typeChoice === t.id);
+    if (textartUebung.checked) {
+      const text = TEXTART_TEXTS.find((tx) => tx.id === textartUebung.textId);
+      if (t.id === textartUebung.typeChoice) {
+        btn.classList.add(t.id === text.typeId ? 'check-correct' : 'check-wrong');
+      } else if (t.id === text.typeId) {
+        btn.classList.add('check-correct');
+      }
+    }
+    typeGroup.appendChild(btn);
+  });
+}
+
+function clearTextartCheck() {
+  if (!textartUebung.checked) return;
+  textartUebung.checked = false;
+  hideTextartCheckResult();
+}
+
+function checkTextartUebung() {
+  if (!textartUebung.gattungChoice || !textartUebung.typeChoice) {
+    showTextartCheckMessage('Wähle zuerst beide Antworten aus, bevor du überprüfst.', false);
+    return;
+  }
+  const text = TEXTART_TEXTS.find((t) => t.id === textartUebung.textId);
+  const type = TEXTART_TYPES.find((t) => t.id === text.typeId);
+  const gattungCorrect = textartUebung.gattungChoice === type.gattung;
+  const typeCorrect = textartUebung.typeChoice === type.id;
+
+  textartUebung.checked = true;
+  renderTextartChips();
+
+  if (gattungCorrect && typeCorrect) {
+    showTextartCheckMessage(`🎉 Genau richtig, das ist ${type.gattung === 'fiktional' ? 'fiktionale' : 'nicht-fiktionale'} ${type.name}!`, true);
+  } else if (typeCorrect) {
+    showTextartCheckMessage(`✅ Die Textart „${type.name}“ hast du richtig erkannt, aber fiktional/nicht-fiktional war falsch.`, false);
+  } else if (gattungCorrect) {
+    showTextartCheckMessage(`✅ Fiktional/nicht-fiktional war richtig, aber die genaue Textart war nicht „${TEXTART_TYPES.find((t) => t.id === textartUebung.typeChoice).name}“. Richtig wäre „${type.name}“ gewesen.`, false);
+  } else {
+    showTextartCheckMessage(`❌ Das war leider nicht richtig. Es handelt sich um ${type.gattung === 'fiktional' ? 'fiktionale' : 'nicht-fiktionale'} ${type.name}.`, false);
+  }
+}
+
+function initTextartenUebung() {
+  el('textart-gattung-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.chip');
+    if (!btn) return;
+    textartUebung.gattungChoice = btn.dataset.gattung;
+    clearTextartCheck();
+    renderTextartChips();
+    hideTextartCheckResult();
+  });
+
+  el('textart-type-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.chip');
+    if (!btn) return;
+    textartUebung.typeChoice = btn.dataset.textartType;
+    clearTextartCheck();
+    renderTextartChips();
+    hideTextartCheckResult();
+  });
+
+  el('textart-new-text-btn').addEventListener('click', loadTextartUebungText);
+  el('textart-check-btn').addEventListener('click', checkTextartUebung);
+
+  loadTextartUebungText();
+}
+
 /* ---------------- Notizen ---------------- */
 
 // Notizen leben ausschließlich in localStorage auf diesem Gerät - es gibt
@@ -3324,6 +3664,8 @@ renderStilmittelListe();
 initStilmittelUebung();
 renderVersmassListe();
 initVersmassUebung();
+renderTextartenListe();
+initTextartenUebung();
 initNotizen();
 initKarteikarten();
 showScreen('home');

@@ -302,6 +302,15 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
+    <button type="button" class="learn-banner" data-goto="deutsch-textarten">
+      <span class="learn-banner-icon">🎭</span>
+      <span class="learn-banner-text">
+        <strong>Textarten</strong>
+        <small>Textsorten lernen und Texten zuordnen üben</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
@@ -462,6 +471,73 @@
     <p class="stilmittel-check-result" id="versmass-check-result" hidden></p>
   </section>
 
+  <!-- ===================== DEUTSCH: TEXTARTEN (ORDNER) ===================== -->
+  <section class="screen" id="screen-deutsch-textarten" data-screen="deutsch-textarten" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="subject-deutsch" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🎭 Textarten</span>
+      </div>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="textarten-lernen">
+      <span class="learn-banner-icon">📙</span>
+      <span class="learn-banner-text">
+        <strong>Textarten lernen</strong>
+        <small>Fiktional oder nicht, Lyrik, Epik, Dramatik &amp; Sachtexte</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="textarten-uben">
+      <span class="learn-banner-icon">🔎</span>
+      <span class="learn-banner-text">
+        <strong>Textarten üben</strong>
+        <small>Texte lesen und der richtigen Textart zuordnen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== DEUTSCH: TEXTARTEN LERNEN ===================== -->
+  <section class="screen" id="screen-textarten-lernen" data-screen="textarten-lernen" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-textarten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📙 Textarten lernen</span>
+      </div>
+    </header>
+    <p class="subtitle learn-subtitle">Texte sind entweder <strong>fiktional</strong> (erfunden) oder <strong>nicht-fiktional</strong> (Sachtexte). Fiktionale Texte gehören zu einer der drei Gattungen Lyrik, Epik oder Dramatik. Tippe auf eine Textart, um mehr zu erfahren.</p>
+
+    <div class="stilmittel-list" id="textarten-list"></div>
+  </section>
+
+  <!-- ===================== DEUTSCH: TEXTARTEN ÜBEN ===================== -->
+  <section class="screen" id="screen-textarten-uben" data-screen="textarten-uben" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-textarten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🔎 Textarten üben</span>
+      </div>
+    </header>
+
+    <div class="stilmittel-uebung-toolbar">
+      <div class="stilmittel-text-meta" id="textart-text-meta"></div>
+      <button type="button" class="btn-text" id="textart-new-text-btn">🔀 Neuer Text</button>
+    </div>
+
+    <div class="stilmittel-text-card" id="textart-text-card"></div>
+
+    <p class="option-label">Fiktional oder nicht-fiktional?</p>
+    <div class="chip-group" id="textart-gattung-group"></div>
+
+    <p class="option-label">Welche Textart ist es genau?</p>
+    <div class="chip-group" id="textart-type-group"></div>
+
+    <button type="button" class="btn-primary" id="textart-check-btn">✅ Überprüfen</button>
+    <p class="stilmittel-check-result" id="textart-check-result" hidden></p>
+  </section>
+
   <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->
   <section class="screen" id="screen-subject-englisch" data-screen="subject-englisch" hidden>
     <header class="app-header">
@@ -531,6 +607,16 @@
         <span class="learn-title">🧩 Terme</span>
       </div>
     </header>
+
+    <button type="button" class="learn-banner" data-goto="setup" id="terme-rechnen-btn">
+      <span class="learn-banner-icon">🧮</span>
+      <span class="learn-banner-text">
+        <strong>Terme rechnen</strong>
+        <small>Wie beim Kopfrechnen: direkt Aufgaben lösen, mit Anzahl- oder Zeit-Modus</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <div class="trick-list">
       <div class="trick-card">
         <h3>Terme vereinfachen</h3>
@@ -597,6 +683,7 @@
         <button type="button" class="chip" data-adv-op="lgs">🔗 Gleichungssysteme</button>
         <button type="button" class="chip" data-adv-op="diffq">📈 Differenzenquotient</button>
         <button type="button" class="chip" data-adv-op="diffeq">🔁 Differenzengleichung</button>
+        <button type="button" class="chip" data-adv-op="terme">🧩 Terme</button>
         <button type="button" class="chip" data-adv-op="mix">🔀 Gemischt</button>
       </div>
 
