@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.12",
+    "date": "2026-08-19",
+    "title": "Terme-Ordner aufgeräumt",
+    "items": [
+      { "icon": "🧩", "text": "Der Terme-Ordner zeigt jetzt nur noch zwei Kacheln: \"Lernen & Üben\" (Vereinfachen, Klammern auflösen, Werte einsetzen) und \"Terme rechnen\" (wie beim Kopfrechnen)." }
+    ]
+  },
+  {
     "version": "2.11",
     "date": "2026-08-19",
     "title": "Versmaß üben: viel mehr Übungssätze",
