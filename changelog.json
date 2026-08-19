@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.9",
+    "date": "2026-08-19",
+    "title": "Deutsch: Versmaß lernen & üben",
+    "items": [
+      { "icon": "📘", "text": "Neu unter Deutsch: \"Versmaß\" mit Jambus, Trochäus, Daktylus, Anapäst und Spondeus – jeweils mit Muster, Erkennungsmerkmalen und Beispiel." },
+      { "icon": "🎵", "text": "\"Versmaß üben\": Silben in einem Vers als betont oder unbetont markieren und direkt überprüfen – mit eigenen Übungstexten und echten Gedichten (Goethe, Matthias Claudius)." }
+    ]
+  },
+  {
     "version": "2.8",
     "date": "2026-08-18",
     "title": "Karteikarten jetzt auch bei Englisch, Physik & Deutsch",

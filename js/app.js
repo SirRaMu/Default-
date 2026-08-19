@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.8';
+const APP_VERSION = '2.9';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -2420,6 +2420,309 @@ function initStilmittelUebung() {
   loadStilUebungText();
 }
 
+/* ---------------- Deutsch: Versmaß ---------------- */
+
+// Betonungsmuster je Silbe wird mit einem "X" (Hebung/betont) bzw. "x"
+// (Senkung/unbetont) beschrieben. Der Aufbau folgt bewusst dem gleichen
+// Aufklapp-Prinzip wie die Stilmittel-Übersicht.
+const VERSMASS_TYPES = [
+  {
+    id: 'jambus', name: 'Jambus', color: '#7dd3fc', muster: 'x  ˉ  |  x  ˉ  |  x  ˉ  |  x  ˉ',
+    definition: 'Ein Versfuß aus einer unbetonten und einer darauffolgenden betonten Silbe (x ˉ). Wiederholt sich das über eine ganze Zeile, entsteht ein steigender Rhythmus.',
+    erkennung: 'Sprich die Zeile laut und klopfe den Takt mit: un-be-TONT, un-be-TONT, … Der Jambus ist im Deutschen das natürlichste Versmaß, weil sehr viele Wörter selbst so betont werden.',
+    beispiel: '„Ich seh den Mond im dunklen Wald“ – Ich SEH den MOND im DUNK len WALD (eigener Übungssatz).',
+  },
+  {
+    id: 'trochaeus', name: 'Trochäus', color: '#fca5a5', muster: 'ˉ  x  |  ˉ  x  |  ˉ  x  |  ˉ  x',
+    definition: 'Ein Versfuß aus einer betonten und einer darauffolgenden unbetonten Silbe (ˉ x) – also genau umgekehrt zum Jambus. Es entsteht ein fallender Rhythmus.',
+    erkennung: 'Die Zeile beginnt betont und „fällt“ danach immer wieder ab: BE-tont-un, BE-tont-un, … Viele deutsche Wörter mit Betonung auf der ersten Silbe (z. B. „Sonne“, „Vögel“) passen von Natur aus in dieses Muster.',
+    beispiel: '„Sonne scheint auf grüne Wiesen“ – SON ne SCHEINT auf GRÜ ne WIE sen (eigener Übungssatz).',
+  },
+  {
+    id: 'daktylus', name: 'Daktylus', color: '#86efac', muster: 'ˉ  x  x  |  ˉ  x  x  |  ˉ  x  x',
+    definition: 'Ein dreisilbiger Versfuß: eine betonte Silbe, gefolgt von zwei unbetonten (ˉ x x).',
+    erkennung: 'Zähle in Dreiergruppen: BE-tont-un-be-TONT-un-be-tont, … Ganze Sätze im reinen Daktylus klingen im Deutschen oft feierlich oder ungewöhnlich, weil dieser Rhythmus nicht dem normalen Sprachfluss entspricht – er stammt ursprünglich aus der antiken Dichtung (z. B. dem Hexameter).',
+    beispiel: '„Abendrot, Kinderlied, fröhlicher Klang“ – A bend rot KIN der lied FRÖH li cher KLANG (eigener Übungssatz).',
+  },
+  {
+    id: 'anapaest', name: 'Anapäst', color: '#fde047', muster: 'x  x  ˉ  |  x  x  ˉ  |  x  x  ˉ',
+    definition: 'Ein dreisilbiger Versfuß: zwei unbetonte Silben, gefolgt von einer betonten (x x ˉ) – also genau umgekehrt zum Daktylus.',
+    erkennung: 'Zähle wieder in Dreiergruppen, diesmal mit der Betonung am Ende: un-be-TONT, un-be-TONT, … Auch der Anapäst ist im Deutschen eher selten und wirkt oft schwungvoll oder eilig.',
+    beispiel: '„Elefant, General, Sekretär“ – e le FANT ge ne RAL se kre TÄR (eigener Übungssatz).',
+  },
+  {
+    id: 'spondeus', name: 'Spondeus', color: '#d8b4fe', muster: 'ˉ  ˉ',
+    definition: 'Zwei aufeinanderfolgende betonte Silben ohne unbetonte Silbe dazwischen (ˉ ˉ).',
+    erkennung: 'Ein ganzer Vers im reinen Spondeus ist im Deutschen sehr selten. Meist taucht er nur als einzelner „Ausnahme-Versfuß“ in einem sonst regelmäßigen Vers auf, um ein Wort besonders hervorzuheben.',
+    beispiel: '„Stopp! Halt!“ – STOPP HALT, beide Silben gleich stark betont.',
+  },
+];
+
+/**
+ * Baut die aufklappbare Versmaß-Übersicht – identisches Prinzip wie
+ * renderStilmittelListe(), nur mit den Versmaß-Daten befüllt.
+ */
+function renderVersmassListe() {
+  const list = el('versmass-list');
+  list.innerHTML = '';
+  VERSMASS_TYPES.forEach((vm) => {
+    const item = document.createElement('div');
+    item.className = 'stilmittel-item';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'stilmittel-toggle';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'stilmittel-swatch';
+    swatch.style.background = vm.color;
+    swatch.setAttribute('aria-hidden', 'true');
+
+    const name = document.createElement('span');
+    name.className = 'stilmittel-name';
+    name.textContent = vm.name;
+
+    const chevron = document.createElement('span');
+    chevron.className = 'stilmittel-chevron';
+    chevron.textContent = '⌄';
+    chevron.setAttribute('aria-hidden', 'true');
+
+    toggle.appendChild(swatch);
+    toggle.appendChild(name);
+    toggle.appendChild(chevron);
+
+    const body = document.createElement('div');
+    body.className = 'stilmittel-body';
+    body.hidden = true;
+
+    const pMuster = document.createElement('p');
+    pMuster.innerHTML = `<strong>Muster:</strong> <span class="vers-muster">${vm.muster}</span>`;
+    const pDef = document.createElement('p');
+    pDef.innerHTML = `<strong>Was es ist:</strong> ${vm.definition}`;
+    const pErk = document.createElement('p');
+    pErk.innerHTML = `<strong>Woran du es erkennst:</strong> ${vm.erkennung}`;
+    const pBsp = document.createElement('p');
+    pBsp.className = 'stilmittel-example';
+    pBsp.innerHTML = `<strong>Beispiel:</strong> <em>${vm.beispiel}</em>`;
+    body.appendChild(pMuster);
+    body.appendChild(pDef);
+    body.appendChild(pErk);
+    body.appendChild(pBsp);
+
+    toggle.addEventListener('click', () => {
+      const willOpen = body.hidden;
+      body.hidden = !willOpen;
+      item.classList.toggle('open', willOpen);
+    });
+
+    item.appendChild(toggle);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+}
+
+// Übungstexte: eigene, komplett durchgeplante Verse haben ein "meter" (die
+// erwartete Lösung) und lassen sich automatisch überprüfen. Bei echten
+// Gedichten ist die Betonung im Detail nicht immer eindeutig, deshalb gibt
+// es dort – genau wie bei den Stilmittel-Übungstexten – keine automatische
+// Überprüfung, sondern nur freies Üben.
+function syl(text, stress) {
+  return { text, stress };
+}
+
+const VERS_TEXTS = [
+  {
+    id: 'mond-wald', title: 'Der Mond im Wald', author: 'eigener Übungstext', meterId: 'jambus',
+    lines: [
+      [syl('Ich', false), syl('seh', true), syl('den', false), syl('Mond', true), syl('im', false), syl('dun', true), syl('klen', false), syl('Wald,', true)],
+      [syl('er', false), syl('scheint', true), syl('so', false), syl('hell', true), syl('im', false), syl('stil', true), syl('len', false), syl('Tal.', true)],
+    ],
+  },
+  {
+    id: 'sonne-wiesen', title: 'Sonne über den Wiesen', author: 'eigener Übungstext', meterId: 'trochaeus',
+    lines: [
+      [syl('Son', true), syl('ne', false), syl('scheint', true), syl('auf', false), syl('grü', true), syl('ne', false), syl('Wie', true), syl('sen,', false)],
+      [syl('Vö', true), syl('gel', false), syl('sin', true), syl('gen', false), syl('fro', true), syl('he', false), syl('Lie', true), syl('der.', false)],
+    ],
+  },
+  {
+    id: 'abendrot', title: 'Abendrot', author: 'eigener Übungstext', meterId: 'daktylus',
+    lines: [
+      [syl('A', true), syl('bend', false), syl('rot,', false), syl('Kin', true), syl('der', false), syl('lied,', false), syl('fröh', true), syl('li', false), syl('cher', false), syl('Klang.', true)],
+    ],
+  },
+  {
+    id: 'berufe', title: 'Drei Berufe', author: 'eigener Übungstext', meterId: 'anapaest',
+    lines: [
+      [syl('E', false), syl('le', false), syl('fant,', true), syl('Ge', false), syl('ne', false), syl('ral,', true), syl('Se', false), syl('kre', false), syl('tär.', true)],
+    ],
+  },
+  {
+    id: 'mond-aufgegangen', title: 'Der Mond ist aufgegangen (1. Strophe)', author: 'Matthias Claudius', meterId: null,
+    lines: [
+      [syl('Der'), syl('Mond'), syl('ist'), syl('auf'), syl('ge'), syl('gan'), syl('gen,')],
+      [syl('die'), syl('gold'), syl('nen'), syl('Stern'), syl('lein'), syl('pran'), syl('gen')],
+      [syl('am'), syl('Him'), syl('mel'), syl('hell'), syl('und'), syl('klar;')],
+      [syl('der'), syl('Wald'), syl('steht'), syl('schwarz'), syl('und'), syl('schwei'), syl('get,')],
+      [syl('und'), syl('aus'), syl('den'), syl('Wie'), syl('sen'), syl('stei'), syl('get')],
+      [syl('der'), syl('wei'), syl('ße'), syl('Ne'), syl('bel'), syl('wun'), syl('der'), syl('bar.')],
+    ],
+  },
+  {
+    id: 'willkommen-abschied', title: 'Willkommen und Abschied (1. Strophe)', author: 'Johann Wolfgang von Goethe', meterId: null,
+    lines: [
+      [syl('Es'), syl('schlug'), syl('mein'), syl('Herz,'), syl('ge'), syl('schwind'), syl('zu'), syl('Pfer'), syl('de!')],
+      [syl('Es'), syl('war'), syl('ge'), syl('tan'), syl('fast'), syl('eh'), syl('ge'), syl('dacht.')],
+      [syl('Der'), syl('A'), syl('bend'), syl('wieg'), syl('te'), syl('schon'), syl('die'), syl('Er'), syl('de,')],
+      [syl('und'), syl('an'), syl('den'), syl('Ber'), syl('gen'), syl('hing'), syl('die'), syl('Nacht.')],
+    ],
+  },
+];
+
+// Zustand der aktuellen Versmaß-Übung: welcher Text, aktueller Markier-Modus
+// (betont/unbetont) und die vom Nutzer vergebenen Markierungen pro Silbe.
+const versUebung = {
+  textId: null,
+  mode: 'betont',
+  marks: [], // marks[lineIdx][sylIdx] = 'betont' | 'unbetont' | null
+  checked: false,
+  checkStates: [], // gleiche Struktur wie marks, Werte: 'correct' | 'wrong' | null
+};
+
+function pickRandomVersText(excludeId) {
+  const pool = VERS_TEXTS.filter((t) => t.id !== excludeId);
+  const source = pool.length ? pool : VERS_TEXTS;
+  return source[Math.floor(Math.random() * source.length)];
+}
+
+function loadVersUebungText() {
+  const text = pickRandomVersText(versUebung.textId);
+  versUebung.textId = text.id;
+  versUebung.marks = text.lines.map((line) => line.map(() => null));
+  versUebung.checked = false;
+  versUebung.checkStates = text.lines.map((line) => line.map(() => null));
+
+  el('versmass-text-meta').textContent = `${text.title} – ${text.author}`;
+  renderVersText();
+  hideVersCheckResult();
+}
+
+function hideVersCheckResult() {
+  const result = el('versmass-check-result');
+  result.hidden = true;
+  result.classList.remove('success');
+}
+
+function showVersCheckMessage(text, success) {
+  const result = el('versmass-check-result');
+  result.textContent = text;
+  result.classList.toggle('success', success);
+  result.hidden = false;
+}
+
+function clearVersCheck() {
+  if (!versUebung.checked) return;
+  versUebung.checked = false;
+  versUebung.checkStates = versUebung.checkStates.map((line) => line.map(() => null));
+  hideVersCheckResult();
+}
+
+function renderVersText() {
+  const text = VERS_TEXTS.find((t) => t.id === versUebung.textId);
+  const card = el('versmass-text-card');
+  card.innerHTML = '';
+  text.lines.forEach((line, lineIdx) => {
+    const lineEl = document.createElement('div');
+    lineEl.className = 'vers-line';
+    line.forEach((s, sylIdx) => {
+      const chip = document.createElement('span');
+      chip.className = 'vers-syllable';
+      chip.dataset.line = String(lineIdx);
+      chip.dataset.syl = String(sylIdx);
+      const mark = versUebung.marks[lineIdx][sylIdx];
+      if (mark) chip.classList.add(mark);
+      const checkState = versUebung.checked ? versUebung.checkStates[lineIdx][sylIdx] : null;
+      if (checkState) chip.classList.add(`check-${checkState}`);
+
+      const markSpan = document.createElement('span');
+      markSpan.className = 'vers-mark';
+      markSpan.textContent = mark === 'betont' ? 'ˉ' : mark === 'unbetont' ? '˘' : '';
+      markSpan.setAttribute('aria-hidden', 'true');
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'vers-syllable-text';
+      textSpan.textContent = s.text;
+
+      chip.appendChild(markSpan);
+      chip.appendChild(textSpan);
+      lineEl.appendChild(chip);
+    });
+    card.appendChild(lineEl);
+  });
+}
+
+function onVersSyllableClick(lineIdx, sylIdx) {
+  const current = versUebung.marks[lineIdx][sylIdx];
+  versUebung.marks[lineIdx][sylIdx] = current === versUebung.mode ? null : versUebung.mode;
+  clearVersCheck();
+  renderVersText();
+}
+
+function checkVersUebung() {
+  const text = VERS_TEXTS.find((t) => t.id === versUebung.textId);
+  const meter = VERSMASS_TYPES.find((m) => m.id === text.meterId);
+  if (!text.meterId || !meter) {
+    versUebung.checked = false;
+    showVersCheckMessage('Für dieses Gedicht gibt es leider keine automatische Überprüfung – die Betonung realer Verse ist nicht immer eindeutig. Nutze es zum freien Üben oder probier einen der anderen Übungstexte aus.', false);
+    return;
+  }
+
+  let correctCount = 0;
+  let total = 0;
+  versUebung.checkStates = text.lines.map((line, lineIdx) => line.map((s, sylIdx) => {
+    total += 1;
+    const expected = s.stress ? 'betont' : 'unbetont';
+    const given = versUebung.marks[lineIdx][sylIdx];
+    const isCorrect = given === expected;
+    if (isCorrect) correctCount += 1;
+    return isCorrect ? 'correct' : 'wrong';
+  }));
+
+  versUebung.checked = true;
+  renderVersText();
+
+  if (correctCount === total) {
+    showVersCheckMessage(`🎉 Genau richtig! Das ist ein ${meter.name} (${meter.muster}).`, true);
+  } else {
+    showVersCheckMessage(`✅ ${correctCount} von ${total} Silben richtig markiert. Schau dir die rot markierten Silben nochmal an.`, false);
+  }
+}
+
+function initVersmassUebung() {
+  el('versmass-text-card').addEventListener('click', (ev) => {
+    const chip = ev.target.closest('.vers-syllable');
+    if (!chip) return;
+    onVersSyllableClick(Number(chip.dataset.line), Number(chip.dataset.syl));
+  });
+
+  el('versmass-mode-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.pill');
+    if (!btn) return;
+    versUebung.mode = btn.dataset.mode;
+    el('versmass-mode-group').querySelectorAll('.pill').forEach((p) => p.classList.toggle('selected', p === btn));
+  });
+
+  el('versmass-new-text-btn').addEventListener('click', loadVersUebungText);
+  el('versmass-check-btn').addEventListener('click', checkVersUebung);
+  el('versmass-reset-btn').addEventListener('click', () => {
+    versUebung.marks = versUebung.marks.map((line) => line.map(() => null));
+    clearVersCheck();
+    renderVersText();
+  });
+
+  loadVersUebungText();
+}
+
 /* ---------------- Notizen ---------------- */
 
 // Notizen leben ausschließlich in localStorage auf diesem Gerät - es gibt
@@ -3019,6 +3322,8 @@ initUpdateButton();
 enhanceTrickCards();
 renderStilmittelListe();
 initStilmittelUebung();
+renderVersmassListe();
+initVersmassUebung();
 initNotizen();
 initKarteikarten();
 showScreen('home');

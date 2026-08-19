@@ -293,6 +293,15 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
+    <button type="button" class="learn-banner" data-goto="deutsch-versmass">
+      <span class="learn-banner-icon">📐</span>
+      <span class="learn-banner-text">
+        <strong>Versmaß</strong>
+        <small>Jambus, Trochäus &amp; Co. lernen und Betonung im Vers üben</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
@@ -377,6 +386,80 @@
       <input type="text" class="text-input" id="stilmittel-legend-search" placeholder="🔍 Farbe zu einem Stilmittel suchen …" autocomplete="off">
       <div class="stilmittel-legend-list" id="stilmittel-legend-list"></div>
     </div>
+  </section>
+
+  <!-- ===================== DEUTSCH: VERSMASS (ORDNER) ===================== -->
+  <section class="screen" id="screen-deutsch-versmass" data-screen="deutsch-versmass" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="subject-deutsch" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📐 Versmaß</span>
+      </div>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="versmass-lernen">
+      <span class="learn-banner-icon">📘</span>
+      <span class="learn-banner-text">
+        <strong>Versmaß lernen</strong>
+        <small>Jambus, Trochäus, Daktylus, Anapäst &amp; Spondeus mit Beispiel</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="versmass-uben">
+      <span class="learn-banner-icon">🎵</span>
+      <span class="learn-banner-text">
+        <strong>Versmaß üben</strong>
+        <small>Silben in einem Vers als betont oder unbetont markieren</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== DEUTSCH: VERSMASS LERNEN ===================== -->
+  <section class="screen" id="screen-versmass-lernen" data-screen="versmass-lernen" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-versmass" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📘 Versmaß lernen</span>
+      </div>
+    </header>
+
+    <p class="subtitle learn-subtitle">
+      <strong>Hebung</strong> = betonte Silbe, <strong>Senkung</strong> = unbetonte Silbe. Ein <strong>Versfuß</strong> ist die kleinste, sich wiederholende Einheit aus Hebungen und Senkungen. Die Abfolge der Versfüße in einer Zeile ergibt das <strong>Versmaß</strong> (auch „Metrum“ genannt). In der Metrik markiert man betonte Silben mit <strong>ˉ</strong> und unbetonte mit <strong>˘</strong>. Tippe auf ein Versmaß, um Muster, Erkennungsmerkmale und ein Beispiel zu sehen.
+    </p>
+
+    <div class="stilmittel-list" id="versmass-list"></div>
+  </section>
+
+  <!-- ===================== DEUTSCH: VERSMASS ÜBEN ===================== -->
+  <section class="screen" id="screen-versmass-uben" data-screen="versmass-uben" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-versmass" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🎵 Versmaß üben</span>
+      </div>
+    </header>
+
+    <div class="stilmittel-uebung-toolbar">
+      <div class="stilmittel-text-meta" id="versmass-text-meta"></div>
+      <button type="button" class="btn-text" id="versmass-new-text-btn">🔀 Neuer Text</button>
+    </div>
+
+    <p class="diff-hint">Wähle unten, ob du gerade betonte oder unbetonte Silben markierst, und tippe dann auf die Silben im Vers.</p>
+
+    <div class="pill-group" id="versmass-mode-group">
+      <button type="button" class="pill selected" data-mode="betont">ˉ Betont</button>
+      <button type="button" class="pill" data-mode="unbetont">˘ Unbetont</button>
+    </div>
+
+    <div class="vers-text-card" id="versmass-text-card"></div>
+
+    <div class="versmass-actions">
+      <button type="button" class="btn-primary" id="versmass-check-btn">✅ Überprüfen</button>
+      <button type="button" class="btn-text" id="versmass-reset-btn">↺ Zurücksetzen</button>
+    </div>
+    <p class="stilmittel-check-result" id="versmass-check-result" hidden></p>
   </section>
 
   <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->

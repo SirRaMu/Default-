@@ -854,6 +854,56 @@ body {
   font-weight: 600;
 }
 
+/* ============ VERSMASS ============ */
+.vers-muster { font-weight: 700; letter-spacing: 0.5px; }
+
+.vers-text-card {
+  background: var(--bg-elevated);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vers-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.vers-syllable {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 1.6em;
+  padding: 4px 6px 3px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.02rem;
+  transition: background 0.1s ease;
+}
+.vers-syllable:active { transform: scale(0.96); }
+.vers-mark {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  height: 1em;
+  line-height: 1;
+}
+.vers-syllable.betont { background: var(--chip-bg); font-weight: 700; }
+.vers-syllable.unbetont { background: var(--chip-bg); opacity: 0.8; }
+.vers-syllable.check-correct { box-shadow: 0 0 0 2px var(--success); }
+.vers-syllable.check-wrong { box-shadow: 0 0 0 2px var(--danger); }
+
+.versmass-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
 /* ============ NOTIZEN ============ */
 .notiz-list { display: flex; flex-direction: column; gap: 10px; }
 
