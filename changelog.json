@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.16",
+    "date": "2026-08-19",
+    "title": "Erklärung: Rechnen mit Kommazahlen",
+    "items": [
+      { "icon": "🔢", "text": "Bei Einheiten \"Lernen & Üben\" erscheint jetzt eine eigene Erklärung, sobald \"Mit Komma\" ausgewählt ist: wie das Komma beim Umrechnen nach rechts bzw. links wandert, mit Beispielen." }
+    ]
+  },
+  {
     "version": "2.15",
     "date": "2026-08-19",
     "title": "Einheiten umrechnen: jetzt auch mit Komma",

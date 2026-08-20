@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.15';
+const APP_VERSION = '2.16';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -429,6 +429,7 @@ function syncEinheitenDecimalUI() {
   document.querySelectorAll('#einheiten-decimal-group .pill, #einheiten-uebung-decimal-group .pill').forEach((btn) => {
     btn.classList.toggle('selected', (btn.dataset.einheitenDecimal === 'true') === state.setup.einheitenDecimal);
   });
+  el('einheiten-komma-erklaerung').hidden = !state.setup.einheitenDecimal;
 }
 
 function initEinheitenUebungToggle() {
