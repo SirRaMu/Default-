@@ -317,6 +317,15 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
+    <button type="button" class="learn-banner" data-goto="deutsch-kadenz">
+      <span class="learn-banner-icon">🎼</span>
+      <span class="learn-banner-text">
+        <strong>Kadenz &amp; Reimschema</strong>
+        <small>Männliche, weibliche &amp; reiche Kadenz sowie Reimschemata lernen und üben</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
     <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
@@ -542,6 +551,70 @@
 
     <button type="button" class="btn-primary" id="textart-check-btn">✅ Überprüfen</button>
     <p class="stilmittel-check-result" id="textart-check-result" hidden></p>
+  </section>
+
+  <!-- ===================== DEUTSCH: KADENZ & REIMSCHEMA (ORDNER) ===================== -->
+  <section class="screen" id="screen-deutsch-kadenz" data-screen="deutsch-kadenz" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="subject-deutsch" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🎼 Kadenz &amp; Reimschema</span>
+      </div>
+    </header>
+
+    <button type="button" class="learn-banner" data-goto="kadenz-lernen">
+      <span class="learn-banner-icon">📕</span>
+      <span class="learn-banner-text">
+        <strong>Kadenz &amp; Reimschema lernen</strong>
+        <small>Männliche, weibliche &amp; reiche Kadenz sowie fünf Reimschemata</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <button type="button" class="learn-banner" data-goto="kadenz-uebung">
+      <span class="learn-banner-icon">🎯</span>
+      <span class="learn-banner-text">
+        <strong>Kadenz &amp; Reimschema üben</strong>
+        <small>Versenden und Gedichte der richtigen Kadenz bzw. dem richtigen Reimschema zuordnen</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+  </section>
+
+  <!-- ===================== DEUTSCH: KADENZ & REIMSCHEMA LERNEN ===================== -->
+  <section class="screen" id="screen-kadenz-lernen" data-screen="kadenz-lernen" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-kadenz" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📕 Kadenz &amp; Reimschema lernen</span>
+      </div>
+    </header>
+    <p class="subtitle learn-subtitle">Die <strong>Kadenz</strong> beschreibt, wie eine Verszeile endet (betont oder unbetont). Das <strong>Reimschema</strong> beschreibt, welche Verszeilen sich innerhalb einer Strophe reimen. Tippe auf einen Eintrag, um mehr zu erfahren.</p>
+
+    <div class="stilmittel-list" id="kadenz-lernen-list"></div>
+  </section>
+
+  <!-- ===================== DEUTSCH: KADENZ & REIMSCHEMA ÜBEN ===================== -->
+  <section class="screen" id="screen-kadenz-uebung" data-screen="kadenz-uebung" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="deutsch-kadenz" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🎯 Kadenz &amp; Reimschema üben</span>
+      </div>
+    </header>
+
+    <div class="stilmittel-uebung-toolbar">
+      <div class="stilmittel-text-meta" id="kadenz-uebung-meta"></div>
+      <button type="button" class="btn-text" id="kadenz-uebung-new-btn">🔀 Neue Aufgabe</button>
+    </div>
+
+    <div class="stilmittel-text-card" id="kadenz-uebung-card"></div>
+
+    <p class="option-label" id="kadenz-uebung-question-label"></p>
+    <div class="chip-group" id="kadenz-uebung-choice-group"></div>
+
+    <button type="button" class="btn-primary" id="kadenz-uebung-check-btn">✅ Überprüfen</button>
+    <p class="stilmittel-check-result" id="kadenz-uebung-check-result" hidden></p>
   </section>
 
   <!-- ===================== FACH: ENGLISCH (Platzhalter) ===================== -->

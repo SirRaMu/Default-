@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.17",
+    "date": "2026-08-19",
+    "title": "Neu bei Deutsch: Kadenz & Reimschema",
+    "items": [
+      { "icon": "🎼", "text": "Neuer Bereich \"Kadenz & Reimschema\": lernen, was männliche, weibliche und reiche Kadenz sind, sowie die fünf Reimschemata Paarreim, Kreuzreim, umarmender Reim, Schweifreim und Haufenreim." },
+      { "icon": "🎯", "text": "\"Kadenz & Reimschema üben\": abwechselnd Verszeilen der richtigen Kadenz und Gedichte dem richtigen Reimschema zuordnen, mit direkter Überprüfung." }
+    ]
+  },
+  {
     "version": "2.16",
     "date": "2026-08-19",
     "title": "Erklärung: Rechnen mit Kommazahlen",

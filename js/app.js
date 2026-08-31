@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.16';
+const APP_VERSION = '2.17';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -3429,6 +3429,291 @@ function initTrash() {
   renderTrashList();
 }
 
+/* ---------------- Deutsch: Kadenz & Reimschema ---------------- */
+
+// Kadenzen beschreiben, wie eine Verszeile endet (betont/unbetont) - das
+// lässt sich direkt aus den bekannten Betonungsmustern des Versmaß-
+// Wortschatzes ableiten. Reimschemata beschreiben dagegen, welche Zeilen
+// sich innerhalb einer Strophe reimen - das ist unabhängig von der Betonung
+// und braucht eigene, handgeschriebene (und überprüfte) Übungstexte.
+const KADENZ_TYPES = [
+  {
+    id: 'maennlich', name: 'Männliche Kadenz (stumpfe Kadenz)', color: '#7dd3fc',
+    definition: 'Der Vers endet auf eine betonte Silbe.',
+    erkennung: 'Sprich die letzte Silbe der Zeile laut – klingt sie betont und „hart“ abgeschlossen, liegt eine männliche (auch: stumpfe) Kadenz vor.',
+    beispiel: '„Der Mond scheint hell und klar“ – die Zeile endet auf die betonte Silbe „klar“.',
+  },
+  {
+    id: 'weiblich', name: 'Weibliche Kadenz (klingende Kadenz)', color: '#fca5a5',
+    definition: 'Der Vers endet auf eine unbetonte Silbe, die direkt auf die letzte betonte Silbe folgt.',
+    erkennung: 'Die letzte Silbe „verklingt“ unbetont – oft, weil das letzte Wort selbst schon auf einer unbetonten Silbe endet (z. B. „Sonne“, „Wiesen“).',
+    beispiel: '„Die Vögel singen in den Wiesen“ – die Zeile endet auf die unbetonte Silbe „-sen“ in „Wiesen“.',
+  },
+  {
+    id: 'reich', name: 'Reiche Kadenz', color: '#86efac',
+    definition: 'Der Vers endet auf mehr als eine unbetonte Silbe nach der letzten Hebung.',
+    erkennung: 'Nach der letzten betonten Silbe folgen noch zwei (oder mehr) unbetonte Silben, z. B. bei Wörtern wie „Sonnenschein“ oder „fröhlicher“.',
+    beispiel: '„Abendrot, Kinderlied, fröhlicher“ – nach der Hebung „fröh“ folgen noch zwei unbetonte Silben „li“ und „cher“.',
+  },
+];
+
+const REIMSCHEMA_TYPES = [
+  {
+    id: 'paarreim', name: 'Paarreim (aabb)', color: '#fde047',
+    definition: 'Zwei aufeinanderfolgende Verse reimen sich jeweils miteinander.',
+    erkennung: 'Reimschema: aabb – Zeile 1 reimt sich mit Zeile 2, Zeile 3 mit Zeile 4.',
+    beispiel: '„Ich steh allein im dunklen Wald (a), die Luft ist kühl, die Nacht wird kalt (a), die Sterne funkeln klar und hell (b), sie leuchten wie ein Zauberquell (b).“',
+  },
+  {
+    id: 'kreuzreim', name: 'Kreuzreim (abab)', color: '#fdba74',
+    definition: 'Der erste und dritte Vers reimen sich, ebenso der zweite und vierte.',
+    erkennung: 'Reimschema: abab – die Reime „kreuzen“ sich über die Zeilen hinweg.',
+    beispiel: '„Ich steh allein im dunklen Wald (a), die Sterne funkeln klar und hell (b), die Luft ist kühl, die Nacht wird kalt (a), sie leuchten wie ein Zauberquell (b).“',
+  },
+  {
+    id: 'umarmend', name: 'Umarmender Reim (abba)', color: '#c4b5fd',
+    definition: 'Der erste und der vierte Vers reimen sich und „umarmen“ damit den zweiten und dritten Vers, die sich ebenfalls reimen.',
+    erkennung: 'Reimschema: abba.',
+    beispiel: '„Ich steh allein im dunklen Wald (a), die Sterne funkeln klar und hell (b), sie leuchten wie ein Zauberquell (b), die Luft ist kühl, die Nacht wird kalt (a).“',
+  },
+  {
+    id: 'schweifreim', name: 'Schweifreim (aabccb)', color: '#f0abfc',
+    definition: 'Zwei Reimpaare (aa und cc) werden durch einen gemeinsamen „Schweif“-Reim (b) verbunden, der jeweils die dritte Zeile jeder Dreiergruppe abschließt.',
+    erkennung: 'Reimschema: aabccb – meist bei sechszeiligen Strophen.',
+    beispiel: '„Ich steh allein im dunklen Wald (a), die Luft ist kühl, die Nacht wird kalt (a), die Sterne funkeln klar und hell (b), der Mond scheint hoch und weit und breit (c), er tröstet mich zu dieser Zeit (c), sie leuchten wie ein Zauberquell (b).“',
+  },
+  {
+    id: 'haufenreim', name: 'Haufenreim (aaaa)', color: '#fda4af',
+    definition: 'Alle Verse einer Strophe reimen sich aufeinander.',
+    erkennung: 'Reimschema: aaaa (oder länger) – jede Zeile endet auf denselben Reimklang.',
+    beispiel: '„Ich steh allein im dunklen Wald (a), die Luft ist kühl, die Nacht wird kalt (a), mein Herz schlägt schnell, ich werde alt (a), ein Rufen aus dem Wald erschallt (a).“',
+  },
+];
+
+function renderKadenzLernenListe() {
+  const list = el('kadenz-lernen-list');
+  list.innerHTML = '';
+
+  const renderGroup = (title, items) => {
+    const heading = document.createElement('h3');
+    heading.className = 'settings-subtitle';
+    heading.textContent = title;
+    list.appendChild(heading);
+
+    items.forEach((data) => {
+      const item = document.createElement('div');
+      item.className = 'stilmittel-item';
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'stilmittel-toggle';
+
+      const swatch = document.createElement('span');
+      swatch.className = 'stilmittel-swatch';
+      swatch.style.background = data.color;
+      swatch.setAttribute('aria-hidden', 'true');
+
+      const name = document.createElement('span');
+      name.className = 'stilmittel-name';
+      name.textContent = data.name;
+
+      const chevron = document.createElement('span');
+      chevron.className = 'stilmittel-chevron';
+      chevron.textContent = '⌄';
+      chevron.setAttribute('aria-hidden', 'true');
+
+      toggle.appendChild(swatch);
+      toggle.appendChild(name);
+      toggle.appendChild(chevron);
+
+      const body = document.createElement('div');
+      body.className = 'stilmittel-body';
+      body.hidden = true;
+
+      const pDef = document.createElement('p');
+      pDef.innerHTML = `<strong>Was es ist:</strong> ${data.definition}`;
+      const pErk = document.createElement('p');
+      pErk.innerHTML = `<strong>Woran du es erkennst:</strong> ${data.erkennung}`;
+      const pBsp = document.createElement('p');
+      pBsp.className = 'stilmittel-example';
+      pBsp.innerHTML = `<strong>Beispiel:</strong> <em>${data.beispiel}</em>`;
+      body.appendChild(pDef);
+      body.appendChild(pErk);
+      body.appendChild(pBsp);
+
+      toggle.addEventListener('click', () => {
+        const willOpen = body.hidden;
+        body.hidden = !willOpen;
+        item.classList.toggle('open', willOpen);
+      });
+
+      item.appendChild(toggle);
+      item.appendChild(body);
+      list.appendChild(item);
+    });
+  };
+
+  renderGroup('Kadenzen', KADENZ_TYPES);
+  renderGroup('Reimschemata', REIMSCHEMA_TYPES);
+}
+
+// Wörter mit bekanntem Betonungsmuster aus dem Versmaß-Wortschatz, sortiert
+// danach, wie sie am Zeilenende klingen würden (männlich/weiblich/reich).
+const KADENZ_UEBUNG_WORDS = {
+  maennlich: VERS_WORDBANK.betont,
+  weiblich: VERS_WORDBANK.trochaeusWort.map(([a, b]) => a + b),
+  reich: VERS_WORDBANK.daktylusWort.map(([a, b, c]) => a + b + c),
+};
+
+// Handgeschriebene, überprüfte Übungstexte je Reimschema - alle nutzen
+// dieselben, sicher reimenden Wortpaare (Wald/kalt/alt/erschallt über die
+// deutsche Auslautverhärtung, hell/Quell, breit/Zeit), nur in anderer
+// Reihenfolge angeordnet, damit jedes Reimschema eindeutig erkennbar ist.
+const REIMSCHEMA_TEXTS = [
+  {
+    id: 'wald-paar', reimschemaId: 'paarreim', title: 'Im dunklen Wald (Paarreim)', author: 'eigener Übungstext',
+    lines: ['Ich steh allein im dunklen Wald,', 'die Luft ist kühl, die Nacht wird kalt.', 'Die Sterne funkeln klar und hell,', 'sie leuchten wie ein Zauberquell.'],
+  },
+  {
+    id: 'wald-kreuz', reimschemaId: 'kreuzreim', title: 'Im dunklen Wald (Kreuzreim)', author: 'eigener Übungstext',
+    lines: ['Ich steh allein im dunklen Wald,', 'die Sterne funkeln klar und hell,', 'die Luft ist kühl, die Nacht wird kalt,', 'sie leuchten wie ein Zauberquell.'],
+  },
+  {
+    id: 'wald-umarmend', reimschemaId: 'umarmend', title: 'Im dunklen Wald (umarmender Reim)', author: 'eigener Übungstext',
+    lines: ['Ich steh allein im dunklen Wald,', 'die Sterne funkeln klar und hell,', 'sie leuchten wie ein Zauberquell,', 'die Luft ist kühl, die Nacht wird kalt.'],
+  },
+  {
+    id: 'wald-haufen', reimschemaId: 'haufenreim', title: 'Im dunklen Wald (Haufenreim)', author: 'eigener Übungstext',
+    lines: ['Ich steh allein im dunklen Wald,', 'die Luft ist kühl, die Nacht wird kalt,', 'mein Herz schlägt schnell, ich werde alt,', 'ein Rufen aus dem Wald erschallt.'],
+  },
+  {
+    id: 'wald-schweif', reimschemaId: 'schweifreim', title: 'Im dunklen Wald (Schweifreim)', author: 'eigener Übungstext',
+    lines: ['Ich steh allein im dunklen Wald,', 'die Luft ist kühl, die Nacht wird kalt,', 'die Sterne funkeln klar und hell.', 'Der Mond scheint hoch und weit und breit,', 'er tröstet mich zu dieser Zeit,', 'sie leuchten wie ein Zauberquell.'],
+  },
+];
+
+const kadenzUebung = {
+  kind: null, // 'kadenz' | 'reimschema'
+  kadenzWord: '',
+  reimschemaText: null,
+  correctId: null,
+  choice: null,
+  checked: false,
+};
+
+function loadKadenzUebungItem() {
+  kadenzUebung.kind = pick(['kadenz', 'reimschema']);
+  kadenzUebung.choice = null;
+  kadenzUebung.checked = false;
+
+  if (kadenzUebung.kind === 'kadenz') {
+    const kadenzId = pick(['maennlich', 'weiblich', 'reich']);
+    kadenzUebung.kadenzWord = pick(KADENZ_UEBUNG_WORDS[kadenzId]);
+    kadenzUebung.correctId = kadenzId;
+    kadenzUebung.reimschemaText = null;
+    el('kadenz-uebung-meta').textContent = 'Versende erkennen';
+  } else {
+    const text = pick(REIMSCHEMA_TEXTS);
+    kadenzUebung.reimschemaText = text;
+    kadenzUebung.correctId = text.reimschemaId;
+    el('kadenz-uebung-meta').textContent = `${text.title} – ${text.author}`;
+  }
+
+  renderKadenzUebung();
+  hideKadenzCheckResult();
+}
+
+function hideKadenzCheckResult() {
+  const result = el('kadenz-uebung-check-result');
+  result.hidden = true;
+  result.classList.remove('success');
+}
+
+function showKadenzCheckMessage(text, success) {
+  const result = el('kadenz-uebung-check-result');
+  result.textContent = text;
+  result.classList.toggle('success', success);
+  result.hidden = false;
+}
+
+function renderKadenzUebung() {
+  const isKadenz = kadenzUebung.kind === 'kadenz';
+  el('kadenz-uebung-question-label').textContent = isKadenz
+    ? 'Welche Kadenz hat diese Verszeile?'
+    : 'Welches Reimschema hat dieses Gedicht?';
+
+  const card = el('kadenz-uebung-card');
+  card.innerHTML = '';
+  if (isKadenz) {
+    const p = document.createElement('p');
+    p.className = 'kadenz-line';
+    p.textContent = `⋯ ${kadenzUebung.kadenzWord}`;
+    card.appendChild(p);
+  } else {
+    kadenzUebung.reimschemaText.lines.forEach((line) => {
+      const p = document.createElement('p');
+      p.className = 'kadenz-poem-line';
+      p.textContent = line;
+      card.appendChild(p);
+    });
+  }
+
+  const options = isKadenz ? KADENZ_TYPES : REIMSCHEMA_TYPES;
+  const group = el('kadenz-uebung-choice-group');
+  group.innerHTML = '';
+  options.forEach((opt) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip';
+    btn.textContent = opt.name;
+    btn.dataset.choiceId = opt.id;
+    btn.classList.toggle('selected', kadenzUebung.choice === opt.id);
+    if (kadenzUebung.checked) {
+      if (opt.id === kadenzUebung.choice) {
+        btn.classList.add(opt.id === kadenzUebung.correctId ? 'check-correct' : 'check-wrong');
+      } else if (opt.id === kadenzUebung.correctId) {
+        btn.classList.add('check-correct');
+      }
+    }
+    group.appendChild(btn);
+  });
+}
+
+function checkKadenzUebung() {
+  if (!kadenzUebung.choice) {
+    showKadenzCheckMessage('Wähle zuerst eine Antwort aus, bevor du überprüfst.', false);
+    return;
+  }
+  kadenzUebung.checked = true;
+  renderKadenzUebung();
+
+  const correct = kadenzUebung.choice === kadenzUebung.correctId;
+  const options = kadenzUebung.kind === 'kadenz' ? KADENZ_TYPES : REIMSCHEMA_TYPES;
+  const correctOption = options.find((o) => o.id === kadenzUebung.correctId);
+
+  if (correct) {
+    showKadenzCheckMessage(`🎉 Genau richtig, das ist ${kadenzUebung.kind === 'kadenz' ? 'eine' : 'ein'} ${correctOption.name}!`, true);
+  } else {
+    showKadenzCheckMessage(`❌ Das war leider nicht richtig. Richtig wäre: ${correctOption.name}.`, false);
+  }
+}
+
+function initKadenzUebung() {
+  el('kadenz-uebung-choice-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.chip');
+    if (!btn) return;
+    kadenzUebung.choice = btn.dataset.choiceId;
+    kadenzUebung.checked = false;
+    renderKadenzUebung();
+    hideKadenzCheckResult();
+  });
+
+  el('kadenz-uebung-new-btn').addEventListener('click', loadKadenzUebungItem);
+  el('kadenz-uebung-check-btn').addEventListener('click', checkKadenzUebung);
+
+  loadKadenzUebungItem();
+}
+
 /* ---------------- Notizen ---------------- */
 
 // Notizen leben ausschließlich in localStorage auf diesem Gerät - es gibt
@@ -4060,6 +4345,8 @@ renderVersmassListe();
 initVersmassUebung();
 renderTextartenListe();
 initTextartenUebung();
+renderKadenzLernenListe();
+initKadenzUebung();
 initTrash();
 initEinheitenUebungToggle();
 initNotizen();

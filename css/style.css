@@ -906,6 +906,19 @@ body {
   margin-top: 4px;
 }
 
+/* ============ KADENZ & REIMSCHEMA ============ */
+.kadenz-line {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 20px 0;
+}
+.kadenz-poem-line {
+  margin: 0 0 6px;
+  line-height: 1.6;
+}
+.kadenz-poem-line:last-child { margin-bottom: 0; }
+
 /* ============ NOTIZEN ============ */
 .notiz-list { display: flex; flex-direction: column; gap: 10px; }
 
