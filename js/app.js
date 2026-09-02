@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.17';
+const APP_VERSION = '2.18';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -4321,6 +4321,18 @@ function initKarteikarten() {
 
   el('karte-delete-btn').addEventListener('click', () => {
     if (currentCardId) deleteCard(currentCardId);
+  });
+
+  // Damit man beim Anlegen mehrerer Karten nicht ständig zur Liste und
+  // wieder zurück muss: direkt speichern und verlassen bzw. speichern und
+  // sofort mit einer neuen Karte weitermachen.
+  el('karte-save-exit-btn').addEventListener('click', () => {
+    saveCurrentCard();
+    showScreen('karteikarten');
+  });
+  el('karte-save-new-btn').addEventListener('click', () => {
+    saveCurrentCard();
+    createNewCard();
   });
 
   el('karte-flip-card').addEventListener('click', flipKarteCard);

@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.18",
+    "date": "2026-09-02",
+    "title": "Karteikarten: schneller mehrere anlegen",
+    "items": [
+      { "icon": "💾", "text": "Neu im Karteikarten-Editor: \"Speichern & verlassen\" und \"Speichern & neue Karteikarte\" – damit musst du beim Anlegen mehrerer Karten nicht mehr ständig zur Liste zurück und wieder rein." }
+    ]
+  },
+  {
     "version": "2.17",
     "date": "2026-08-19",
     "title": "Neu bei Deutsch: Kadenz & Reimschema",
