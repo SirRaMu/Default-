@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.18';
+const APP_VERSION = '2.19';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -3429,6 +3429,175 @@ function initTrash() {
   renderTrashList();
 }
 
+/* ---------------- Gerät wechseln (Übertragungscode) ---------------- */
+
+// Es gibt bewusst kein Backend und kein Benutzerkonto - alle Daten bleiben
+// nur auf diesem Gerät. Wer sie trotzdem auf ein anderes Gerät mitnehmen
+// will, kann sich hier einen Code erzeugen (Karteikarten, Notizen,
+// Erfolge) und ihn selbst dorthin übertragen (z. B. per Nachricht an sich
+// selbst). Beim Importieren werden vorhandene Daten auf dem Zielgerät
+// nicht ersetzt, sondern zusammengeführt.
+const TRANSFER_TYPE = 'kopfrechnen-transfer';
+
+function buildTransferPayload() {
+  return {
+    type: TRANSFER_TYPE,
+    v: 1,
+    createdAt: Date.now(),
+    flashcards: loadAllFlashcards(),
+    notes: loadNotes(),
+    history: loadHistory(),
+    highscores: loadHighscores(),
+    trickCount: getTrickCounter(),
+  };
+}
+
+function encodeTransferPayload(payload) {
+  const json = JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(json);
+  let binary = '';
+  bytes.forEach((b) => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+function decodeTransferPayload(code) {
+  const binary = atob(code.trim());
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  const json = new TextDecoder().decode(bytes);
+  return JSON.parse(json);
+}
+
+function mergeImportedFlashcards(imported) {
+  if (!Array.isArray(imported)) return 0;
+  const existing = loadAllFlashcards();
+  const existingIds = new Set(existing.map((c) => c.id));
+  let added = 0;
+  imported.forEach((card) => {
+    if (!card || !card.id || existingIds.has(card.id)) return;
+    existing.push(card);
+    existingIds.add(card.id);
+    added++;
+  });
+  if (added > 0) saveFlashcards(existing);
+  return added;
+}
+
+function mergeImportedNotes(imported) {
+  if (!Array.isArray(imported)) return 0;
+  const existing = loadNotes();
+  const existingIds = new Set(existing.map((n) => n.id));
+  let added = 0;
+  imported.forEach((note) => {
+    if (!note || !note.id || existingIds.has(note.id)) return;
+    existing.push(note);
+    existingIds.add(note.id);
+    added++;
+  });
+  if (added > 0) saveNotes(existing);
+  return added;
+}
+
+function mergeImportedHistory(imported) {
+  if (!Array.isArray(imported) || imported.length === 0) return;
+  const combined = loadHistory().concat(imported);
+  combined.sort((a, b) => (b.date || 0) - (a.date || 0));
+  try {
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(combined.slice(0, 10)));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function mergeImportedHighscores(imported) {
+  if (!imported || typeof imported !== 'object') return;
+  const existing = loadHighscores();
+  Object.keys(imported).forEach((key) => {
+    const val = Number(imported[key]);
+    if (val > (existing[key] || 0)) existing[key] = val;
+  });
+  try {
+    localStorage.setItem(STORAGE_KEYS.highscores, JSON.stringify(existing));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function mergeImportedTrickCount(imported) {
+  const add = Number(imported) || 0;
+  if (add <= 0) return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.trickCount, String(getTrickCounter() + add));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function importTransferCode(code) {
+  if (!code || !code.trim()) {
+    return { ok: false, error: 'Bitte füge zuerst einen Code ein.' };
+  }
+  let payload;
+  try {
+    payload = decodeTransferPayload(code);
+  } catch (e) {
+    return { ok: false, error: 'Der Code konnte nicht gelesen werden. Bitte prüfe, ob er vollständig eingefügt wurde.' };
+  }
+  if (!payload || payload.type !== TRANSFER_TYPE) {
+    return { ok: false, error: 'Das ist kein gültiger Übertragungscode dieser App.' };
+  }
+  const addedCards = mergeImportedFlashcards(payload.flashcards);
+  const addedNotes = mergeImportedNotes(payload.notes);
+  mergeImportedHistory(payload.history);
+  mergeImportedHighscores(payload.highscores);
+  mergeImportedTrickCount(payload.trickCount);
+  renderNotesList();
+
+  const parts = [];
+  if (addedCards > 0) parts.push(`${addedCards} neue Karteikarte${addedCards === 1 ? '' : 'n'}`);
+  if (addedNotes > 0) parts.push(`${addedNotes} neue Notiz${addedNotes === 1 ? '' : 'en'}`);
+  const summary = parts.length > 0
+    ? `Übertragen: ${parts.join(', ')}. Erfolge wurden zusammengeführt. Deine vorhandenen Daten auf diesem Gerät bleiben erhalten.`
+    : 'Übertragen: Erfolge wurden zusammengeführt (keine neuen Karteikarten oder Notizen gefunden). Deine vorhandenen Daten auf diesem Gerät bleiben erhalten.';
+  return { ok: true, message: summary };
+}
+
+function initTransfer() {
+  const createBtn = el('transfer-create-btn');
+  const output = el('transfer-code-output');
+  const copyBtn = el('transfer-copy-btn');
+  const createStatus = el('transfer-create-status');
+  const input = el('transfer-code-input');
+  const importBtn = el('transfer-import-btn');
+  const importStatus = el('transfer-import-status');
+
+  createBtn.addEventListener('click', () => {
+    const code = encodeTransferPayload(buildTransferPayload());
+    output.value = code;
+    output.hidden = false;
+    copyBtn.hidden = false;
+    createStatus.hidden = true;
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(output.value);
+      createStatus.textContent = '✅ Code in die Zwischenablage kopiert.';
+    } catch (e) {
+      output.select();
+      createStatus.textContent = 'Kopieren hat nicht automatisch geklappt - der Code ist markiert, du kannst ihn jetzt manuell kopieren.';
+    }
+    createStatus.hidden = false;
+  });
+
+  importBtn.addEventListener('click', () => {
+    const result = importTransferCode(input.value);
+    importStatus.textContent = result.ok ? `✅ ${result.message}` : `⚠️ ${result.error}`;
+    importStatus.classList.toggle('transfer-status-error', !result.ok);
+    importStatus.hidden = false;
+    if (result.ok) input.value = '';
+  });
+}
+
 /* ---------------- Deutsch: Kadenz & Reimschema ---------------- */
 
 // Kadenzen beschreiben, wie eine Verszeile endet (betont/unbetont) - das
@@ -4360,6 +4529,7 @@ initTextartenUebung();
 renderKadenzLernenListe();
 initKadenzUebung();
 initTrash();
+initTransfer();
 initEinheitenUebungToggle();
 initNotizen();
 initKarteikarten();

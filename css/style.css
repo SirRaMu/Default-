@@ -1245,6 +1245,23 @@ body {
 .karte-editor-actions .btn-primary,
 .karte-editor-actions .btn-secondary { margin-top: 0; }
 
+.transfer-code-area {
+  width: 100%;
+  min-height: 110px;
+  margin-top: 12px;
+  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  resize: vertical;
+  word-break: break-all;
+}
+.transfer-status {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.transfer-status-error { color: #dc2626; }
+
 .karte-flip-outer {
   perspective: 1400px;
   margin-top: 4px;

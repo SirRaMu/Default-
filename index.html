@@ -991,6 +991,14 @@
         </span>
         <span class="learn-banner-arrow">→</span>
       </button>
+      <button type="button" class="learn-banner" data-goto="transfer">
+        <span class="learn-banner-icon">🔄</span>
+        <span class="learn-banner-text">
+          <strong>Gerät wechseln / Daten übertragen</strong>
+          <small>Karteikarten, Erfolge &amp; Notizen per Code auf ein anderes Gerät mitnehmen</small>
+        </span>
+        <span class="learn-banner-arrow">→</span>
+      </button>
     </div>
 
     <div class="setup-card">
@@ -1017,6 +1025,32 @@
 
     <div class="trash-list" id="trash-list"></div>
     <p class="trash-empty-hint" id="trash-empty-hint" hidden>Der Papierkorb ist leer.</p>
+  </section>
+
+  <!-- ===================== GERÄT WECHSELN / ÜBERTRAGUNGSCODE ===================== -->
+  <section class="screen" id="screen-transfer" data-screen="transfer" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="settings" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">🔄 Gerät wechseln</span>
+      </div>
+    </header>
+    <p class="diff-hint">Diese App hat kein Benutzerkonto und keinen Server – deine Daten liegen nur auf diesem Gerät. Mit einem Übertragungscode kannst du Karteikarten, Notizen und Erfolge trotzdem selbst auf ein anderes Gerät mitnehmen. Vorhandene Daten auf dem Zielgerät gehen dabei nicht verloren, sie werden zusammengeführt.</p>
+
+    <div class="setup-card">
+      <h3 class="settings-subtitle">1. Code auf diesem Gerät erstellen</h3>
+      <button type="button" class="btn-primary" id="transfer-create-btn">Übertragungscode erstellen</button>
+      <textarea id="transfer-code-output" class="text-input transfer-code-area" readonly hidden placeholder="Dein Code erscheint hier..."></textarea>
+      <button type="button" class="btn-secondary" id="transfer-copy-btn" hidden>📋 Code kopieren</button>
+      <p class="transfer-status" id="transfer-create-status" hidden></p>
+    </div>
+
+    <div class="setup-card">
+      <h3 class="settings-subtitle">2. Code auf dem anderen Gerät einfügen</h3>
+      <textarea id="transfer-code-input" class="text-input transfer-code-area" placeholder="Code hier einfügen..."></textarea>
+      <button type="button" class="btn-primary" id="transfer-import-btn">Code importieren</button>
+      <p class="transfer-status" id="transfer-import-status" hidden></p>
+    </div>
   </section>
 
   <!-- ===================== QUIZ SCREEN ===================== -->

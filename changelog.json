@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.19",
+    "date": "2026-09-02",
+    "title": "Gerät wechseln per Übertragungscode",
+    "items": [
+      { "icon": "🔄", "text": "Neu in den Einstellungen unter \"Daten\": \"Gerät wechseln / Daten übertragen\". Es gibt weiterhin kein Benutzerkonto und keinen Server – aber du kannst dir einen Code erzeugen, der deine Karteikarten, Notizen und Erfolge enthält, und ihn selbst auf ein anderes Gerät übertragen." },
+      { "icon": "🔒", "text": "Beim Importieren des Codes werden vorhandene Daten auf dem Zielgerät nicht gelöscht, sondern mit den übertragenen Daten zusammengeführt." }
+    ]
+  },
+  {
     "version": "2.18",
     "date": "2026-09-02",
     "title": "Karteikarten: schneller mehrere anlegen",
