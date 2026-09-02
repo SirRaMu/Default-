@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.20",
+    "date": "2026-09-02",
+    "title": "Karteikarten: Stapel wie bei der Papier-Kartei",
+    "items": [
+      { "icon": "✅", "text": "Beim Lernen kannst du jetzt nach jeder Karte \"Kann ich\" oder \"Muss ich üben\" antippen – genau wie beim Sortieren echter Karteikarten in Fächer." },
+      { "icon": "📚", "text": "In der Kartenliste gibt es jetzt zwei Stapel: \"Kann ich schon\" und \"Noch üben\". Du kannst gezielt nur einen der beiden Stapel weiterüben." },
+      { "icon": "🔀", "text": "Mit \"Stapel wieder zusammenfügen\" holst du dir jederzeit alle Karten zurück in einen Stapel, um wieder von vorne zu üben." }
+    ]
+  },
+  {
     "version": "2.19",
     "date": "2026-09-02",
     "title": "Gerät wechseln per Übertragungscode",

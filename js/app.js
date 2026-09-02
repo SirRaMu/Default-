@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.19';
+const APP_VERSION = '2.20';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -4311,11 +4311,60 @@ function renderKarteList() {
       deleteCard(card.id);
     });
 
+    if (card.known === true) row.classList.add('karte-card-known');
+    else if (card.known === false) row.classList.add('karte-card-unknown');
+
     row.appendChild(main);
     row.appendChild(deleteBtn);
     row.addEventListener('click', () => openCardEditor(card.id));
     list.appendChild(row);
   });
+
+  renderKarteStapelRow(cards);
+}
+
+/**
+ * Zeigt die beiden "Stapel" (Kann ich schon / Noch üben) an - wie bei
+ * einer klassischen Karteikarten-Box, bei der man Karten je nach dem, ob
+ * man sie schon kann, in ein anderes Fach sortiert. Karten ohne
+ * Einschätzung (noch nie geübt) zählen zu "Noch üben".
+ */
+function renderKarteStapelRow(cards) {
+  const known = cards.filter((c) => c.known === true).length;
+  const unknown = cards.length - known;
+  const hasPiles = cards.some((c) => typeof c.known === 'boolean');
+
+  el('karte-stapel-row').hidden = cards.length === 0;
+  el('karte-stapel-known-count').textContent = String(known);
+  el('karte-stapel-unknown-count').textContent = String(unknown);
+  el('karte-stapel-known-btn').disabled = known === 0;
+  el('karte-stapel-unknown-btn').disabled = unknown === 0;
+  el('karte-stapel-merge-btn').hidden = !hasPiles;
+}
+
+function getCardPileCounts(subject) {
+  const cards = loadFlashcardsForSubject(subject);
+  const known = cards.filter((c) => c.known === true).length;
+  return { total: cards.length, known, unknown: cards.length - known };
+}
+
+/**
+ * Führt die beiden Stapel wieder zu einem zusammen: die Einschätzung
+ * "kann ich" / "kann ich noch nicht" wird für alle Karten des aktuellen
+ * Fachs zurückgesetzt, damit man wieder von vorne mit allen Karten üben
+ * kann - wie beim Zusammenschütten einer Karteikarten-Box.
+ */
+function mergeKartePiles() {
+  const cards = loadAllFlashcards();
+  let changed = false;
+  cards.forEach((c) => {
+    if (c.subject === karteContext.subject && typeof c.known === 'boolean') {
+      delete c.known;
+      changed = true;
+    }
+  });
+  if (changed) saveFlashcards(cards);
+  renderKarteList();
 }
 
 function deleteCard(id) {
@@ -4377,7 +4426,10 @@ function saveCurrentCard() {
 
 /* ---------------- Karteikarten lernen (Umdrehen) ---------------- */
 
-const karteLernen = { order: [], index: 0, flipped: false };
+// filter: 'all' (alle Karten), 'known' (nur "Kann ich schon"-Stapel) oder
+// 'unknown' (nur "Noch üben"-Stapel) - wie beim Ziehen aus einem
+// bestimmten Fach einer Karteikarten-Box.
+const karteLernen = { order: [], index: 0, flipped: false, filter: 'all', sessionKnown: 0, sessionUnknown: 0 };
 
 function renderKarteLernenCard() {
   const cards = loadAllFlashcards();
@@ -4406,18 +4458,37 @@ function renderKarteLernenCard() {
 
   karteLernen.flipped = false;
   el('karte-flip-card').classList.remove('flipped');
-  el('karte-lernen-next-btn').textContent = karteLernen.index < karteLernen.order.length - 1 ? 'Weiter →' : 'Fertig ✓';
+  el('karte-flip-hint').hidden = false;
+  el('karte-lernen-assess-row').hidden = true;
 }
 
-function startKarteLernen() {
-  const cards = loadFlashcardsForSubject(karteContext.subject);
+function startKarteLernen(filter) {
+  filter = filter || 'all';
+  let cards = loadFlashcardsForSubject(karteContext.subject);
+  if (filter === 'known') cards = cards.filter((c) => c.known === true);
+  else if (filter === 'unknown') cards = cards.filter((c) => c.known !== true);
   if (!cards.length) return;
+
   karteLernen.order = shuffle(cards.map((c) => c.id));
   karteLernen.index = 0;
+  karteLernen.filter = filter;
+  karteLernen.sessionKnown = 0;
+  karteLernen.sessionUnknown = 0;
+
+  const stackLabel = el('karte-lernen-stack-label');
+  if (filter === 'known') {
+    stackLabel.textContent = '✅ Stapel: Kann ich schon';
+    stackLabel.hidden = false;
+  } else if (filter === 'unknown') {
+    stackLabel.textContent = '📚 Stapel: Noch üben';
+    stackLabel.hidden = false;
+  } else {
+    stackLabel.hidden = true;
+  }
+
   el('karte-lernen-done').hidden = true;
   el('karte-flip-outer').hidden = false;
-  el('karte-flip-hint').hidden = false;
-  el('karte-lernen-next-btn').hidden = false;
+  el('karte-lernen-assess-row').hidden = true;
   renderKarteLernenCard();
   showScreen('karte-lernen');
 }
@@ -4425,6 +4496,8 @@ function startKarteLernen() {
 function flipKarteCard() {
   karteLernen.flipped = !karteLernen.flipped;
   el('karte-flip-card').classList.toggle('flipped', karteLernen.flipped);
+  el('karte-flip-hint').hidden = karteLernen.flipped;
+  el('karte-lernen-assess-row').hidden = !karteLernen.flipped;
 }
 
 function nextKarteCard() {
@@ -4434,9 +4507,32 @@ function nextKarteCard() {
   } else {
     el('karte-flip-outer').hidden = true;
     el('karte-flip-hint').hidden = true;
-    el('karte-lernen-next-btn').hidden = true;
+    el('karte-lernen-assess-row').hidden = true;
     el('karte-lernen-done').hidden = false;
+
+    const counts = getCardPileCounts(karteContext.subject);
+    el('karte-lernen-summary').textContent =
+      `In dieser Runde: ✅ ${karteLernen.sessionKnown} kannst du jetzt, ❌ ${karteLernen.sessionUnknown} musst du noch üben. `
+      + `Insgesamt: ✅ ${counts.known} kannst du schon, 📚 ${counts.unknown} noch offen.`;
+    el('karte-lernen-unknown-again-btn').hidden = counts.unknown === 0;
   }
+}
+
+/**
+ * Wird beim Antippen von "Kann ich" / "Kann ich noch nicht" aufgerufen:
+ * sortiert die aktuelle Karte in den entsprechenden Stapel ein (wie beim
+ * Umsortieren einer Papier-Karteikarte in ein anderes Fach der Box) und
+ * geht zur nächsten Karte weiter.
+ */
+function markKarteCard(known) {
+  const cards = loadAllFlashcards();
+  const card = cards.find((c) => c.id === karteLernen.order[karteLernen.index]);
+  if (card) {
+    card.known = known;
+    saveFlashcards(cards);
+  }
+  if (known) karteLernen.sessionKnown += 1; else karteLernen.sessionUnknown += 1;
+  nextKarteCard();
 }
 
 /**
@@ -4461,7 +4557,10 @@ function initKarteikarten() {
   });
 
   el('karte-new-btn').addEventListener('click', createNewCard);
-  el('karte-lernen-btn').addEventListener('click', startKarteLernen);
+  el('karte-lernen-btn').addEventListener('click', () => startKarteLernen('all'));
+  el('karte-stapel-known-btn').addEventListener('click', () => startKarteLernen('known'));
+  el('karte-stapel-unknown-btn').addEventListener('click', () => startKarteLernen('unknown'));
+  el('karte-stapel-merge-btn').addEventListener('click', mergeKartePiles);
 
   el('karte-front-input').addEventListener('input', saveCurrentCard);
   el('karte-back-input').addEventListener('input', saveCurrentCard);
@@ -4505,9 +4604,20 @@ function initKarteikarten() {
   });
 
   el('karte-flip-card').addEventListener('click', flipKarteCard);
-  el('karte-lernen-next-btn').addEventListener('click', nextKarteCard);
-  el('karte-lernen-again-btn').addEventListener('click', startKarteLernen);
-  el('karte-lernen-exit-btn').addEventListener('click', () => showScreen('karteikarten'));
+  el('karte-lernen-know-btn').addEventListener('click', () => markKarteCard(true));
+  el('karte-lernen-dontknow-btn').addEventListener('click', () => markKarteCard(false));
+  el('karte-lernen-again-btn').addEventListener('click', () => startKarteLernen(karteLernen.filter));
+  el('karte-lernen-unknown-again-btn').addEventListener('click', () => startKarteLernen('unknown'));
+  el('karte-lernen-exit-btn').addEventListener('click', () => {
+    renderKarteList();
+    showScreen('karteikarten');
+  });
+  // Auch über den ✕-Button im Lernen-Screen verlassen aktualisiert die
+  // Stapel-Anzeige - sonst zeigt die Liste noch den Stand von vor dem
+  // Üben (Karten wurden ja gerade erst in einen Stapel einsortiert).
+  document.querySelectorAll('#screen-karte-lernen [data-goto="karteikarten"]').forEach((btn) => {
+    btn.addEventListener('click', renderKarteList);
+  });
 }
 
 /* ---------------- Init ---------------- */

@@ -131,7 +131,21 @@
     <p class="diff-hint">Für Vorderseite und Rückseite kannst du jeweils ein eigenes Foto machen (z. B. Formel vorne, Lösung hinten) und zusätzlich Text dazuschreiben.</p>
 
     <button type="button" class="btn-primary" id="karte-new-btn">✏️ Neue Karteikarte</button>
-    <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Karteikarten lernen</button>
+    <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Alle Karten lernen</button>
+
+    <div class="karte-stapel-row" id="karte-stapel-row" hidden>
+      <button type="button" class="karte-stapel-btn karte-stapel-known" id="karte-stapel-known-btn">
+        <span class="karte-stapel-icon">✅</span>
+        <span class="karte-stapel-label">Kann ich schon</span>
+        <span class="karte-stapel-count" id="karte-stapel-known-count">0</span>
+      </button>
+      <button type="button" class="karte-stapel-btn karte-stapel-unknown" id="karte-stapel-unknown-btn">
+        <span class="karte-stapel-icon">📚</span>
+        <span class="karte-stapel-label">Noch üben</span>
+        <span class="karte-stapel-count" id="karte-stapel-unknown-count">0</span>
+      </button>
+    </div>
+    <button type="button" class="btn-text" id="karte-stapel-merge-btn" hidden>🔀 Stapel wieder zusammenfügen</button>
 
     <div class="karte-list" id="karte-list"></div>
     <p class="karte-empty-hint" id="karte-empty-hint" hidden>Noch keine Karteikarten vorhanden – leg mit "Neue Karteikarte" los.</p>
@@ -181,6 +195,7 @@
       <button type="button" class="btn-icon" data-goto="karteikarten" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
         <span class="progress-label" id="karte-lernen-progress">Karte 1 von 1</span>
+        <span class="karte-lernen-stack-label" id="karte-lernen-stack-label" hidden></span>
       </div>
     </header>
 
@@ -200,11 +215,16 @@
     </div>
     <p class="diff-hint" id="karte-flip-hint">Tippe auf die Karte, um sie umzudrehen.</p>
 
-    <button type="button" class="btn-primary" id="karte-lernen-next-btn">Weiter →</button>
+    <div class="karte-lernen-assess-row" id="karte-lernen-assess-row" hidden>
+      <button type="button" class="karte-assess-btn karte-assess-no" id="karte-lernen-dontknow-btn">❌ Muss ich üben</button>
+      <button type="button" class="karte-assess-btn karte-assess-yes" id="karte-lernen-know-btn">✅ Kann ich</button>
+    </div>
 
     <div class="karte-lernen-done" id="karte-lernen-done" hidden>
       <h2>🎉 Alle Karten durch!</h2>
+      <p class="karte-lernen-summary" id="karte-lernen-summary"></p>
       <button type="button" class="btn-primary" id="karte-lernen-again-btn">🔀 Nochmal (neu gemischt)</button>
+      <button type="button" class="btn-secondary" id="karte-lernen-unknown-again-btn" hidden>📚 Nur die üben, die ich noch nicht kann</button>
       <button type="button" class="btn-secondary" id="karte-lernen-exit-btn">Zur Übersicht</button>
     </div>
   </section>

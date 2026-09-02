@@ -1166,6 +1166,31 @@ body {
 /* ============ ASTRONOMIE: KARTEIKARTEN ============ */
 #karte-lernen-btn { margin-top: 10px; }
 
+.karte-stapel-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.karte-stapel-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  color: var(--text);
+}
+.karte-stapel-btn:disabled { opacity: 0.45; cursor: default; }
+.karte-stapel-icon { font-size: 1.3rem; }
+.karte-stapel-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+.karte-stapel-count { font-size: 1.2rem; font-weight: 800; }
+#karte-stapel-merge-btn { margin-top: 8px; }
+
 .karte-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 
 .karte-card {
@@ -1177,7 +1202,10 @@ body {
   padding: 12px 14px;
   box-shadow: var(--shadow);
   cursor: pointer;
+  border-left: 4px solid transparent;
 }
+.karte-card-known { border-left-color: #16a34a; }
+.karte-card-unknown { border-left-color: #dc2626; }
 
 .karte-card-thumb {
   width: 44px;
@@ -1328,5 +1356,33 @@ body {
   margin-top: 24px;
 }
 .karte-lernen-done h2 { margin: 0; }
+.karte-lernen-summary { color: var(--text-muted); margin: 0; }
 .karte-lernen-done .btn-primary,
 .karte-lernen-done .btn-secondary { width: 100%; max-width: 320px; margin-top: 0; }
+
+.karte-lernen-stack-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.karte-lernen-assess-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.karte-assess-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #fff;
+}
+.karte-assess-no { background: #dc2626; }
+.karte-assess-yes { background: #16a34a; }
+.karte-assess-btn:active { transform: scale(0.97); }
