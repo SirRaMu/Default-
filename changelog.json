@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.22",
+    "date": "2026-09-03",
+    "title": "Karteikarten: Stapel anlegen & Vokabeln per Text einfügen",
+    "items": [
+      { "icon": "🗂️", "text": "Neu: eigene, benennbare Karteikarten-Stapel je Fach (z. B. \"Kapitel 3\"). \"Alle Karten\" zeigt weiterhin alles, jeder Stapel nur seine eigenen Karten – so hast du beim Lernen nicht immer alle Themen gemischt." },
+      { "icon": "✏️", "text": "Stapel lassen sich umbenennen und löschen; die Karten selbst bleiben dabei erhalten und wandern zurück zu \"Alle Karten\"." },
+      { "icon": "📥", "text": "Neuer Knopf \"Mehrere per Text einfügen\": mehrere Vokabeln auf einmal einfügen (eine pro Zeile, z. B. \"Wort = Übersetzung\") statt jede Karte einzeln anzulegen." },
+      { "icon": "🔀", "text": "Im Karteikarten-Editor kannst du eine bestehende Karte jederzeit einem anderen Stapel zuordnen." }
+    ]
+  },
+  {
     "version": "2.21",
     "date": "2026-09-03",
     "title": "Karteikarten: Lernrichtung wählbar",

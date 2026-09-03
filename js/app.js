@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.21';
+const APP_VERSION = '2.22';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -25,6 +25,7 @@ const STORAGE_KEYS = {
   notes: 'kopfrechnen.notes.v1',
   flashcards: 'kopfrechnen.flashcards.v1',
   trash: 'kopfrechnen.trash.v1',
+  karteDecks: 'kopfrechnen.karteDecks.v1',
 };
 
 // Akzentfarben-Paletten für die Farbgestaltung in den Einstellungen.
@@ -4173,7 +4174,7 @@ function initNotizen() {
 // Eine gemeinsame Liste/Editor/Lern-Ansicht wird von mehreren Fächern genutzt;
 // karteContext merkt sich, aus welchem Fach man gerade kommt (für Titel,
 // Zurück-Button und Filterung der angezeigten Karten).
-const karteContext = { subject: null, screen: null, icon: '', label: '' };
+const karteContext = { subject: null, screen: null, icon: '', label: '', deckId: 'all' };
 let currentCardId = null;
 let pendingFrontPhoto = undefined; // undefined = unverändert, null = entfernt, string = neues Foto
 let pendingBackPhoto = undefined;
@@ -4202,6 +4203,10 @@ function loadAllFlashcards() {
       }
       if (c.frontPhoto === undefined) { c.frontPhoto = null; migrated = true; }
       if (c.backPhoto === undefined) { c.backPhoto = null; migrated = true; }
+      // Karten aus der Zeit vor den Karteikarten-Stapeln haben noch kein
+      // "deckId" - sie gehören dann einfach zu keinem Stapel (null) und
+      // tauchen weiterhin unter "Alle Karten" auf, gehen also nicht verloren.
+      if (c.deckId === undefined) { c.deckId = null; migrated = true; }
     });
     if (migrated) saveFlashcards(cards);
     return cards;
@@ -4225,6 +4230,49 @@ function saveFlashcards(cards) {
 function makeCardId() {
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return `karte-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+/* ---------------- Karteikarten-Stapel (Ordner je Fach) ---------------- */
+
+// Ein Stapel ist nur ein benanntes Etikett ("Kapitel 3") pro Fach - die
+// Karten selbst leben weiter in derselben Liste und bekommen nur ein
+// zusätzliches "deckId"-Feld. So gehen beim Anlegen/Umbenennen/Löschen
+// eines Stapels nie Karteninhalte verloren, nur die Gruppierung ändert sich.
+function loadKarteDecks() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.karteDecks);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveKarteDecks(decks) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.karteDecks, JSON.stringify(decks));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function makeDeckId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `deck-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function decksForSubject(subject) {
+  return loadKarteDecks().filter((d) => d.subject === subject);
+}
+
+// karteContext.deckId ist entweder 'all' (kein Filter, alle Karten des
+// Fachs) oder die id eines konkreten Stapels (nur dessen Karten, inkl.
+// Lernen, Stapel-Zähler und "Stapel zusammenfügen").
+function cardMatchesDeckContext(card) {
+  return karteContext.deckId === 'all' || card.deckId === karteContext.deckId;
+}
+
+function getScopedCards() {
+  return loadFlashcardsForSubject(karteContext.subject).filter(cardMatchesDeckContext);
 }
 
 function shuffle(arr) {
@@ -4272,7 +4320,7 @@ function resizeImageFile(file, maxDim = 900, quality = 0.75) {
 }
 
 function renderKarteList() {
-  const cards = loadFlashcardsForSubject(karteContext.subject);
+  const cards = getScopedCards();
   const list = el('karte-list');
   list.innerHTML = '';
   el('karte-empty-hint').hidden = cards.length > 0;
@@ -4343,23 +4391,24 @@ function renderKarteStapelRow(cards) {
   el('karte-stapel-merge-btn').hidden = !hasPiles;
 }
 
-function getCardPileCounts(subject) {
-  const cards = loadFlashcardsForSubject(subject);
+function getCardPileCounts() {
+  const cards = getScopedCards();
   const known = cards.filter((c) => c.known === true).length;
   return { total: cards.length, known, unknown: cards.length - known };
 }
 
 /**
  * Führt die beiden Stapel wieder zu einem zusammen: die Einschätzung
- * "kann ich" / "kann ich noch nicht" wird für alle Karten des aktuellen
- * Fachs zurückgesetzt, damit man wieder von vorne mit allen Karten üben
- * kann - wie beim Zusammenschütten einer Karteikarten-Box.
+ * "kann ich" / "kann ich noch nicht" wird für alle Karten im aktuellen
+ * Kontext (aktueller Karteikarten-Stapel bzw. "Alle Karten") zurückgesetzt,
+ * damit man wieder von vorne üben kann - wie beim Zusammenschütten einer
+ * Karteikarten-Box.
  */
 function mergeKartePiles() {
   const cards = loadAllFlashcards();
   let changed = false;
   cards.forEach((c) => {
-    if (c.subject === karteContext.subject && typeof c.known === 'boolean') {
+    if (c.subject === karteContext.subject && cardMatchesDeckContext(c) && typeof c.known === 'boolean') {
       delete c.known;
       changed = true;
     }
@@ -4382,7 +4431,8 @@ function deleteCard(id) {
 
 function createNewCard() {
   const cards = loadAllFlashcards();
-  const card = { id: makeCardId(), subject: karteContext.subject, front: '', back: '', frontPhoto: null, backPhoto: null, createdAt: new Date().toISOString() };
+  const deckId = karteContext.deckId === 'all' ? null : karteContext.deckId;
+  const card = { id: makeCardId(), subject: karteContext.subject, deckId, front: '', back: '', frontPhoto: null, backPhoto: null, createdAt: new Date().toISOString() };
   cards.push(card);
   saveFlashcards(cards);
   openCardEditor(card.id);
@@ -4399,6 +4449,45 @@ function renderCardPhotoPreview(side, photo) {
   }
 }
 
+/**
+ * Zeigt im Editor auswählbare Pills für "Kein Stapel" plus alle Stapel des
+ * aktuellen Fachs, damit man eine einzelne Karte nachträglich einem
+ * anderen Stapel zuordnen kann. Neue Stapel legt man auf der
+ * Stapel-Übersicht an, hier wird nur zwischen bestehenden gewählt.
+ */
+function renderKarteEditorDeckPills(card) {
+  const group = el('karte-editor-deck-group');
+  group.innerHTML = '';
+
+  const noneBtn = document.createElement('button');
+  noneBtn.type = 'button';
+  noneBtn.className = 'pill';
+  noneBtn.textContent = 'Kein Stapel';
+  noneBtn.classList.toggle('selected', !card.deckId);
+  noneBtn.addEventListener('click', () => setCurrentCardDeck(null));
+  group.appendChild(noneBtn);
+
+  decksForSubject(card.subject).forEach((deck) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pill';
+    btn.textContent = deck.name;
+    btn.classList.toggle('selected', card.deckId === deck.id);
+    btn.addEventListener('click', () => setCurrentCardDeck(deck.id));
+    group.appendChild(btn);
+  });
+}
+
+function setCurrentCardDeck(deckId) {
+  if (!currentCardId) return;
+  const cards = loadAllFlashcards();
+  const card = cards.find((c) => c.id === currentCardId);
+  if (!card) return;
+  card.deckId = deckId;
+  saveFlashcards(cards);
+  renderKarteEditorDeckPills(card);
+}
+
 function openCardEditor(id) {
   const card = loadAllFlashcards().find((c) => c.id === id);
   if (!card) return;
@@ -4409,6 +4498,7 @@ function openCardEditor(id) {
   el('karte-back-input').value = card.back || '';
   renderCardPhotoPreview('front', card.frontPhoto || null);
   renderCardPhotoPreview('back', card.backPhoto || null);
+  renderKarteEditorDeckPills(card);
   showScreen('karte-editor');
 }
 
@@ -4483,7 +4573,7 @@ function renderKarteLernenCard() {
 
 function startKarteLernen(filter) {
   filter = filter || 'all';
-  let cards = loadFlashcardsForSubject(karteContext.subject);
+  let cards = getScopedCards();
   if (filter === 'known') cards = cards.filter((c) => c.known === true);
   else if (filter === 'unknown') cards = cards.filter((c) => c.known !== true);
   if (!cards.length) return;
@@ -4530,7 +4620,7 @@ function nextKarteCard() {
     el('karte-lernen-assess-row').hidden = true;
     el('karte-lernen-done').hidden = false;
 
-    const counts = getCardPileCounts(karteContext.subject);
+    const counts = getCardPileCounts();
     el('karte-lernen-summary').textContent =
       `In dieser Runde: ✅ ${karteLernen.sessionKnown} kannst du jetzt, ❌ ${karteLernen.sessionUnknown} musst du noch üben. `
       + `Insgesamt: ✅ ${counts.known} kannst du schon, 📚 ${counts.unknown} noch offen.`;
@@ -4556,9 +4646,10 @@ function markKarteCard(known) {
 }
 
 /**
- * Öffnet die (fachübergreifend geteilte) Karteikarten-Liste für ein
- * bestimmtes Fach: merkt sich den Kontext (für Titel, Zurück-Button und
- * Filterung) und aktualisiert die Liste entsprechend.
+ * Öffnet die (fachübergreifend geteilte) Karteikarten-Stapel-Übersicht für
+ * ein bestimmtes Fach: merkt sich den Kontext (für Titel, Zurück-Button und
+ * Filterung) und zeigt "Alle Karten" plus die angelegten Stapel dieses
+ * Fachs an.
  */
 function openKarteikartenForSubject(btn) {
   karteContext.subject = btn.dataset.karteSubject;
@@ -4566,9 +4657,122 @@ function openKarteikartenForSubject(btn) {
   karteContext.icon = btn.dataset.karteIcon;
   karteContext.label = btn.dataset.karteLabel;
 
-  el('karten-back-btn').dataset.goto = karteContext.screen;
-  el('karten-header-title').textContent = `${karteContext.icon} Karteikarten`;
+  el('karte-decks-back-btn').dataset.goto = karteContext.screen;
+  el('karte-decks-header-title').textContent = `${karteContext.icon} Karteikarten`;
+  closeKarteDeckForm();
+  renderKarteDecksList();
+}
+
+/**
+ * Rendert die Stapel-Übersicht: "Alle Karten" mit Gesamtzahl, plus je
+ * einen Eintrag pro angelegtem Stapel mit Kartenzahl, Umbenennen- und
+ * Löschen-Knopf.
+ */
+function renderKarteDecksList() {
+  const allCards = loadFlashcardsForSubject(karteContext.subject);
+  el('karte-deck-all-count').textContent = `${allCards.length} Karte${allCards.length === 1 ? '' : 'n'}`;
+
+  const decks = decksForSubject(karteContext.subject);
+  const list = el('karte-deck-list');
+  list.innerHTML = '';
+
+  decks.forEach((deck) => {
+    const count = allCards.filter((c) => c.deckId === deck.id).length;
+
+    const item = document.createElement('div');
+    item.className = 'karte-deck-item';
+
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'karte-deck-open';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'karte-deck-name';
+    nameEl.textContent = deck.name;
+    const countEl = document.createElement('span');
+    countEl.className = 'karte-deck-count';
+    countEl.textContent = `${count} Karte${count === 1 ? '' : 'n'}`;
+    openBtn.appendChild(nameEl);
+    openBtn.appendChild(countEl);
+    openBtn.addEventListener('click', () => openKarteDeck(deck.id, deck.name));
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'karte-deck-edit';
+    editBtn.textContent = '✏️';
+    editBtn.setAttribute('aria-label', 'Stapel umbenennen');
+    editBtn.addEventListener('click', () => openKarteDeckForm(deck));
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'karte-deck-delete';
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.setAttribute('aria-label', 'Stapel löschen');
+    deleteBtn.addEventListener('click', () => deleteKarteDeck(deck.id));
+
+    item.appendChild(openBtn);
+    item.appendChild(editBtn);
+    item.appendChild(deleteBtn);
+    list.appendChild(item);
+  });
+}
+
+// null = es wird ein neuer Stapel angelegt; sonst die id des Stapels, der
+// gerade über das Formular umbenannt wird.
+let editingDeckId = null;
+
+function openKarteDeckForm(deck) {
+  editingDeckId = deck ? deck.id : null;
+  el('karte-deck-name-input').value = deck ? deck.name : '';
+  el('karte-deck-form').hidden = false;
+  el('karte-deck-name-input').focus();
+}
+
+function closeKarteDeckForm() {
+  editingDeckId = null;
+  el('karte-deck-form').hidden = true;
+  el('karte-deck-name-input').value = '';
+}
+
+function saveKarteDeckForm() {
+  const name = el('karte-deck-name-input').value.trim();
+  if (!name) return;
+  const decks = loadKarteDecks();
+  if (editingDeckId) {
+    const deck = decks.find((d) => d.id === editingDeckId);
+    if (deck) deck.name = name;
+  } else {
+    decks.push({ id: makeDeckId(), subject: karteContext.subject, name, createdAt: new Date().toISOString() });
+  }
+  saveKarteDecks(decks);
+  closeKarteDeckForm();
+  renderKarteDecksList();
+}
+
+/**
+ * Löscht nur das Stapel-Etikett - die Karten selbst bleiben erhalten und
+ * wandern zurück zu "Alle Karten" (deckId wird zurückgesetzt), statt
+ * mitgelöscht zu werden.
+ */
+function deleteKarteDeck(id) {
+  saveKarteDecks(loadKarteDecks().filter((d) => d.id !== id));
+  const cards = loadAllFlashcards();
+  let changed = false;
+  cards.forEach((c) => {
+    if (c.deckId === id) { c.deckId = null; changed = true; }
+  });
+  if (changed) saveFlashcards(cards);
+  renderKarteDecksList();
+}
+
+/**
+ * Öffnet die Kartenliste für "Alle Karten" (deckId 'all') oder einen
+ * konkreten Stapel.
+ */
+function openKarteDeck(deckId, deckName) {
+  karteContext.deckId = deckId;
+  el('karten-header-title').textContent = deckId === 'all' ? `${karteContext.icon} Alle Karten` : `${karteContext.icon} ${deckName}`;
   renderKarteList();
+  showScreen('karteikarten');
 }
 
 function syncKarteRichtungUI() {
@@ -4577,9 +4781,95 @@ function syncKarteRichtungUI() {
   });
 }
 
+/* ---------------- Karteikarten: mehrere per Text einfügen ---------------- */
+
+// Erlaubt, viele Vokabeln auf einmal einzufügen (z. B. abgetippt aus einer
+// Vokabelliste) statt jede Karte einzeln über den Editor anzulegen: eine
+// Zeile pro Karte, Vorder- und Rückseite getrennt durch Tab, " = ", " - ",
+// ";" oder "=". Zeilen ohne erkennbaren Trenner werden übersprungen und
+// gezählt, statt die ganze Eingabe abzulehnen.
+function parseVokabelImportText(text) {
+  const delimiters = ['\t', ' = ', ' - ', ';', '='];
+  const cards = [];
+  let skipped = 0;
+  text.split(/\r?\n/).forEach((raw) => {
+    const line = raw.trim();
+    if (!line) return;
+    let parts = null;
+    for (const d of delimiters) {
+      const idx = line.indexOf(d);
+      if (idx > 0) {
+        parts = [line.slice(0, idx).trim(), line.slice(idx + d.length).trim()];
+        break;
+      }
+    }
+    if (!parts || !parts[0] || !parts[1]) { skipped += 1; return; }
+    cards.push({ front: parts[0], back: parts[1] });
+  });
+  return { cards, skipped };
+}
+
+/**
+ * Legt aus dem eingefügten Text mehrere Karteikarten auf einmal an, im
+ * aktuell geöffneten Stapel (oder ohne Stapel, wenn "Alle Karten" aktiv
+ * ist) - genau wie beim manuellen Anlegen einer einzelnen Karte.
+ */
+function importVokabelCards(text) {
+  const { cards: parsed, skipped } = parseVokabelImportText(text);
+  if (!parsed.length) return { created: 0, skipped };
+  const cards = loadAllFlashcards();
+  const deckId = karteContext.deckId === 'all' ? null : karteContext.deckId;
+  parsed.forEach((p) => {
+    cards.push({
+      id: makeCardId(),
+      subject: karteContext.subject,
+      deckId,
+      front: p.front,
+      back: p.back,
+      frontPhoto: null,
+      backPhoto: null,
+      createdAt: new Date().toISOString(),
+    });
+  });
+  saveFlashcards(cards);
+  return { created: parsed.length, skipped };
+}
+
 function initKarteikarten() {
   document.querySelectorAll('[data-karte-subject]').forEach((btn) => {
     btn.addEventListener('click', () => openKarteikartenForSubject(btn));
+  });
+
+  el('karte-deck-all-btn').addEventListener('click', () => openKarteDeck('all'));
+  el('karte-deck-new-btn').addEventListener('click', () => openKarteDeckForm(null));
+  el('karte-deck-save-btn').addEventListener('click', saveKarteDeckForm);
+  el('karte-deck-cancel-btn').addEventListener('click', closeKarteDeckForm);
+  // Zurück von der Kartenliste zur Stapel-Übersicht: Zähler neu rendern,
+  // falls sich die Kartenzahl inzwischen geändert hat (neu, gelöscht, ...).
+  document.querySelectorAll('#screen-karteikarten [data-goto="karte-decks"]').forEach((btn) => {
+    btn.addEventListener('click', renderKarteDecksList);
+  });
+
+  document.querySelectorAll('[data-goto="karte-import"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      el('karte-import-textarea').value = '';
+      el('karte-import-status').hidden = true;
+    });
+  });
+  el('karte-import-create-btn').addEventListener('click', () => {
+    const { created, skipped } = importVokabelCards(el('karte-import-textarea').value);
+    const status = el('karte-import-status');
+    if (created === 0) {
+      status.textContent = 'Keine Karten erkannt. Bitte prüfe das Format, z. B. "Wort = Übersetzung" pro Zeile.';
+      status.classList.add('transfer-status-error');
+    } else {
+      status.textContent = `✅ ${created} Karte${created === 1 ? '' : 'n'} erstellt`
+        + (skipped ? `, ${skipped} Zeile${skipped === 1 ? '' : 'n'} nicht erkannt.` : '.');
+      status.classList.remove('transfer-status-error');
+      el('karte-import-textarea').value = '';
+      renderKarteList();
+    }
+    status.hidden = false;
   });
 
   el('karte-new-btn').addEventListener('click', createNewCard);

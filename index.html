@@ -110,7 +110,7 @@
       <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
 
-    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="astronomie" data-karte-screen="subject-astronomie" data-karte-icon="🔭" data-karte-label="Astronomie">
+    <button type="button" class="learn-banner" data-goto="karte-decks" data-karte-subject="astronomie" data-karte-screen="subject-astronomie" data-karte-icon="🔭" data-karte-label="Astronomie">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
         <strong>Karteikarten</strong>
@@ -121,9 +121,40 @@
   </section>
 
   <!-- ===================== KARTEIKARTEN-LISTE (gemeinsam für alle Fächer) ===================== -->
+  <section class="screen" id="screen-karte-decks" data-screen="karte-decks" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" id="karte-decks-back-btn" data-goto="subject-astronomie" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title" id="karte-decks-header-title">📇 Karteikarten</span>
+      </div>
+    </header>
+    <p class="diff-hint">Sortiere deine Karteikarten in eigene Stapel, z. B. nach Kapitel oder Thema – so hast du beim Lernen nicht immer alle Karten auf einmal.</p>
+
+    <button type="button" class="learn-banner" id="karte-deck-all-btn">
+      <span class="learn-banner-icon">📚</span>
+      <span class="learn-banner-text">
+        <strong>Alle Karten</strong>
+        <small id="karte-deck-all-count">0 Karten</small>
+      </span>
+      <span class="learn-banner-arrow">→</span>
+    </button>
+
+    <div class="karte-deck-list" id="karte-deck-list"></div>
+
+    <button type="button" class="btn-secondary" id="karte-deck-new-btn">➕ Neuer Stapel</button>
+
+    <div class="karte-deck-form" id="karte-deck-form" hidden>
+      <input type="text" class="text-input" id="karte-deck-name-input" placeholder="Name des Stapels, z. B. Kapitel 3" maxlength="40">
+      <div class="karte-deck-form-actions">
+        <button type="button" class="btn-primary" id="karte-deck-save-btn">Speichern</button>
+        <button type="button" class="btn-secondary" id="karte-deck-cancel-btn">Abbrechen</button>
+      </div>
+    </div>
+  </section>
+
   <section class="screen" id="screen-karteikarten" data-screen="karteikarten" hidden>
     <header class="quiz-header">
-      <button type="button" class="btn-icon" id="karten-back-btn" data-goto="subject-astronomie" aria-label="Zurück">✕</button>
+      <button type="button" class="btn-icon" id="karten-back-btn" data-goto="karte-decks" aria-label="Zurück">✕</button>
       <div class="quiz-progress">
         <span class="learn-title" id="karten-header-title">📇 Karteikarten</span>
       </div>
@@ -140,6 +171,7 @@
     </div>
 
     <button type="button" class="btn-primary" id="karte-new-btn">✏️ Neue Karteikarte</button>
+    <button type="button" class="btn-secondary" id="karte-import-btn" data-goto="karte-import">📥 Mehrere per Text einfügen</button>
     <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Alle Karten lernen</button>
 
     <div class="karte-stapel-row" id="karte-stapel-row" hidden>
@@ -192,6 +224,11 @@
       <textarea class="text-input karte-textarea" id="karte-back-input" rows="3" placeholder="z. B. Wie berechnet man die Geschwindigkeit aus Strecke und Zeit?"></textarea>
     </div>
 
+    <div class="karte-field">
+      <label class="karte-field-label">Stapel (optional)</label>
+      <div class="pill-group" id="karte-editor-deck-group"></div>
+    </div>
+
     <div class="karte-editor-actions">
       <button type="button" class="btn-primary" id="karte-save-exit-btn">💾 Speichern &amp; verlassen</button>
       <button type="button" class="btn-secondary" id="karte-save-new-btn">➕ Speichern &amp; neue Karteikarte</button>
@@ -238,6 +275,26 @@
     </div>
   </section>
 
+  <!-- ===================== KARTEIKARTEN: MEHRERE PER TEXT EINFÜGEN ===================== -->
+  <section class="screen" id="screen-karte-import" data-screen="karte-import" hidden>
+    <header class="quiz-header">
+      <button type="button" class="btn-icon" data-goto="karteikarten" aria-label="Zurück">✕</button>
+      <div class="quiz-progress">
+        <span class="learn-title">📥 Mehrere Karten einfügen</span>
+      </div>
+    </header>
+    <p class="diff-hint">
+      Füge mehrere Vokabeln auf einmal ein – eine pro Zeile, Vorderseite und Rückseite getrennt durch <strong>=</strong>, <strong>-</strong>, <strong>;</strong> oder Tab. Zum Beispiel:<br>
+      <code>diverse = vielfältig; unterschiedlich</code><br>
+      <code>to guarantee = garantieren; bürgen für</code>
+    </p>
+    <textarea class="text-input karte-textarea" id="karte-import-textarea" rows="10" placeholder="diverse = vielfältig
+to guarantee = garantieren
+to tear apart = auseinanderreißen"></textarea>
+    <button type="button" class="btn-primary" id="karte-import-create-btn">Karten erstellen</button>
+    <p class="transfer-status" id="karte-import-status" hidden></p>
+  </section>
+
   <!-- ===================== FACH: PHYSIK ===================== -->
   <section class="screen" id="screen-subject-physik" data-screen="subject-physik" hidden>
     <header class="app-header">
@@ -245,7 +302,7 @@
       <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
 
-    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="physik" data-karte-screen="subject-physik" data-karte-icon="⚛️" data-karte-label="Physik">
+    <button type="button" class="learn-banner" data-goto="karte-decks" data-karte-subject="physik" data-karte-screen="subject-physik" data-karte-icon="⚛️" data-karte-label="Physik">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
         <strong>Karteikarten</strong>
@@ -360,7 +417,7 @@
       <span class="learn-banner-arrow">→</span>
     </button>
 
-    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
+    <button type="button" class="learn-banner" data-goto="karte-decks" data-karte-subject="deutsch" data-karte-screen="subject-deutsch" data-karte-icon="📖" data-karte-label="Deutsch">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
         <strong>Karteikarten</strong>
@@ -658,7 +715,7 @@
       <p class="subtitle">Wähle einen Bereich, um zu üben.</p>
     </header>
 
-    <button type="button" class="learn-banner" data-goto="karteikarten" data-karte-subject="englisch" data-karte-screen="subject-englisch" data-karte-icon="🇬🇧" data-karte-label="Englisch">
+    <button type="button" class="learn-banner" data-goto="karte-decks" data-karte-subject="englisch" data-karte-screen="subject-englisch" data-karte-icon="🇬🇧" data-karte-label="Englisch">
       <span class="learn-banner-icon">📇</span>
       <span class="learn-banner-text">
         <strong>Karteikarten</strong>

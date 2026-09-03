@@ -1250,6 +1250,66 @@ body {
 
 .karte-empty-hint { color: var(--text-muted); text-align: center; margin-top: 20px; }
 
+.karte-deck-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+.karte-deck-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 8px 8px 8px 16px;
+  box-shadow: var(--shadow);
+}
+
+.karte-deck-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+}
+.karte-deck-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.karte-deck-count { color: var(--text-muted); font-size: 0.82rem; }
+
+.karte-deck-edit,
+.karte-deck-delete {
+  border: none;
+  background: var(--chip-bg);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#karte-deck-new-btn { margin-top: 14px; }
+
+.karte-deck-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.karte-deck-form-actions { display: flex; gap: 10px; }
+.karte-deck-form-actions .btn-primary,
+.karte-deck-form-actions .btn-secondary { flex: 1; margin-top: 0; }
+
 .karte-photo-preview {
   display: flex;
   flex-direction: column;
