@@ -195,7 +195,7 @@ body {
   gap: 10px;
 }
 .option-label { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
-.pill-group { display: flex; gap: 8px; }
+.pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
 .pill {
   padding: 8px 16px;
   border-radius: 999px;
@@ -206,6 +206,9 @@ body {
   cursor: pointer;
 }
 .pill.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.karte-richtung-block { margin-top: 14px; }
+.karte-richtung-block .option-label { display: block; margin-bottom: 8px; }
 
 .highscore-line {
   margin: 14px 2px 0;

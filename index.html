@@ -130,6 +130,15 @@
     </header>
     <p class="diff-hint">Für Vorderseite und Rückseite kannst du jeweils ein eigenes Foto machen (z. B. Formel vorne, Lösung hinten) und zusätzlich Text dazuschreiben.</p>
 
+    <div class="karte-richtung-block">
+      <span class="option-label">Lernrichtung:</span>
+      <div class="pill-group" id="karte-richtung-group">
+        <button type="button" class="pill" data-karte-richtung="front">Vorne → Hinten</button>
+        <button type="button" class="pill" data-karte-richtung="back">Hinten → Vorne</button>
+        <button type="button" class="pill" data-karte-richtung="mixed">Gemischt</button>
+      </div>
+    </div>
+
     <button type="button" class="btn-primary" id="karte-new-btn">✏️ Neue Karteikarte</button>
     <button type="button" class="btn-secondary" id="karte-lernen-btn">🔀 Alle Karten lernen</button>
 
@@ -202,12 +211,12 @@
     <div class="karte-flip-outer" id="karte-flip-outer">
       <div class="karte-flip-card" id="karte-flip-card">
         <div class="karte-flip-face karte-flip-front">
-          <span class="karte-flip-label">Vorderseite</span>
+          <span class="karte-flip-label" id="karte-lernen-front-label">Vorderseite</span>
           <img class="karte-flip-photo" id="karte-lernen-front-photo" hidden alt="Foto zur Vorderseite">
           <p class="karte-flip-text" id="karte-lernen-front-text"></p>
         </div>
         <div class="karte-flip-face karte-flip-back">
-          <span class="karte-flip-label">Rückseite</span>
+          <span class="karte-flip-label" id="karte-lernen-back-label">Rückseite</span>
           <img class="karte-flip-photo" id="karte-lernen-back-photo" hidden alt="Foto zur Rückseite">
           <p class="karte-flip-text" id="karte-lernen-back-text"></p>
         </div>

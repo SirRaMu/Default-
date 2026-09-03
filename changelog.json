@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.21",
+    "date": "2026-09-03",
+    "title": "Karteikarten: Lernrichtung wählbar",
+    "items": [
+      { "icon": "🔀", "text": "Beim Karteikarten-Lernen kannst du jetzt die Lernrichtung wählen: \"Vorne → Hinten\", \"Hinten → Vorne\" oder \"Gemischt\" (jede Karte zufällig in eine der beiden Richtungen)." }
+    ]
+  },
+  {
     "version": "2.20",
     "date": "2026-09-02",
     "title": "Karteikarten: Stapel wie bei der Papier-Kartei",

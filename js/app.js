@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.20';
+const APP_VERSION = '2.21';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -188,6 +188,7 @@ const state = {
     operations: ['add'],
     advancedTopics: ['pct'],
     einheitenDecimal: false, // nur beim Thema "Einheiten": auch Kommazahlen zulassen
+    karteRichtung: 'front', // Karteikarten lernen: 'front' (Vorne→Hinten), 'back' (Hinten→Vorne) oder 'mixed'
     difficulty: 'easy',
     mode: 'count', // 'count' | 'time'
     count: 10,
@@ -4429,28 +4430,46 @@ function saveCurrentCard() {
 // filter: 'all' (alle Karten), 'known' (nur "Kann ich schon"-Stapel) oder
 // 'unknown' (nur "Noch üben"-Stapel) - wie beim Ziehen aus einem
 // bestimmten Fach einer Karteikarten-Box.
-const karteLernen = { order: [], index: 0, flipped: false, filter: 'all', sessionKnown: 0, sessionUnknown: 0 };
+// reversed[i] legt pro Karte fest, ob sie umgedreht abgefragt wird (erst
+// Rückseite zeigen, Vorderseite ist die Lösung) - abhängig von der
+// gewählten Lernrichtung ('front' | 'back' | 'mixed').
+const karteLernen = { order: [], reversed: [], index: 0, flipped: false, filter: 'all', sessionKnown: 0, sessionUnknown: 0 };
+
+function decideKarteReversed(richtung) {
+  if (richtung === 'back') return true;
+  if (richtung === 'mixed') return Math.random() < 0.5;
+  return false;
+}
 
 function renderKarteLernenCard() {
   const cards = loadAllFlashcards();
   const card = cards.find((c) => c.id === karteLernen.order[karteLernen.index]);
   if (!card) return;
+  const reversed = karteLernen.reversed[karteLernen.index];
+  const firstSide = reversed
+    ? { text: card.back, empty: 'Ohne Rückseite', photo: card.backPhoto, label: 'Rückseite' }
+    : { text: card.front, empty: 'Ohne Vorderseite', photo: card.frontPhoto, label: 'Vorderseite' };
+  const secondSide = reversed
+    ? { text: card.front, empty: 'Ohne Vorderseite', photo: card.frontPhoto, label: 'Vorderseite' }
+    : { text: card.back, empty: 'Ohne Rückseite', photo: card.backPhoto, label: 'Rückseite' };
 
   el('karte-lernen-progress').textContent = `Karte ${karteLernen.index + 1} von ${karteLernen.order.length}`;
-  el('karte-lernen-front-text').textContent = card.front || 'Ohne Vorderseite';
-  el('karte-lernen-back-text').textContent = card.back || 'Ohne Rückseite';
+  el('karte-lernen-front-label').textContent = firstSide.label;
+  el('karte-lernen-front-text').textContent = firstSide.text || firstSide.empty;
+  el('karte-lernen-back-label').textContent = secondSide.label;
+  el('karte-lernen-back-text').textContent = secondSide.text || secondSide.empty;
 
   const frontPhotoEl = el('karte-lernen-front-photo');
-  if (card.frontPhoto) {
-    frontPhotoEl.src = card.frontPhoto;
+  if (firstSide.photo) {
+    frontPhotoEl.src = firstSide.photo;
     frontPhotoEl.hidden = false;
   } else {
     frontPhotoEl.hidden = true;
   }
 
   const backPhotoEl = el('karte-lernen-back-photo');
-  if (card.backPhoto) {
-    backPhotoEl.src = card.backPhoto;
+  if (secondSide.photo) {
+    backPhotoEl.src = secondSide.photo;
     backPhotoEl.hidden = false;
   } else {
     backPhotoEl.hidden = true;
@@ -4470,6 +4489,7 @@ function startKarteLernen(filter) {
   if (!cards.length) return;
 
   karteLernen.order = shuffle(cards.map((c) => c.id));
+  karteLernen.reversed = karteLernen.order.map(() => decideKarteReversed(state.setup.karteRichtung));
   karteLernen.index = 0;
   karteLernen.filter = filter;
   karteLernen.sessionKnown = 0;
@@ -4551,6 +4571,12 @@ function openKarteikartenForSubject(btn) {
   renderKarteList();
 }
 
+function syncKarteRichtungUI() {
+  document.querySelectorAll('#karte-richtung-group .pill').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.karteRichtung === state.setup.karteRichtung);
+  });
+}
+
 function initKarteikarten() {
   document.querySelectorAll('[data-karte-subject]').forEach((btn) => {
     btn.addEventListener('click', () => openKarteikartenForSubject(btn));
@@ -4561,6 +4587,15 @@ function initKarteikarten() {
   el('karte-stapel-known-btn').addEventListener('click', () => startKarteLernen('known'));
   el('karte-stapel-unknown-btn').addEventListener('click', () => startKarteLernen('unknown'));
   el('karte-stapel-merge-btn').addEventListener('click', mergeKartePiles);
+
+  el('karte-richtung-group').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.pill');
+    if (!btn) return;
+    state.setup.karteRichtung = btn.dataset.karteRichtung;
+    syncKarteRichtungUI();
+    saveSettings();
+  });
+  syncKarteRichtungUI();
 
   el('karte-front-input').addEventListener('input', saveCurrentCard);
   el('karte-back-input').addEventListener('input', saveCurrentCard);
