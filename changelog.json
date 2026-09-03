@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.23",
+    "date": "2026-09-03",
+    "title": "Übertragungscode: Stapel wurden vergessen",
+    "items": [
+      { "icon": "🐛", "text": "Fehler behoben: Der Übertragungscode (Gerät wechseln) hat die Karteikarten-Stapel bisher nicht mit übertragen. Jetzt werden beim Erzeugen und Einfügen des Codes auch die Stapel-Namen mit übernommen, nicht nur die einzelnen Karten." }
+    ]
+  },
+  {
     "version": "2.22",
     "date": "2026-09-03",
     "title": "Karteikarten: Stapel anlegen & Vokabeln per Text einfügen",

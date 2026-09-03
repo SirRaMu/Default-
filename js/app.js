@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.22';
+const APP_VERSION = '2.23';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -3435,10 +3435,14 @@ function initTrash() {
 
 // Es gibt bewusst kein Backend und kein Benutzerkonto - alle Daten bleiben
 // nur auf diesem Gerät. Wer sie trotzdem auf ein anderes Gerät mitnehmen
-// will, kann sich hier einen Code erzeugen (Karteikarten, Notizen,
-// Erfolge) und ihn selbst dorthin übertragen (z. B. per Nachricht an sich
-// selbst). Beim Importieren werden vorhandene Daten auf dem Zielgerät
-// nicht ersetzt, sondern zusammengeführt.
+// will, kann sich hier einen Code erzeugen (Karteikarten samt ihren
+// Stapeln, Notizen, Erfolge) und ihn selbst dorthin übertragen (z. B. per
+// Nachricht an sich selbst). Beim Importieren werden vorhandene Daten auf
+// dem Zielgerät nicht ersetzt, sondern zusammengeführt. Wird hier ein neuer
+// Datentyp ergänzt (wie zuletzt die Karteikarten-Stapel), muss er sowohl in
+// buildTransferPayload() als auch mit einer eigenen mergeImported...()-
+// Funktion in importTransferCode() berücksichtigt werden - sonst geht er
+// beim Übertragen auf ein anderes Gerät verloren.
 const TRANSFER_TYPE = 'kopfrechnen-transfer';
 
 function buildTransferPayload() {
@@ -3447,6 +3451,7 @@ function buildTransferPayload() {
     v: 1,
     createdAt: Date.now(),
     flashcards: loadAllFlashcards(),
+    karteDecks: loadKarteDecks(),
     notes: loadNotes(),
     history: loadHistory(),
     highscores: loadHighscores(),
@@ -3481,6 +3486,21 @@ function mergeImportedFlashcards(imported) {
     added++;
   });
   if (added > 0) saveFlashcards(existing);
+  return added;
+}
+
+function mergeImportedKarteDecks(imported) {
+  if (!Array.isArray(imported)) return 0;
+  const existing = loadKarteDecks();
+  const existingIds = new Set(existing.map((d) => d.id));
+  let added = 0;
+  imported.forEach((deck) => {
+    if (!deck || !deck.id || existingIds.has(deck.id)) return;
+    existing.push(deck);
+    existingIds.add(deck.id);
+    added++;
+  });
+  if (added > 0) saveKarteDecks(existing);
   return added;
 }
 
@@ -3548,6 +3568,7 @@ function importTransferCode(code) {
     return { ok: false, error: 'Das ist kein gültiger Übertragungscode dieser App.' };
   }
   const addedCards = mergeImportedFlashcards(payload.flashcards);
+  const addedDecks = mergeImportedKarteDecks(payload.karteDecks);
   const addedNotes = mergeImportedNotes(payload.notes);
   mergeImportedHistory(payload.history);
   mergeImportedHighscores(payload.highscores);
@@ -3556,6 +3577,7 @@ function importTransferCode(code) {
 
   const parts = [];
   if (addedCards > 0) parts.push(`${addedCards} neue Karteikarte${addedCards === 1 ? '' : 'n'}`);
+  if (addedDecks > 0) parts.push(`${addedDecks} neue${addedDecks === 1 ? 'r' : ''} Stapel`);
   if (addedNotes > 0) parts.push(`${addedNotes} neue Notiz${addedNotes === 1 ? '' : 'en'}`);
   const summary = parts.length > 0
     ? `Übertragen: ${parts.join(', ')}. Erfolge wurden zusammengeführt. Deine vorhandenen Daten auf diesem Gerät bleiben erhalten.`
