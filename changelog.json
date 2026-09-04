@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.24",
+    "date": "2026-09-04",
+    "title": "Karteikarten: \"Nochmal\" reagierte manchmal nicht",
+    "items": [
+      { "icon": "🐛", "text": "Fehler behoben: Wenn man z. B. den kompletten \"Noch üben\"-Stapel fertig geübt hatte, tat der Knopf \"Nochmal (neu gemischt)\" nichts mehr, weil dieser Stapel inzwischen leer war. Der Knopf wird jetzt in so einem Fall ausgeblendet, mit dem Hinweis \"Dieser Stapel ist jetzt leer\"." }
+    ]
+  },
+  {
     "version": "2.23",
     "date": "2026-09-03",
     "title": "Übertragungscode: Stapel wurden vergessen",

@@ -13,7 +13,7 @@
 // Muss bei jeder Änderung zusammen mit dem neuesten Eintrag in
 // changelog.json aktualisiert werden - zeigt in den Einstellungen, welche
 // Version tatsächlich gerade läuft (nicht, welche ggf. schon online steht).
-const APP_VERSION = '2.23';
+const APP_VERSION = '2.24';
 
 const STORAGE_KEYS = {
   settings: 'kopfrechnen.settings.v1',
@@ -4643,9 +4643,24 @@ function nextKarteCard() {
     el('karte-lernen-done').hidden = false;
 
     const counts = getCardPileCounts();
-    el('karte-lernen-summary').textContent =
+    let summary =
       `In dieser Runde: ✅ ${karteLernen.sessionKnown} kannst du jetzt, ❌ ${karteLernen.sessionUnknown} musst du noch üben. `
       + `Insgesamt: ✅ ${counts.known} kannst du schon, 📚 ${counts.unknown} noch offen.`;
+
+    // "Nochmal" würde denselben Filter (z. B. nur "Noch üben") erneut
+    // starten - ist dieser Stapel durch die gerade erfolgte Einschätzung
+    // inzwischen leer geworden, gäbe es nichts mehr zu mischen und der
+    // Knopf würde wirkungslos wirken. Dann lieber ausblenden statt einen
+    // Knopf zu zeigen, der nichts tut.
+    const remainingForFilter = karteLernen.filter === 'known' ? counts.known
+      : karteLernen.filter === 'unknown' ? counts.unknown
+      : counts.total;
+    const againBtn = el('karte-lernen-again-btn');
+    againBtn.hidden = remainingForFilter === 0;
+    if (remainingForFilter === 0 && karteLernen.filter !== 'all') {
+      summary += ' Dieser Stapel ist jetzt leer.';
+    }
+    el('karte-lernen-summary').textContent = summary;
     el('karte-lernen-unknown-again-btn').hidden = counts.unknown === 0;
   }
 }
